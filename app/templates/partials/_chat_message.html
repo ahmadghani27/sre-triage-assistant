@@ -1,0 +1,28 @@
+{# Satu bubble chat; user (kanan) atau assistant (kiri). Dikirim sebagai
+   *body partial* dan di-append ke #chat-messages dipakai POST /chat. #}
+{% if role == 'user' %}
+<div class="flex justify-end">
+  <div class="max-w-[85%] rounded-sm border border-gcp-blue-light/25 bg-gcp-blue-light/5 px-3.5 py-2">
+    <p class="text-[12px] leading-relaxed text-gcp-ink whitespace-pre-wrap">{{ text }}</p>
+    <p class="mt-1 text-[9px] uppercase tracking-wider text-gcp-blue-light text-right">You</p>
+  </div>
+</div>
+{% else %}
+<div class="flex justify-start">
+  <div class="max-w-[92%] rounded-sm border border-gcp-border bg-gcp-elevated px-3.5 py-2.5">
+    <div class="flex items-center gap-1.5 mb-1.5">
+      <span class="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-gcp-success/15 text-gcp-success">
+        <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="text-[9px] uppercase tracking-wider text-gcp-ink-muted">Strict-RAG Assistant</span>
+    </div>
+    <div class="text-[12px] leading-relaxed text-gcp-ink space-y-1.5">
+      {%- for block in text.split('\n') %}
+      {%- if not loop.first %}<br/>{% endif %}{{ block }}
+      {%- endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
