@@ -1,0 +1,68 @@
+{# Panel kanan: runbook terkunci Top-3. Mendukung OOB swap (hx-swap-oob="true"). #}
+{% set rank_colors = ['text-gcp-error', 'text-gcp-warning', 'text-gcp-success'] %}
+
+<div id="top3-reference-panel" class="space-y-3" {% if oob %}hx-swap-oob="true"{% endif %}>
+{% for rb in runbooks %}
+{% set sev_class = {
+     'SEV1': 'bg-gcp-sev1-bg text-gcp-sev1-text ring-gcp-sev1-border',
+     'SEV2': 'bg-gcp-sev2-bg text-gcp-sev2-text ring-gcp-sev2-border',
+     'SEV3': 'bg-gcp-sev3-bg text-gcp-sev3-text ring-gcp-sev3-border',
+     'SEV4': 'bg-gcp-sev4-bg text-gcp-sev4-text ring-gcp-sev4-border',
+   }.get(rb.severity, 'bg-gcp-surface text-gcp-ink-secondary ring-gcp-border') %}
+<article class="group rounded-lg border border-gcp-border bg-gcp-surface transition hover:border-gcp-border-elev">
+  <div class="flex items-start gap-3 p-3">
+    <!-- Rank badge -->
+    <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-gcp-elevated text-[11px] font-bold {{ rank_colors[loop.index0] if loop.index0 < 3 else 'text-gcp-ink-muted' }}">
+      {{ loop.index }}
+    </span>
+
+    <div class="min-w-0 flex-1">
+      <!-- Badges kategori + severity -->
+      <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+        <span class="inline-flex items-center rounded-sm ring-1 px-2 py-0.5 text-[10px] font-bold {{ sev_class }}">{{ rb.severity }}</span>
+        <span class="inline-flex items-center rounded-sm border border-gcp-border-elev px-2 py-0.5 text-[10px] font-medium text-gcp-ink-secondary">{{ rb.category }}</span>
+        <span class="text-[10px] text-gcp-ink-muted font-mono ml-auto">#{{ rb.id }}</span>
+      </div>
+
+      <h3 class="text-sm font-semibold text-gcp-ink leading-snug">{{ rb.title }}</h3>
+      <p class="mt-1 text-[11px] text-gcp-ink-muted leading-relaxed">
+        <span class="text-gcp-ink-muted font-medium">Root cause:</span> {{ rb.root_cause }}
+      </p>
+
+      <!-- Resolution steps collapsible -->
+      <details class="mt-2">
+        <summary class="inline-flex items-center gap-1 text-[11px] font-medium text-gcp-blue-light hover:text-gcp-blue-light">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          View Full Resolution Steps
+        </summary>
+        <ol class="mt-2 space-y-1.5 rounded-sm border border-gcp-border bg-gcp-elevated/30 p-2.5">
+          {%- for step in rb.resolution_steps.split('\n') if step.strip() %}
+          <li class="flex gap-2 text-[11px] leading-relaxed text-gcp-ink-secondary">
+            {%- set trimmed = step.strip() %}
+            {%- if trimmed[0].isdigit() and '.' in trimmed[:3] %}
+            <span class="shrink-0 font-mono text-gcp-ink-muted">{{ trimmed.split('.')[0] }}.</span>
+            <span>{{ trimmed.split('.', 1)[1].strip() }}</span>
+            {%- else %}
+            <span class="shrink-0 text-gcp-ink-muted">&bull;</span>
+            <span>{{ trimmed }}</span>
+            {%- endif %}
+          </li>
+          {%- endfor %}
+        </ol>
+      </details>
+    </div>
+  </div>
+</article>
+{% else %}
+<div class="rounded-lg border border-dashed border-gcp-border bg-gcp-elevated/30 px-5 py-8 text-center">
+  <p class="text-xs text-gcp-ink-muted">Tidak ada runbook yang cocok untuk konteks ini.</p>
+</div>
+{% endfor %}
+</div>
+
+{% if oob %}
+{# Update indikator jumlah referensi lewat OOB lightweight swap #}
+<span id="ref-count" hx-swap-oob="true" class="text-[10px] text-gcp-ink-muted font-mono">{{ runbooks|length }} ref</span>
+{% endif %}

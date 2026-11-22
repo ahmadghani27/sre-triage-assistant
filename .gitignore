@@ -1,0 +1,22 @@
+.env
+.agents/**/*
+.agents/
+.env.*
+!.env.example
+scripts/.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+other/**/*
+other/
+
+*.egg-info/
+data/app.db
+data/app.db-wal
+data/app.db-shm
+
+scripts/data/
+.pytest_cache/

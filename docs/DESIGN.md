@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS runbooks (
     root_cause TEXT NOT NULL,
     resolution_steps TEXT NOT NULL,
     source_ref TEXT DEFAULT 'internal',
+    content_hash TEXT NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -60,6 +61,8 @@ CREATE TABLE IF NOT EXISTS triage_logs (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+Catatan agregasi analitik: kolom `predicted_category` dan `predicted_severity` dapat menampung nilai fallback `"unclassified"` dan `"SEV-PENDING"` selain nilai standar (`network`/`database`/`deployment`/`resource` dan `SEV1`–`SEV4`) ketika LLM gagal atau timeout. Semua kueri agregasi di `analytics_service.py` harus memperhitungkan kedua nilai ini agar visualisasi Chart.js di dashboard tidak rusak saat graceful degradation aktif.
 
 ---
 
@@ -117,11 +120,11 @@ CREATE TABLE IF NOT EXISTS triage_logs (
 | Method & Route | Request Payload (`form-data`) | Primary Target (`hx-target`) | Out-of-Band Swaps (`hx-swap-oob`) | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET /` | None | Full Page (`workspace.html`) | None | Renders empty 2-column triage workspace. |
-| `POST /triage` | `raw_log` (string) | `#triage-output-area` | `#top3-reference-panel` | Runs redaction, FTS5 + LLM triage, saves analytics log, unlocks chat. |
+|| `POST /triage` | `raw_log` (string) | `#triage-output-area` | `#top3-reference-panel`, `#workspace-state` | Runs redaction, FTS5 + LLM triage, saves analytics log, unlocks chat. |
 | `POST /triage/refine` | `refine_note`, `sanitized_log`, `locked_runbook_ids` | `#chat-messages` (`beforeend`) | `#top3-reference-panel`, `#workspace-state` | Appends context divider to chat and updates Top-3 panel + hidden IDs. |
 | `POST /chat` | `message` OR `quick_action`, `locked_runbook_ids` | `#chat-messages` (`beforeend`) | None | Appends user bubble + Strict-RAG assistant response bubble. |
 | `GET /dashboard` | None | Full Page (`dashboard.html`) | None | Renders analytics dashboard shell. |
-| `GET /api/analytics/charts` | None | JSON Response | None | Returns aggregated counts by category, severity, and daily trend. |
+| `GET /api/analytics/charts` | None | JSON Response | None | Mengembalikan agregasi hitungan berdasarkan kategori, severitas, dan tren harian. Agregasi harus mendukung nilai fallback `"unclassified"` dan `"SEV-PENDING"` selain kategori (`network`/`database`/`deployment`/`resource`) dan severitas standar (`SEV1`–`SEV4`) agar visualisasi Chart.js tidak rusak saat degradation. |
 
 ---
 

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SRE Triage Assistant{% endblock %}</title>
+
+  <!-- Tailwind CSS via CDN (lihat ARCHITECTURE.md §2) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gcp: {
+              canvas: '#131314',
+              surface: '#1E2025',
+              elevated: '#25282E',
+              border: '#333740',
+              borderElev: '#3C4043',
+              focus: '#8AB4F8',
+              ink: '#E8EAED',
+              inkSecondary: '#9AA0A6',
+              inkMuted: '#5F6368',
+              blue: '#4285F4',
+              blueLight: '#8AB4F8',
+              success: '#0F9D58',
+              warning: '#FBBC05',
+              error: '#EA4335',
+              sev1: { bg: '#3C1618', border: '#F28B82', text: '#F28B82' },
+              sev2: { bg: '#3B2611', border: '#FDD663', text: '#FDD663' },
+              sev3: { bg: '#172B4D', border: '#8AB4F8', text: '#8AB4F8' },
+              sev4: { bg: '#282A2D', border: '#9AA0A6', text: '#9AA0A6' },
+              pending: { bg: '#352A15', border: '#FBBF24', text: '#FBBF24' },
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Roboto Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+          },
+          fontSize: {
+            caption: ['10px', { lineHeight: '14px', letterSpacing: '0.05em' }],
+            body: ['13px', { lineHeight: '1.5' }],
+          },
+          borderRadius: {
+            md: '6px',
+            sm: '4px',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- HTMX via CDN (tanpa SRI integrity: hash dijaga agar tetap valid antar versi CDN) -->
+  <script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --gcp-canvas: #131314;
+      --gcp-surface: #1E2025;
+      --gcp-elevated: #25282E;
+      --gcp-border: #333740;
+      --gcp-border-elev: #3C4043;
+      --gcp-focus: #8AB4F8;
+      --gcp-ink: #E8EAED;
+      --gcp-ink-secondary: #9AA0A6;
+      --gcp-ink-muted: #5F6368;
+      --gcp-blue: #4285F4;
+      --gcp-blue-light: #8AB4F8;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-feature-settings: 'rlig' 1, 'calt' 1;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #333740; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4A4F58; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    [x-cloak] { display: none !important; }
+    details > summary { cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+
+    *:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--gcp-focus);
+      border-radius: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+  {% block head %}{% endblock %}
+</head>
+
+<!-- CSRF token ditempel pada SEMUA request HTMX via hx-headers (AGENTS.md §3.3) -->
+<body class="h-full bg-gcp-canvas text-gcp-ink antialiased selection:bg-gcp-blue-light selection:text-gcp-canvas"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+      hx-indicator='#global-htmx-indicator'>
+
+  <div class="h-full flex flex-col overflow-hidden">
+    <!-- ===== Top Utility Bar (fixed 48px) ===== -->
+    <header class="h-12 border-b border-gcp-border bg-gcp-surface flex items-center justify-between px-4 shrink-0 z-20 flex-shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="flex h-6 w-6 items-center justify-center rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-blue-light">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 9v4m0 3h.01" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm font-semibold text-gcp-ink tracking-tight">SRE Incident Triage</h1>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main Shell ===== -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+      <!-- ===== Left Navigation Rail (GCP Console Sidebar) ===== -->
+      <nav id="nav-rail"
+           class="w-14 border-r border-gcp-border bg-gcp-surface flex flex-col shrink-0 z-10 transition-all duration-300">
+        <div class="flex flex-col items-center justify-start gap-6 p-3 h-full min-h-[calc(100vh-48px)]">
+          <a href="{{ url_for('triage.index') }}"
+             class="flex flex-col items-center gap-1.5 p-2 rounded-sm {% if request.endpoint and request.endpoint.startswith('triage') %}bg-gcp-blue-light/10 text-gcp-blue-light border border-gcp-blue-light/20{% else %}text-gcp-ink-secondary hover:bg-gcp-elevated hover:text-gcp-ink{% endif %}"
+             title="Incident Triage">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="text-[10px] font-medium leading-tight">Triage</span>
+          </a>
+          <a href="{{ url_for('analytics.dashboard') }}"
+             class="flex flex-col items-center gap-1.5 p-2 rounded-sm {% if request.endpoint and request.endpoint.startswith('analytics') %}bg-gcp-blue-light/10 text-gcp-blue-light border border-gcp-blue-light/20{% else %}text-gcp-ink-secondary hover:bg-gcp-elevated hover:text-gcp-ink{% endif %}"
+             title="Operations Analytics">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="text-[10px] font-medium leading-tight">Analytics</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- ===== Page Content Area ===== -->
+      <div class="flex-1 flex flex-col overflow-hidden relative min-w-0">
+
+        <!-- Sub-Header Contextual Toolbar -->
+        <header class="h-12 border-b border-gcp-border bg-gcp-surface/80 backdrop-blur flex items-center justify-between px-4 shrink-0 z-10 flex-shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <h2 class="text-sm font-medium text-gcp-ink">{% block page_title %}Console{% endblock %}</h2>
+            <p class="text-[10px] text-gcp-ink-muted font-mono">{% block page_subtitle %}{% endblock %}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            {% block toolbar %}{% endblock %}
+          </div>
+        </header>
+
+        <!-- Global HTMX indicator (determinate progress bar selama request) -->
+        <div id="global-htmx-indicator" class="htmx-indicator absolute top-0 left-0 right-0 h-[3px] bg-gcp-blue-light w-0 opacity-0 transition-all duration-300 z-40"></div>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto p-4 min-w-0">
+          {% block content %}{% endblock %}
+        </main>
+
+      </div>
+    </div>
+  </div>
+
+  {% block scripts %}{% endblock %}
+
+  <script>
+    // ===== Global HTMX determinate progress bar =====
+    const bar = document.getElementById('global-htmx-indicator');
+    let progressTimer = null;
+    let progress = 0;
+
+    function nudgeProgress() {
+      if (!bar) return;
+      if (progress < 75) {
+        progress += Math.random() * 12 + 3; // naik perlahan ke 75%
+        bar.style.width = Math.min(progress, 75) + '%';
+        bar.style.opacity = 1;
+        progressTimer = setTimeout(nudgeProgress, 350);
+      }
+    }
+
+    document.body.addEventListener('htmx:request', () => {
+      if (progressTimer) clearTimeout(progressTimer);
+      progress = 0;
+      bar.style.width = '0%';
+      bar.style.opacity = 1;
+      nudgeProgress();
+    });
+
+    document.body.addEventListener('htmx:afterRequest', () => {
+      if (progressTimer) clearTimeout(progressTimer);
+      progress = 100;
+      bar.style.width = '100%';
+      setTimeout(() => { bar.style.opacity = 0; bar.style.width = '0%'; progress = 0; }, 400);
+    });
+  </script>
+</body>
+</html>

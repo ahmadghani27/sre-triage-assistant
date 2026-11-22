@@ -1,0 +1,7 @@
+{# Hidden state DOM-anchored (ARCHITECTURE.md §4) untuk multi-tab isolation
+   tanpa server session. Ditukar via hx-swap-oob="true" setiap kali triase
+   atau refine memperbarui konteks aktif. #}
+<form id="workspace-state" class="hidden" aria-hidden="true" {% if oob %}hx-swap-oob="true"{% endif %}>
+  <input type="hidden" name="sanitized_log" id="state-sanitized-log" value="{{ sanitized_log }}" />
+  <input type="hidden" name="locked_runbook_ids" id="state-locked-ids" value="{{ locked_ids }}" />
+</form>

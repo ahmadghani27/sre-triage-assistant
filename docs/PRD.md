@@ -52,10 +52,10 @@ Membangun aplikasi web terpusat yang berfungsi sebagai sistem pendukung keputusa
     
 
 ## 5. Persyaratan Non-Fungsional (Non-Functional Requirements)
--   **Arsitektur Modular:** Backend dibangun menggunakan pola _Flask Application Factory_ dan _Blueprints_ (`auth`,  `triage`,  `runbooks`,  `analytics`) dengan pemisahan ketat antara _routing layer_ dan _service/business logic layer_.
+-   **Arsitektur Modular:** Backend dibangun menggunakan pola _Flask Application Factory_ dan _Blueprints_ (`triage`, `analytics`) dengan pemisahan ketat antara _routing layer_ dan _service/business logic layer_.
 -   **Graceful Degradation (Resiliensi):** Jika layanan LLM API eksternal mengalami gangguan (_timeout_ atau _rate limit_), aplikasi tidak boleh _crash_. Sistem wajib melakukan _fallback_ otomatis dengan tetap menampilkan hasil pencarian Top-3 dari database lokal beserta langkah perbaikannya.
--   **Keamanan Aplikasi Web:** Implementasi proteksi CSRF pada seluruh _form_,  _password hashing_ standar industri (`bcrypt`/`argon2`), serta _rate limiting_ berbasis IP untuk mencegah penyalahgunaan kuota API LLM.
--   **Portabilitas Database:** Penggunaan SQLAlchemy ORM agar skema database dapat dijalankan secara lokal menggunakan SQLite saat pengembangan/demo, namun siap dimigrasi ke PostgreSQL pada lingkungan produksi skala besar.
+-   **Keamanan Aplikasi Web:** Implementasi proteksi CSRF pada seluruh _form_ dan batas panjang karakter input (`max_length=5000`). _Password hashing_ dan _rate limiting_ berbasis IP ditunda ke versi selanjutnya.
+-   **Portabilitas Database:** Database menggunakan **SQLite tunggal** (`app.db`) dengan `sqlite3` stdlib. Semua skema, FTS5 virtual table, dan trigger didefinisikan di `data/schema.sql`. Karena FTS5, trigger BM25, dan tokenizer `porter unicode61` hanya tersedia pada SQLite, skema ini **tidak dapat dimigrasi ke PostgreSQL** tanpa penulisan ulang ulang lapis pencarian.
     
 
 ## 6. Batasan Ruang Lingkup (Out of Scope)
