@@ -1,0 +1,686 @@
+[
+  {
+    "title": "Prometheus Alert: CPUThrottlingHigh",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: CPUThrottlingHigh\nProcesses experience elevated CPU throttling.\nThe alert is purely informative and unless there is some other issue with\nthe application, it can be skipped.",
+    "root_cause": "Processes experience elevated CPU throttling.",
+    "resolution_steps": "**Notice**:\nUser shouldn't increase CPU limits unless the application is behaving\nerratically (another alert firing).\n\nFor this particular reason, the alert is inhibited by default in\nkube-prometheus and can be sent only if another alert in the same namespace\nis firing.\n\n**When mixed with other alerts**:\n\nGive specific container in the pod more CPU limits. Requests can stay the same.\n\nIn specific cases kubernetes node has too old kernel which is known to have\nissues with assigning CPU resources to the process [see here](https://github.com/kubernetes/kubernetes/issues/67577)\n\nIn certain scenarios ensure to use CPU Pinning and isolation - in short give\nto the container full CPU cores.\nAlso ensure to update app so that it is aware it runs in cgroups,\nor explicitly set number of CPU it can use, or limit number of threads.\n\nLonger and more detailed info - [PDF from Intel](https://builders.intel.com/docs/networkbuilders/cpu-pin-and-isolation-in-kubernetes-app-note.pdf)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/cputhrottlinghigh"
+  },
+  {
+    "title": "Prometheus Alert: KubeAPIDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeAPIDown\nThe `KubeAPIDown` alert is triggered when all Kubernetes API servers have not\nbeen reachable by the monitoring system for more than 15 minutes.\nThis is a critical alert. The Kubernetes API is not responding. The\ncluster may partially or fully non-functional.\n\nApplications, which do not use kubernetes API directly, will continue to work. Changing kubernetes resources is not possible.\nin the cluster.\n\nServices using Kubernetes API directly will start to behave erratically.",
+    "root_cause": "The `KubeAPIDown` alert is triggered when all Kubernetes API servers have not\nbeen reachable by the monitoring system for more than 15 minutes.",
+    "resolution_steps": "If you can still reach the API server intermittently, you may be able treat this\nlike any other failing deployment. If not, it's possible you may have to refer\nto the disaster recovery documentation.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapidown"
+  },
+  {
+    "title": "Prometheus Alert: KubeAPIErrorBudgetBurn",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeAPIErrorBudgetBurn\nThe overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.\nThe overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.\n\n**This is always important; the only deciding factor is how urgent it is at the current rate**\n\n<details>\n<summary>Full context</summary>\n\nThis alert essentially means that a higher-than-expected percentage of the operations kube-apiserver is performing are erroring. Since random errors are inevitable, kube-apiserver has a \"budget\" of errors that it is allowed to make before triggering this alert.\n\nLearn more about Multiple Burn Rate Alerts in the [SRE Workbook Chapter 5](https://sre.google/wor",
+    "root_cause": "The overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.",
+    "resolution_steps": "# KubeAPIErrorBudgetBurn\n\n## Impact\n\nThe overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.\n\n**This is always important; the only deciding factor is how urgent it is at the current rate**\n\n<details>\n<summary>Full context</summary>\n\nThis alert essentially means that a higher-than-expected percentage of the operations kube-apiserver is performing are erroring. Since random errors are inevitable, kube-apiserver has a \"budget\" of errors that it is allowed to make before triggering this alert.\n\nLearn more about Multiple Burn Rate Alerts in the [SRE Workbook Chapter 5](https://sre.google/workbook/alerting-on-slos/#recommended_time_windows_and_burn_rates_f).\n\n</details>\n\n## Critical\n\nFirst check the labels `long` and `short`.\n\n* `long: 1h` and `short: 5m`: less than **~2 days** -- You should fix the problem as soon as possible!\n* `long: 6h` and `short: 30m`: less than **~5 days** -- Track this down now but no immediate fix required.\n\n## Warning\n\nFirst check the labels `long` and `short`.\n\n* `long: 1d` and `short: 2h`: less than **~10 da",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn"
+  },
+  {
+    "title": "Prometheus Alert: KubeAPITerminatedRequests",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeAPITerminatedRequests\nThe apiserver has terminated over 20% of its incoming requests.\nClient will not be able to interact with the cluster.\nSome in-cluster services this may degrade or make service unavailable.",
+    "root_cause": "The apiserver has terminated over 20% of its incoming requests.",
+    "resolution_steps": "TODO",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapiterminatedrequests"
+  },
+  {
+    "title": "Prometheus Alert: KubeAggregatedAPIDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeAggregatedAPIDown\nKubernetes aggregated API has reported errors.\nIt has appeared unavailable X times averaged over the past 10m.\nFrom minor such as inability to see cluster metrics to more severe such as\nunable to use custom metrics to scale or even unable to use cluster.",
+    "root_cause": "Kubernetes aggregated API has reported errors.\nIt has appeared unavailable X times averaged over the past 10m.",
+    "resolution_steps": "TODO\n\nSee [APIServer aggregation](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeaggregatedapidown"
+  },
+  {
+    "title": "Prometheus Alert: KubeAggregatedAPIErrors",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeAggregatedAPIErrors\nKubernetes aggregated API has reported errors.\nIt has appeared unavailable over 4 times averaged over the past 10m.\nFrom minor such as inability to see cluster metrics to more severe such as\nunable to use custom metrics to scale or even unable to use cluster.",
+    "root_cause": "Kubernetes aggregated API has reported errors.\nIt has appeared unavailable over 4 times averaged over the past 10m.",
+    "resolution_steps": "TODO\n\nSee [APIServer aggregation](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeaggregatedapierrors"
+  },
+  {
+    "title": "Prometheus Alert: KubeCPUOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeCPUOvercommit\nCluster has overcommitted CPU resource requests for Pods\nand cannot tolerate node failure.\n\n<details>\n<summary>Full context</summary>\n\nTotal number of CPU requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.\n\n</details>\nThe cluster cannot tolerate node failure. In the event of a node failure, some Pods will be in `Pending` state.",
+    "root_cause": "Cluster has overcommitted CPU resource requests for Pods\nand cannot tolerate node failure.\n\n<details>\n<summary>Full context</summary>\n\nTotal number of CPU requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.\n\n</details>",
+    "resolution_steps": "- Add more nodes to the cluster - usually it is better to have more smaller\n  nodes, than few bigger.\n\n- Add different node pools with different instance types to avoid problem\n  when using only one instance type in the cloud.\n\n- Use pod priorities to avoid important services from losing performance,\n  see [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n\n- Prepare performance tests for the expected workload, plan cluster capacity\n  accordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuovercommit"
+  },
+  {
+    "title": "Prometheus Alert: KubeCPUQuotaOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeCPUQuotaOvercommit\nCluster has overcommitted CPU resource requests for Namespaces and cannot tolerate node failure.\nIn the event of a node failure, some Pods will be in `Pending` state due to a lack of available CPU resources.",
+    "root_cause": "Cluster has overcommitted CPU resource requests for Namespaces and cannot tolerate node failure.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n\n- Add more nodes to the cluster - usually it is better to have more smaller\n  nodes, than few bigger.\n\n- Add different node pools with different instance types to avoid problem\n  when using only one instance type in the cloud.\n\n- Use pod priorities to avoid important services from losing performance,\n  see [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n\n- Prepare performance tests for the expected workload, plan cluster capacity\n  accordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuquotaovercommit"
+  },
+  {
+    "title": "Prometheus Alert: KubeClientCertificateExpiration",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeClientCertificateExpiration\nA client certificate used to authenticate to the apiserver is expiring in less than 7 days (warning alert) or 24 hours (critical alert).\nClient will not be able to interact with the cluster.\nIn cluster services communicating with Kubernetes API may degrade or become unavailable.",
+    "root_cause": "A client certificate used to authenticate to the apiserver is expiring in less than 7 days (warning alert) or 24 hours (critical alert).",
+    "resolution_steps": "Update client certificate.\n\nFor in-cluster clients recreate pods.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeclientcertificateexpiration"
+  },
+  {
+    "title": "Prometheus Alert: KubeClientErrors",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeClientErrors\nKubernetes API server client is experiencing over 1% error rate in the last 15 minutes.\nSpecific kubernetes client may malfunction. Service degradation.",
+    "root_cause": "Kubernetes API server client is experiencing over 1% error rate in the last 15 minutes.",
+    "resolution_steps": "TODO",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeclienterrors"
+  },
+  {
+    "title": "Prometheus Alert: KubeContainerWaiting",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeContainerWaiting\nContainer in pod is in Waiting state for too long.\nService degradation or unavailability.",
+    "root_cause": "Container in pod is in Waiting state for too long.",
+    "resolution_steps": "See [Container waiting](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#my-pod-stays-waiting)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecontainerwaiting"
+  },
+  {
+    "title": "Prometheus Alert: KubeControllerManagerDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeControllerManagerDown\nKubeControllerManager has disappeared from Prometheus target discovery.\nThe cluster is not functional and Kubernetes resources cannot be reconciled.\n\n<details>\n<summary>Full context</summary>\n\nMore about kube-controller-manager function can be found at https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/\n\n</details>",
+    "root_cause": "KubeControllerManager has disappeared from Prometheus target discovery.",
+    "resolution_steps": "See old CoreOS docs in [Web Archive](http://web.archive.org/web/20201026205154/https://coreos.com/tectonic/docs/latest/troubleshooting/controller-recovery.html)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecontrollermanagerdown"
+  },
+  {
+    "title": "Prometheus Alert: KubeDaemonSetMisScheduled",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeDaemonSetMisScheduled\nA number of pods of daemonset are running where they are not supposed to run.\nService degradation or unavailability.\nExcessive resource usage where they could be used by other apps.",
+    "root_cause": "A number of pods of daemonset are running where they are not supposed to run.",
+    "resolution_steps": "Update DaemonSet and apply change, delete pods manually.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetmisscheduled"
+  },
+  {
+    "title": "Prometheus Alert: KubeDaemonSetNotScheduled",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeDaemonSetNotScheduled\nA number of pods of daemonset are not scheduled.\nService degradation or unavailability.",
+    "root_cause": "A number of pods of daemonset are not scheduled.",
+    "resolution_steps": "Set proper priority class for important dameonsets to system-node-critical.\n\nSee [DaemonSet rolling update is stuck](https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/#daemonset-rolling-update-is-stuck)\n\nIn some rare cases you may need to change node affinities or delete pod\nmanually if this is special daemonset which has specific pod priority class\nand is limited to only 1 replica (so it runs on specific node only)\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetnotscheduled"
+  },
+  {
+    "title": "Prometheus Alert: KubeDaemonSetRolloutStuck",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeDaemonSetRolloutStuck\nDaemonSet update is stuck waiting for replaced pod.\nService degradation or unavailability.",
+    "root_cause": "DaemonSet update is stuck waiting for replaced pod.",
+    "resolution_steps": "See [DaemonSet rolling update is stuck](https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/#daemonset-rolling-update-is-stuck)\n\nIn some rare cases you may need to change node affinities or delete pod\nmanually if this is special daemonset\nwhich has pod priority class system-cluster-critical and is limited to only\n1 replica (so it runs on specific node only)\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetrolloutstuck"
+  },
+  {
+    "title": "Prometheus Alert: KubeDeploymentGenerationMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeDeploymentGenerationMismatch\nDeployment generation mismatch due to possible roll-back.\nService degradation or unavailability.",
+    "root_cause": "Deployment generation mismatch due to possible roll-back.",
+    "resolution_steps": "Depending on the conditions usually adding new nodes solves the issue.\n\nOtherwise probably deployment or HPA definition needs to be fixed.\nIf you can not add nodes then you can change rolling update strategy to `Recreate`.\nSometimes manually deleting pod helps :)\n\nIn rare cases roll back to previous version - see [Kubernetes Docs - Rolling Back](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-to-a-previous-revision)\n\nIn extremely rare situations scale oldest ReplicaSets to 0 and delete them.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedeploymentgenerationmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeDeploymentReplicasMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeDeploymentReplicasMismatch\nDeployment has not matched the expected number of replicas.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes Deployment resource does not have number of replicas which were\ndeclared to be in operation.\nFor example deployment is expected to have 3 replicas, but it has less than\nthat for a noticeable period of time.\n\nIn rare occasions there may be more replicas than it should and system did\nnot clean it up.\n</details>\nService degradation or unavailability.",
+    "root_cause": "Deployment has not matched the expected number of replicas.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes Deployment resource does not have number of replicas which were\ndeclared to be in operation.\nFor example deployment is expected to have 3 replicas, but it has less than\nthat for a noticeable period of time.\n\nIn rare occasions there may be more replicas than it should and system did\nnot clean it up.\n</details>",
+    "resolution_steps": "Depending on the conditions usually adding new nodes solves the issue.\n\nOtherwise probably deployment or HPA definition needs to be fixed.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedeploymentreplicasmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeHpaMaxedOut",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeHpaMaxedOut\nHorizontal Pod Autoscaler has been running at max replicas for longer\nthan 15 minutes.\nHorizontal Pod Autoscaler won't be able to add new pods and thus scale application.\n**Notice** for some services maximizing HPA is in fact desired.",
+    "root_cause": "Horizontal Pod Autoscaler has been running at max replicas for longer\nthan 15 minutes.",
+    "resolution_steps": "If using basic metrics like CPU/Memory then ensure to set proper values for\n`requests`.\nFor memory based scaling ensure there are no memory leaks.\nIf using custom metrics then fine-tune how app scales accordingly to it.\n\nUse performance tests to see how the app scales.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubehpamaxedout"
+  },
+  {
+    "title": "Prometheus Alert: KubeHpaReplicasMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeHpaReplicasMismatch\nHorizontal Pod Autoscaler has not matched the desired number of replicas for\nlonger than 15 minutes.\nHPA was unable to schedule desired number of pods.",
+    "root_cause": "Horizontal Pod Autoscaler has not matched the desired number of replicas for\nlonger than 15 minutes.",
+    "resolution_steps": "In case of cluster-autoscaler you may need to set up preemtive pod pools to\nensure nodes are created on time.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubehpareplicasmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeJobCompletion",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeJobCompletion\nJob is taking more than 1h to complete.\n- Long processing of batch jobs.\n- Possible issues with scheduling next Job",
+    "root_cause": "Job is taking more than 1h to complete.",
+    "resolution_steps": "- Give it more resources so it finishes faster, if applicable.\n- See [Job patterns](https://kubernetes.io/docs/tasks/job/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubejobcompletion"
+  },
+  {
+    "title": "Prometheus Alert: KubeJobFailed",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeJobFailed\nJob failed complete.\nFailure of processing of a scheduled task.",
+    "root_cause": "Job failed complete.",
+    "resolution_steps": "- See [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)\n- See [Job patterns](https://kubernetes.io/docs/tasks/job/)\n- redesign job so that it is idempotent (can be re-run many times which will\n  always produce the same output even if input differs)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubejobfailed"
+  },
+  {
+    "title": "Prometheus Alert: KubeMemoryOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeMemoryOvercommit\nCluster has overcommitted Memory resource requests for Pods\nand cannot tolerate node failure.\n\n<details>\n<summary>Full context</summary>\n\nTotal number of Memory requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.\n\n</details>\nThe cluster cannot tolerate node failure. In the event of a node failure,\nsome Pods will be in `Pending` state.",
+    "root_cause": "Cluster has overcommitted Memory resource requests for Pods\nand cannot tolerate node failure.\n\n<details>\n<summary>Full context</summary>\n\nTotal number of Memory requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.\n\n</details>",
+    "resolution_steps": "- Add more nodes to the cluster - usually it is better to have more smaller\n  nodes, than few bigger.\n\n- Add different node pools with different instance types to avoid problem\n  when using only one instance type in the cloud.\n\n- Use pod priorities to avoid important services from losing performance,\n  see [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n\n- Prepare performance tests for the expected workload, plan cluster capacity\n  accordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubememoryovercommit"
+  },
+  {
+    "title": "Prometheus Alert: KubeMemoryQuotaOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeMemoryQuotaOvercommit\nCluster has overcommitted memory resource requests for Namespaces.\nVarious services degradation or unavailability in case of single node failure.",
+    "root_cause": "Cluster has overcommitted memory resource requests for Namespaces.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n\n- Add more nodes to the cluster - usually it is better to have more smaller\n  nodes, than few bigger.\n\n- Add different node pools with different instance types to avoid problem\n  when using only one instance type in the cloud.\n\n- Use pod priorities to avoid important services from losing performance,\n  see [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n\n- Prepare performance tests for the expected workload, plan cluster capacity\n  accordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubememoryquotaovercommit"
+  },
+  {
+    "title": "Prometheus Alert: KubeNodeNotReady",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeNodeNotReady\nKubeNodeNotReady alert is fired when a Kubernetes node is not in `Ready`\nstate for a certain period. In this case, the node is not able to host any new\npods as described [here][KubeNode].\nThe performance of the cluster deployments is affected, depending on the overall\nworkload and the type of the node.",
+    "root_cause": "KubeNodeNotReady alert is fired when a Kubernetes node is not in `Ready`\nstate for a certain period. In this case, the node is not able to host any new\npods as described [here][KubeNode].",
+    "resolution_steps": "Once, the problem was resolved that prevented node from being replaced,\nthe instance should be terminated.\n\nSee [KubeNode](https://kubernetes.io/docs/concepts/architecture/nodes/#condition)\nSee [node problem detector](https://github.com/kubernetes/node-problem-detector)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodenotready"
+  },
+  {
+    "title": "Prometheus Alert: KubeNodeReadinessFlapping",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeNodeReadinessFlapping\nThe readiness status of node  has changed few times in the last 15 minutes.\nThe performance of the cluster deployments is affected, depending on the overall\nworkload and the type of the node.",
+    "root_cause": "The readiness status of node  has changed few times in the last 15 minutes.",
+    "resolution_steps": "In case of maintenance ensure to [cordon and drain node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/).\n\nIn other cases ensure storage and networking redundancy if applicable.\n\nSee [KubeNode](https://kubernetes.io/docs/concepts/architecture/nodes/#condition)\nSee [node problem detector](https://github.com/kubernetes/node-problem-detector)\nSee [Watchdog timer](https://en.wikipedia.org/wiki/Watchdog_timer)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodereadinessflapping"
+  },
+  {
+    "title": "Prometheus Alert: KubeNodeUnreachable",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeNodeUnreachable\nKubernetes node is unreachable and some workloads may be rescheduled.\nThe performance of the cluster deployments is affected, depending on the overall\nworkload and the type of the node.",
+    "root_cause": "Kubernetes node is unreachable and some workloads may be rescheduled.",
+    "resolution_steps": "In case of maintenance ensure to [cordon and drain node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/).\n\nIn other cases ensure storage and networking redundancy if applicable.\n\nSee [KubeNode](https://kubernetes.io/docs/concepts/architecture/nodes/#condition)\nSee [node problem detector](https://github.com/kubernetes/node-problem-detector)\nSee [Watchdog timer](https://en.wikipedia.org/wiki/Watchdog_timer)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodeunreachable"
+  },
+  {
+    "title": "Prometheus Alert: KubePersistentVolumeErrors",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubePersistentVolumeErrors\nPersistentVolume is having issues with provisioning.\nVolue may be unavailable or have data erors (corrupted storage).\n\nService degradation, data loss.",
+    "root_cause": "PersistentVolume is having issues with provisioning.",
+    "resolution_steps": "In happy scenario storage is just not provisioned as fast as expected.\nIn worst scenario there is data corruption or data loss. Restore from backup.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepersistentvolumeerrors"
+  },
+  {
+    "title": "Prometheus Alert: KubePersistentVolumeFillingUp",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubePersistentVolumeFillingUp\nThere can be various reasons why a volume is filling up.\nThis runbook does not cover application specific reasons, only mitigations\nfor volumes that are legitimately filling.\n\nAs always refer to recommended scenarios for given service.\nService degradation, switching to read only mode.",
+    "root_cause": "There can be various reasons why a volume is filling up.\nThis runbook does not cover application specific reasons, only mitigations\nfor volumes that are legitimately filling.\n\nAs always refer to recommended scenarios for given service.",
+    "resolution_steps": "### Data retention\n\nDeleting no longer needed data is the fastest and the cheapest solution.\n\nAsk the service owner if specific old data can be deleted.\nEnable data retention especially for snapshots, if possible.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepersistentvolumefillingup"
+  },
+  {
+    "title": "Prometheus Alert: KubePodCrashLooping",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubePodCrashLooping\nPod is in CrashLoop which means the app dies or is unresponsive and \nkubernetes tries to restart it automatically.\nService degradation or unavailability.\nInability to do rolling upgrades.\nCertain apps will not perform required tasks such as data migrations.",
+    "root_cause": "Pod is in CrashLoop which means the app dies or is unresponsive and \nkubernetes tries to restart it automatically.",
+    "resolution_steps": "Talk with developers or read documentation about the app, ensure to define\nsane default values to start the app.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepodcrashlooping"
+  },
+  {
+    "title": "Prometheus Alert: KubePodNotReady",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubePodNotReady\nPod has been in a non-ready state for more than 15 minutes.\n\nState Running but not ready means readiness probe fails.\nState Pending means pod can not be created for specific namespace and node.\n\n<details>\n<summary>Full context</summary>\n\nPod failed to reach ready state, depending on the readiness/liveness probes.\nSee [pod-lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)\n\n</details>\nService degradation or unavailability.\nPod not attached to service, thus not getting any traffic.",
+    "root_cause": "Pod has been in a non-ready state for more than 15 minutes.\n\nState Running but not ready means readiness probe fails.\nState Pending means pod can not be created for specific namespace and node.\n\n<details>\n<summary>Full context</summary>\n\nPod failed to reach ready state, depending on the readiness/liveness probes.\nSee [pod-lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)\n\n</details>",
+    "resolution_steps": "Talk with developers or read documentation about the app, ensure to define\nsane default values to start the app.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepodnotready"
+  },
+  {
+    "title": "Prometheus Alert: KubeProxyDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeProxyDown\nThe `KubeProxyDown` alert is triggered when all Kubernetes Proxy instances have not\nbeen reachable by the monitoring system for more than 15 minutes.\nkube-proxy is a network proxy that runs on each node in your cluster,\nimplementing part of the Kubernetes Service concept.\n\nkube-proxy maintains network rules on nodes.\nThese network rules allow network communication to your Pods\nfrom network sessions inside or outside of your cluster.\n\nkube-proxy uses the operating system packet filtering layer if\nthere is one and it's available. Otherwise, kube-proxy forwards the traffic\nitself.",
+    "root_cause": "The `KubeProxyDown` alert is triggered when all Kubernetes Proxy instances have not\nbeen reachable by the monitoring system for more than 15 minutes.",
+    "resolution_steps": "### AWS EKS\nIf you are running AWS EKS cluster and you find that the `kube-proxy` pods are all running normally, make sure to update the `kube-proxy-config` cm as shown below.\n\n```console\nkubectl edit cm -n kube-system kube-proxy-config\n...\nmetricsBindAddress: 0.0.0.0:10249\n...\n```\nThis setting configures the IP address with port for the metrics server to serve on (set to '0.0.0.0:10249' for all IPv4 interfaces and '[::]:10249' for all IPv6 interfaces). More information on the [documentation page](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/)\n\nThen just go delete `kube-proxy` pods and new ones will be created automatically.\n\n```console\nkubectl delete pod -l k8s-app=kube-proxy -n kube-system\n```",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeproxydown"
+  },
+  {
+    "title": "Prometheus Alert: KubeQuotaAlmostFull",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeQuotaAlmostFull\nCluster reaches to the allowed limits for given namespace.\nIn the future deployments may not be possbile.",
+    "root_cause": "Cluster reaches to the allowed limits for given namespace.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n- Review resources used by the quota and fine tune them.\n- Continue with standard capacity planning procedures.\n- See [Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubequotaalmostfull"
+  },
+  {
+    "title": "Prometheus Alert: KubeQuotaExceeded",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeQuotaExceeded\nCluster reaches to the allowed hard limits for given namespace.\nInability to create resources in kubernetes.",
+    "root_cause": "Cluster reaches to the allowed hard limits for given namespace.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n- Review resources used by the quota and fine tune them.\n- Continue with standard capacity planning procedures.\n- See [Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubequotaexceeded"
+  },
+  {
+    "title": "Prometheus Alert: KubeQuotaFullyUsed",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeQuotaFullyUsed\nCluster reached allowed limits for given namespace.\nNew app installations may not be possible.",
+    "root_cause": "Cluster reached allowed limits for given namespace.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n- Review resources used by the quota and fine tune them.\n- Continue with standard capacity planning procedures.\n- See [Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubequotafullyused"
+  },
+  {
+    "title": "Prometheus Alert: KubeSchedulerDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeSchedulerDown\nKube Scheduler has disappeared from Prometheus target discovery.\nThis is a critical alert. The cluster may partially or fully non-functional.",
+    "root_cause": "Kube Scheduler has disappeared from Prometheus target discovery.",
+    "resolution_steps": "See old CoreOS docs in [Web Archive](http://web.archive.org/web/20201026205154/https://coreos.com/tectonic/docs/latest/troubleshooting/controller-recovery.html)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeschedulerdown"
+  },
+  {
+    "title": "Prometheus Alert: KubeStatefulSetGenerationMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeStatefulSetGenerationMismatch\nStatefulSet generation mismatch due to possible roll-back.\nService degradation or unavailability.",
+    "root_cause": "StatefulSet generation mismatch due to possible roll-back.",
+    "resolution_steps": "Statefulsets are quite specific, and usually have special scripts on pod termination.\nSee if there are special commands executed such as data migration, which may significantly slow down the progress.\n\nIn case of scale out usually adding new nodes solves the issue.\n\nOtherwise probably statefulset definition needs to be fixed.\n\nIn rare cases roll back to previous version - see [Kubernetes Docs - Rolling Back](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#rolling-updates)\n\nIn extremely rare situations it may be better to delete problematic pods.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubestatefulsetgenerationmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeStatefulSetReplicasMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeStatefulSetReplicasMismatch\nStatefulSet has not matched the expected number of replicas.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes StatefulSet resource does not have number of replicas which were\ndeclared to be in operation.\nFor example statefulset is expected to have 3 replicas, but it has less than\nthat for a noticeable period of time.\n\nIn rare occasions there may be more replicas than it should and system did not\nclean it up.\n</details>\nService degradation or unavailability.",
+    "root_cause": "StatefulSet has not matched the expected number of replicas.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes StatefulSet resource does not have number of replicas which were\ndeclared to be in operation.\nFor example statefulset is expected to have 3 replicas, but it has less than\nthat for a noticeable period of time.\n\nIn rare occasions there may be more replicas than it should and system did not\nclean it up.\n</details>",
+    "resolution_steps": "Depending on the conditions usually adding new nodes solves the issue.\n\nSet proper affinity rules to schedule pods in the same zone to avoid issues\nwith volumes.\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubestatefulsetreplicasmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeStatefulSetUpdateNotRolledOut",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeStatefulSetUpdateNotRolledOut\nStatefulSet update has not been rolled out.\nService degradation or unavailability.",
+    "root_cause": "StatefulSet update has not been rolled out.",
+    "resolution_steps": "TODO\n\nSee [Debugging Pods](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/#debugging-pods)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubestatefulsetupdatenotrolledout"
+  },
+  {
+    "title": "Prometheus Alert: KubeVersionMismatch",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeVersionMismatch\nDifferent semantic versions of Kubernetes components running.\nUsually happens during kubernetes cluster upgrade process.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes control plane nodes or worker nodes use different versions.\nThis usually happens when kubernetes cluster is upgraded between minor and\nmajor version.\n\n</details>\nIncompatible API versions between kubernetes components may have very\nbroad range of issues, influencing single containers, through app stability,\nending at whole cluster stability.",
+    "root_cause": "Different semantic versions of Kubernetes components running.\nUsually happens during kubernetes cluster upgrade process.\n\n<details>\n<summary>Full context</summary>\n\nKubernetes control plane nodes or worker nodes use different versions.\nThis usually happens when kubernetes cluster is upgraded between minor and\nmajor version.\n\n</details>",
+    "resolution_steps": "- Drain affected nodes, then upgrade or replace them with newer ones,\n  see [Safely drain node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/)\n\n- Ensure to set proper control plane version and node pool versions when\n  creating clusters.\n- Ensure auto cluster updates for control plane and node pools.\n- Set proper maintenance windows for the clusters.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeversionmismatch"
+  },
+  {
+    "title": "Prometheus Alert: KubeletClientCertificateExpiration",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: KubeletClientCertificateExpiration\nClient certificate for Kubelet on node expires soon or already expired.\nNode will not be able to be used within the cluster.",
+    "root_cause": "Client certificate for Kubelet on node expires soon or already expired.",
+    "resolution_steps": "Update certificates in the cluster control nodes and the worker nodes.\nRefer to the documentation of the tool used to create cluster.\n\nAnother option is to delete node if it affects only one,\n\nIn extreme situations recreate cluster.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletclientcertificateexpiration"
+  },
+  {
+    "title": "Prometheus Alert: InfoInhibitor",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: InfoInhibitor\nThis is an alert that is used to inhibit info alerts.\n\nBy themselves, the info-level alerts are sometimes very noisy,\nbut they are relevant when combined with other alerts.\n\n<details>\n<summary>Full context</summary>\n\nMore information about the alert and design considerations can be found in a [kube-prometheus issue](https://github.com/prometheus-operator/kube-prometheus/issues/861)\n</details>\nAlert does not have any impact and it is used only as a workaround to a missing feature in alertmanager.",
+    "root_cause": "This is an alert that is used to inhibit info alerts.\n\nBy themselves, the info-level alerts are sometimes very noisy,\nbut they are relevant when combined with other alerts.\n\n<details>\n<summary>Full context</summary>\n\nMore information about the alert and design considerations can be found in a [kube-prometheus issue](https://github.com/prometheus-operator/kube-prometheus/issues/861)\n</details>",
+    "resolution_steps": "This alert should be routed to a null receiver and configured to inhibit\nalerts with `severity=\"info\"`. Such configuration is available at https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/alertmanager-secret.yaml",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/general/infoinhibitor"
+  },
+  {
+    "title": "Prometheus Alert: NodeNetworkInterfaceFlapping",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: NodeNetworkInterfaceFlapping\nNetwork interface is often changing its status\nApplications on the node may no longer be able to operate with other services.\nNetwork attached storage performance issues or even data loss.",
+    "root_cause": "Network interface is often changing its status",
+    "resolution_steps": "Cordon and drain node to migrate apps from it.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/general/nodenetworkinterfaceflapping"
+  },
+  {
+    "title": "Prometheus Alert: TargetDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: TargetDown\nThe alert means that one or more prometheus scrape targets are down. It fires when at least 10% of scrape targets in a Service are unreachable.\n\n<details>\n<summary>Full context</summary>\n\nPrometheus works by sending an HTTP GET request to all of its \"targets\" every few seconds. So TargetDown really means that Prometheus just can't access your service, which may or may not mean it's actually down. If your service appears to be running fine, a common cause could be a misconfigured ServiceMonitor (maybe the port or path is incorrect), a misconfigured NetworkPolicy, or Service with incorrect labelSelectors that isn't selecting any Pods.\n\n</details>\nMetrics from a particular target cannot be scraped as such there is no data for this target in Prometheus and alerting can be hindered.",
+    "root_cause": "The alert means that one or more prometheus scrape targets are down. It fires when at least 10% of scrape targets in a Service are unreachable.\n\n<details>\n<summary>Full context</summary>\n\nPrometheus works by sending an HTTP GET request to all of its \"targets\" every few seconds. So TargetDown really means that Prometheus just can't access your service, which may or may not mean it's actually down. If your service appears to be running fine, a common cause could be a misconfigured ServiceMonitor (",
+    "resolution_steps": "Mitigation depends on the error reported by prometheus and there is no generic one.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/general/targetdown"
+  },
+  {
+    "title": "Prometheus Alert: Watchdog",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: Watchdog\nThis is an alert meant to ensure that the entire alerting pipeline is functional.\nThis alert is always firing, therefore it should always be firing in Alertmanager\nand always fire against a receiver.\nIf not firing then it should alert external systems that this alerting system\nis no longer working.",
+    "root_cause": "This is an alert meant to ensure that the entire alerting pipeline is functional.\nThis alert is always firing, therefore it should always be firing in Alertmanager\nand always fire against a receiver.",
+    "resolution_steps": "There are integrations with various notification\nmechanisms that send a notification when this alert is not firing.\nFor example the `DeadMansSnitch` integration in PagerDuty.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/general/watchdog"
+  },
+  {
+    "title": "Prometheus Alert: etcdBackendQuotaLowSpace",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdBackendQuotaLowSpace\nThis alert fires when the total existing DB size exceeds 95% of the maximum\nDB quota. The consumed space is in Prometheus represented by the metric\n`etcd_mvcc_db_total_size_in_bytes`, and the DB quota size is defined by\n`etcd_server_quota_backend_bytes`.\nIn case the DB size exceeds the DB quota, no writes can be performed anymore on\nthe etcd cluster. This further prevents any updates in the cluster, such as the\ncreation of pods.",
+    "root_cause": "This alert fires when the total existing DB size exceeds 95% of the maximum\nDB quota. The consumed space is in Prometheus represented by the metric\n`etcd_mvcc_db_total_size_in_bytes`, and the DB quota size is defined by\n`etcd_server_quota_backend_bytes`.",
+    "resolution_steps": "### Capacity planning\n\nIf the `etcd_mvcc_db_total_size_in_bytes` shows that you are growing close to\nthe `etcd_server_quota_backend_bytes`, etcd almost reached max capacity and it's\nstart planning for new cluster.\n\nIn the meantime before migration happens, you can use defrag to gain some time.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdbackendquotalowspace"
+  },
+  {
+    "title": "Prometheus Alert: etcdGRPCRequestsSlow",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdGRPCRequestsSlow\nThis alert fires when the 99th percentile of etcd gRPC requests are too slow.\nWhen requests are too slow, they can lead to various scenarios like leader\nelection failure, slow reads and writes.",
+    "root_cause": "This alert fires when the 99th percentile of etcd gRPC requests are too slow.",
+    "resolution_steps": "### Fragmented state\n\nIn the case of slow fisk or when the etcd DB size increases, we can defragment\nexisting etcd DB to optimize DB consumption as described in\n[etcdDefragmentation](https://etcd.io/docs/v3.4.0/op-guide/maintenance/).\nRun the following command in all etcd pods.\n\n```console\n$ etcdctl defrag\n```\n\nAs validation, check the endpoint status of etcd members to know the reduced\nsize of etcd DB. Use for this purpose the same diagnostic approaches as listed\nabove. More space should be available now.\n\nFurther info on etcd best practices can be found in the [etcdPractices](https://docs.openshift.com/container-platform/4.7/scalability_and_performance/recommended-host-practices.html#recommended-etcd-practices).",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdgrpcrequestsslow"
+  },
+  {
+    "title": "Prometheus Alert: etcdHighFsyncDurations",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdHighFsyncDurations\nThis alert fires when the 99th percentile of etcd disk fsync duration is too\nhigh for 10 minutes.\n\n<details>\n<summary>Full context</summary>\n\nEvery write request sent to etcd has to be [fsync'd][fsync] to disk by the leader node, transmitted to its peers, and fsync'd to those disks as well before etcd can tell the client that the write request succeeded (as part of the [Raft consensus algorithm][raft]). As a result of all those fsync's, etcd cares a LOT about disk latency, which this alert picks up on.\n\nEtcd instances perform poorly on network-attached storage. Directly-attached spinning disks may work, but solid-state disks or better [are recommended][etcd-disks] for larger clusters. For very large clusters, you may even consider a [separate etcd cluster just for events][etcd-events] to reduce the write load.\n\n</details>\nWhen this happens it can lead to various scenarios like leader election failure,\nfrequ",
+    "root_cause": "This alert fires when the 99th percentile of etcd disk fsync duration is too\nhigh for 10 minutes.\n\n<details>\n<summary>Full context</summary>\n\nEvery write request sent to etcd has to be [fsync'd][fsync] to disk by the leader node, transmitted to its peers, and fsync'd to those disks as well before etcd can tell the client that the write request succeeded (as part of the [Raft consensus algorithm][raft]). As a result of all those fsync's, etcd cares a LOT about disk latency, which this alert picks",
+    "resolution_steps": "### Fragmented state\n\nIn the case of slow fisk or when the etcd DB size increases, we can defragment\nexisting etcd DB to optimize DB consumption as described in\n[here][etcdDefragmentation]. Run the following command in all etcd pods.\n\n```console\n$ etcdctl defrag\n```\n\nAs validation, check the endpoint status of etcd members to know the reduced\nsize of etcd DB. Use for this purpose the same diagnostic approaches as listed\nabove. More space should be available now.\n\nFurther info on etcd best practices can be found in the [OpenShift docs\nhere][etcdPractices].\n\n- [fsync](https://man7.org/linux/man-pages/man2/fsync.2.html)\n- [raft](https://en.wikipedia.org/wiki/Raft_(algorithm)#Log_replication)\n- [etcd-disks](https://etcd.io/docs/v3.5/op-guide/hardware/#disks)\n- [etcd-events](https://github.com/kubernetes/kubernetes/issues/4432)\n- [etcdDefragmentation](https://etcd.io/docs/v3.4.0/op-guide/maintenance/)\n- [etcdPractices](https://docs.openshift.com/container-platform/4.7/scalability_and_performance/recommended-host-practices.html#recommended-etcd-practices_)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdhighfsyncdurations"
+  },
+  {
+    "title": "Prometheus Alert: etcdHighNumberOfFailedGRPCRequests",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdHighNumberOfFailedGRPCRequests\nThis alert fires when at least 5% of etcd gRPC requests failed in the past 10\nminutes.\nFirst establish which gRPC method is failing, this will be visible in the alert.\nIf it's not part of the alert, the following query will display method and etcd\ninstance that has failing requests:\n\n```promql\n100 * sum without(grpc_type, grpc_code)\n(rate(grpc_server_handled_total{grpc_code=~\"Unknown|FailedPrecondition|ResourceExhausted|Internal|Unavailable|DataLoss|DeadlineExceeded\",job=\"etcd\"}[5m]))\n/ sum without(grpc_type, grpc_code)\n(rate(grpc_server_handled_total{job=\"etcd\"}[5m])) > 5 and on()\n(sum(cluster_infrastructure_provider{type!~\"ipi|BareMetal\"} == bool 1))\n```",
+    "root_cause": "This alert fires when at least 5% of etcd gRPC requests failed in the past 10\nminutes.",
+    "resolution_steps": "Depending on the above diagnosis, the issue will most likely be described in the\nerror log line of either etcd or openshift-etcd-operator. Most likely causes\ntend to be networking issues.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdhighnumberoffailedgrpcrequests"
+  },
+  {
+    "title": "Prometheus Alert: etcdInsufficientMembers",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdInsufficientMembers\nThis alert fires when there are fewer instances available than are needed by\netcd to be healthy.\nThis means that etcd cluster has not enough members in the cluster to create quorum.\nWhen etcd does not have a majority of instances available the Kubernetes and\nOpenShift APIs will reject read and write requests and operations that preserve\nthe health of workloads cannot be performed.\n\nIn general loosing quorum will switch etcd to read only, which effectively renders k8s api read only.\nIt is possible to read the current state, but not possible to update it.",
+    "root_cause": "This alert fires when there are fewer instances available than are needed by\netcd to be healthy.\nThis means that etcd cluster has not enough members in the cluster to create quorum.",
+    "resolution_steps": "### Disaster and recovery\n\nIf an upgrade is in progress, the alert may automatically resolve in some time\nwhen the master node comes up again. If MCO is not working on the master node,\ncheck the cloud provider to verify if the master node instances are running or not.\n\nIn the case when you are running on AWS, the AWS instance retirement might need\na manual reboot of the master node.\n\nAs a last resort if none of the above fix the issue and the alert is still\nfiring, for etcd specific issues follow the steps described in the\n[disaster-recovery](https://docs.openshift.com/container-platform/4.7/backup_and_restore/control_plane_backup_and_restore/disaster_recovery/about-disaster-recovery.html).",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdinsufficientmembers"
+  },
+  {
+    "title": "Prometheus Alert: etcdMembersDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdMembersDown\nThis alert fires when one or more etcd member goes down and evaluates the\nnumber of etcd members that are currently down. Often, this alert was observed\nas part of a cluster upgrade when a master node is being upgraded and requires a\nreboot.\nIn etcd a majority of (n/2)+1 has to agree on membership changes or key-value\nupgrade proposals. With this approach, a split-brain inconsistency can be\navoided. In the case that only one member is down in a 3-member cluster, it\nstill can make forward progress. Due to the fact that the quorum is 2 and 2\nmembers are still alive. However, when more members are down, the cluster\nbecomes unrecoverable.",
+    "root_cause": "This alert fires when one or more etcd member goes down and evaluates the\nnumber of etcd members that are currently down. Often, this alert was observed\nas part of a cluster upgrade when a master node is being upgraded and requires a\nreboot.",
+    "resolution_steps": "If an upgrade is in progress, the alert may automatically resolve in some time\nwhen the master node comes up again. If MCO is not working on the master node,\ncheck the cloud provider to verify if the master node instances are running or not.\n\nIn the case when you are running on AWS, the AWS instance retirement might need\na manual reboot of the master node.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdmembersdown"
+  },
+  {
+    "title": "Prometheus Alert: etcdNoLeader",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: etcdNoLeader\nThis alert is triggered when etcd cluster does not have a leader for more than 1\nminute.\nThis can happen if nodes from the cluster are orphaned - they were part of the cluster\nbut now they are in minority and thus can not form a cluster,\nfor example due to network partition.\nWhen there is no leader, Kubernetes API will not be able to work\nas expected and cluster cannot process any writes or reads, and any write\nrequests are queued for processing until a new leader is elected. Operations\nthat preserve the health of the workloads cannot be performed.\n\nIn general loosing quorum will switch etcd to read only, which effectively renders k8s api read only.\nIt is possible to read the current state, but not possible to update it.",
+    "root_cause": "This alert is triggered when etcd cluster does not have a leader for more than 1\nminute.\nThis can happen if nodes from the cluster are orphaned - they were part of the cluster\nbut now they are in minority and thus can not form a cluster,\nfor example due to network partition.",
+    "resolution_steps": "### Disaster and recovery\n\nFollow the steps described in the [disaster-recovery](https://docs.openshift.com/container-platform/4.7/backup_and_restore/control_plane_backup_and_restore/disaster_recovery/about-disaster-recovery.html)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/etcd/etcdnoleader"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusBadConfig",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusBadConfig\nAlert fires when Prometheus cannot successfully reload the configuration file\ndue to the file having incorrect content.\nConfiguration cannot be reloaded and prometheus operates with last known good\nconfiguration.\nConfiguration changes in any of Prometheus, Probe, PodMonitor,\nor ServiceMonitor objects may not be picked up by prometheus server.",
+    "root_cause": "Alert fires when Prometheus cannot successfully reload the configuration file\ndue to the file having incorrect content.",
+    "resolution_steps": "Remove conflicting configuration option.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusbadconfig"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusDuplicateTimestamps",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusDuplicateTimestamps\nFind the Prometheus Pod that concerns this.",
+    "root_cause": "Find the Prometheus Pod that concerns this.",
+    "resolution_steps": "# PrometheusDuplicateTimestamps\n\nFind the Prometheus Pod that concerns this.\n\n```shell\n$ kubectl -n <namespace> get pod\nprometheus-k8s-0                       2/2     Running   1          122m\nprometheus-k8s-1                       2/2     Running   1          122m\n```\n\nLook at the logs of each of them, there should be a log line such as:\n\n```shell\n$ kubectl -n <namespace> logs prometheus-k8s-0\nlevel=warn ts=2021-01-04T15:08:55.613Z caller=scrape.go:1372 component=\"scrape manager\" scrape_pool=default/main-ingress-nginx-controller/0 target=http://10.0.7.3:10254/metrics msg=\"Error on ingesting samples with different value but same timestamp\" num_dropped=16\n```\n\nNow there is a judgement call to make, this could be the result of:\n\n* Faulty configuration, which could be resolved by removing the offending\n  `ServiceMonitor` or `PodMonitor` object, which can be identified through\n  the `scrape_pool` label in the log line, which is in the format of\n  `<namespace>/<service-monitor-name>/<endpoint-id>`.\n\n* The target is reporting faulty data, sometimes this can be resolved by\n  restarting the target, or it might need to be fixed in code of the offending\n  application.\n\nFurther reading [blog]",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusduplicatetimestamps"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusErrorSendingAlertsToAnyAlertmanager",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusErrorSendingAlertsToAnyAlertmanager\nPrometheus has encountered errors sending alerts to a any Alertmanager.\nAll alerts may be lost.",
+    "root_cause": "Prometheus has encountered errors sending alerts to a any Alertmanager.",
+    "resolution_steps": "Set multiple AlertManager instances, spread them across nodes.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheuserrorsendingalertstoanyalertmanager"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusErrorSendingAlertsToSomeAlertmanagers",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusErrorSendingAlertsToSomeAlertmanagers\nPrometheus has encountered more than 1% errors sending alerts to a specific Alertmanager.\nSome alerts may be lost.",
+    "root_cause": "Prometheus has encountered more than 1% errors sending alerts to a specific Alertmanager.",
+    "resolution_steps": "Set multiple AlertManager instances, spread them across nodes.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheuserrorsendingalertstosomealertmanagers"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusLabelLimitHit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusLabelLimitHit\nPrometheus has dropped targets because some scrape configs have exceeded the labels limit.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus has dropped targets because some scrape configs have exceeded the labels limit.",
+    "resolution_steps": "Start thinking about sharding prometheus.\nIncrease scrape times to perform it less frequently.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheuslabellimithit"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusMissingRuleEvaluations",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusMissingRuleEvaluations\nPrometheus is missing rule evaluations due to slow rule group evaluation.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus is missing rule evaluations due to slow rule group evaluation.",
+    "resolution_steps": "Sometimes giving more CPU is the only way to fix it.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusmissingruleevaluations"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusNotConnectedToAlertmanagers",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusNotConnectedToAlertmanagers\nPrometheus is not connected to any Alertmanagers.\nSending alerts is not possible.",
+    "root_cause": "Prometheus is not connected to any Alertmanagers.",
+    "resolution_steps": "Set multiple AlertManager instances, spread them across nodes.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusnotconnectedtoalertmanagers"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusNotIngestingSamples",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusNotIngestingSamples\nPrometheus is not ingesting samples.\nMissing metrics.",
+    "root_cause": "Prometheus is not ingesting samples.",
+    "resolution_steps": "TODO",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusnotingestingsamples"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusNotificationQueueRunningFull",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusNotificationQueueRunningFull\nPrometheus alert notification queue predicted to run full in less than 30m.\nFail to send alerts.",
+    "root_cause": "Prometheus alert notification queue predicted to run full in less than 30m.",
+    "resolution_steps": "Remove conflicting configuration option.\n\nCheck if there is an option to decrease number of alerts firing,\nfor example by sharding prometheus.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusnotificationqueuerunningfull"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusOutOfOrderTimestamps",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusOutOfOrderTimestamps\nMore information in [blog](https://www.robustperception.io/debugging-out-of-order-samples)",
+    "root_cause": "More information in [blog](https://www.robustperception.io/debugging-out-of-order-samples)",
+    "resolution_steps": "# PrometheusOutOfOrderTimestamps\n\nMore information in [blog](https://www.robustperception.io/debugging-out-of-order-samples)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusoutofordertimestamps"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusRemoteStorageFailures",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusRemoteStorageFailures\nPrometheus fails to send samples to remote storage.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus fails to send samples to remote storage.",
+    "resolution_steps": "TODO",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusremotestoragefailures"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusRemoteWriteBehind",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusRemoteWriteBehind\nPrometheus remote write is behind.\nMetrics and alerts may be missing or inaccurate.\nIncreased data lag between locations.",
+    "root_cause": "Prometheus remote write is behind.",
+    "resolution_steps": "Probbaly amout of data sent to remote system is too high\nfor given network connectivity speed.\nYou may need to limit which metrics to send to minimize transfers.\n\nSee [Prometheus Remote Storage Failures]({{< ref \"./PrometheusRemoteStorageFailures.md\" >}})",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusremotewritebehind"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusRemoteWriteDesiredShards",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusRemoteWriteDesiredShards\nPrometheus remote write desired shards calculation wants to run\nmore than configured max shards.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus remote write desired shards calculation wants to run\nmore than configured max shards.",
+    "resolution_steps": "Probbaly amout of data sent to remote system is too high\nfor given network connectivity speed.\nYou may need to limit which metrics to send to minimize transfers.\n\nSee [Prometheus Remote Storage Failures]({{< ref \"./PrometheusRemoteStorageFailures.md\" >}})",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusremotewritedesiredshards"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusRuleFailures",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusRuleFailures\nPrometheus is failing rule evaluations.\nPrometheus rules are incorrect or failed to calculate.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus is failing rule evaluations.\nPrometheus rules are incorrect or failed to calculate.",
+    "resolution_steps": "Fix rules.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusrulefailures"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusTSDBCompactionsFailing",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusTSDBCompactionsFailing\nPrometheus has issues compacting blocks.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus has issues compacting blocks.",
+    "resolution_steps": "At first just wait, it may fix itself after some time.\n\nIncrease Prometheus pod memory so that it caches more from disk.\nTry expanding volumes if they are too small or too slow.\nChange PVC storageClass to a more performant one.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustsdbcompactionsfailing"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusTSDBReloadsFailing",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusTSDBReloadsFailing\nPrometheus has issues reloading blocks from disk.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus has issues reloading blocks from disk.",
+    "resolution_steps": "Increase Prometheus pod memory so that it caches more from disk.\nTry expanding volumes if they are too small or too slow.\nChange PVC storageClass to a more performant one.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustsdbreloadsfailing"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusTargetLimitHit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusTargetLimitHit\nPrometheus has dropped targets because some scrape configs have exceeded the targets limit.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "Prometheus has dropped targets because some scrape configs have exceeded the targets limit.",
+    "resolution_steps": "Start thinking about sharding prometheus.\nIncrease scrape times to perform it less frequently.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustargetlimithit"
+  },
+  {
+    "title": "Prometheus Alert: PrometheusTargetSyncFailure",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: PrometheusTargetSyncFailure\nThis alert is triggered when at least one of the Prometheus instances has\nconsistently failed to sync its configuration.\nMetrics and alerts may be missing or inaccurate.",
+    "root_cause": "This alert is triggered when at least one of the Prometheus instances has\nconsistently failed to sync its configuration.",
+    "resolution_steps": "If the logs indicate a syntax or other configuration error, correct the\ncorresponding `ServiceMonitor`, `PodMonitor`, or other configuration\nresource. In most all cases, the operator should prevent this from happening.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustargetsyncfailure"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerClusterCrashlooping",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerClusterCrashlooping\nHalf or more of the Alertmanager instances within the same cluster are crashlooping.\nAlerts could be notified multiple time unless pods are crashing to fast and no alerts can be sent.",
+    "root_cause": "Half or more of the Alertmanager instances within the same cluster are crashlooping.",
+    "resolution_steps": "Make sure pods have enough resources (CPU, MEM) to work correctly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclustercrashlooping"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerClusterDown",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerClusterDown\nHalf or more of the Alertmanager instances within the same cluster are down.\nYou have an unstable cluster, if everything goes wrong you will lose the whole cluster.",
+    "root_cause": "Half or more of the Alertmanager instances within the same cluster are down.",
+    "resolution_steps": "There are no cheap options to mitigate this risk.\nVerifying any new changes in preprod before production environment should improve stability.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclusterdown"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerClusterFailedToSendAlerts",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerClusterFailedToSendAlerts\nAll instances failed to send notification to an integration.\nYou will not receive a notification when an alert is raised.",
+    "root_cause": "All instances failed to send notification to an integration.",
+    "resolution_steps": "Depending on the integration, correct the integration with the faulty instance (network, authorization token, firewall...)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclusterfailedtosendalerts"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerConfigInconsistent",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerConfigInconsistent\nThe configuration between instances inside a cluster is inconsistent.\nConfiguration inconsistency can be multiple and impact is hard to predict. \nNevertheless, in most cases the alert might be lost or routed to the incorrect integration.",
+    "root_cause": "The configuration between instances inside a cluster is inconsistent.",
+    "resolution_steps": "Delete the incorrect secret and deploy the correct one.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerconfiginconsistent"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerFailedReload",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerFailedReload\nThe alert `AlertmanagerFailedReload` is triggered when the Alertmanager instance\nfor the cluster monitoring stack has consistently failed to reload its\nconfiguration for a certain period.\nThe impact depends on the type of the error you will find in the logs.\nMost of the time, previous configuration is still working, thanks to multiple\ninstances, so avoid deleting existing pods.",
+    "root_cause": "The alert `AlertmanagerFailedReload` is triggered when the Alertmanager instance\nfor the cluster monitoring stack has consistently failed to reload its\nconfiguration for a certain period.",
+    "resolution_steps": "Running [amtool check-config alertmanager.yaml](https://github.com/prometheus/alertmanager#amtool)\non your configuration file will help you detect problem related to syntax.\nYou could also rollback `alertmanager.yaml` to the previous version in order\nto get back to a stable version.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedreload"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerFailedToSendAlerts",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerFailedToSendAlerts\nAt least one instance is unable to routed alert to the corresponding integration.\nNo impact since another instance should be able to send the notification,\nunless `AlertmanagerClusterFailedToSendAlerts` is also triggerd for the same integration.",
+    "root_cause": "At least one instance is unable to routed alert to the corresponding integration.",
+    "resolution_steps": "Depending on the integration, you can have a look to alert-manager logs and act (network, authorization token, firewall...)\n\nDepending on the integration, you can have a look to alert-manager logs\nand act (network, authorization token, firewall...)\n\n```shell\nkubectl -n monitoring logs -l 'alertmanager=main' -c alertmanager\n```",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedtosendalerts"
+  },
+  {
+    "title": "Prometheus Alert: AlertmanagerMembersInconsistent",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Alert: AlertmanagerMembersInconsistent\nAt least one of alertmanager cluster members cannot be found.\n## Diagnosis\n\nCheck if IP addresses discovered by alertmanager cluster are the same ones as in alertmanager Service. Following example show possible inconsistency in Endpoint IP addresses:\n\n```shell\n$ kubectl describe svc alertmanager-main\n\nName:              alertmanager-main\nNamespace:         monitoring\n...\nEndpoints:         10.128.2.3:9095,10.129.2.5:9095,10.131.0.44:9095\n\n$ kubectl get pod -o wide | grep alertmanager-main\n\nalertmanager-main-0                            5/5     Running   0          11d     10.129.2.6\nalertmanager-main-1                            5/5     Running   0          2d16h   10.131.0.44     \nalertmanager-main-2                            5/5     Running   0          6d      10.128.2.3  \n```",
+    "root_cause": "At least one of alertmanager cluster members cannot be found.",
+    "resolution_steps": "Deleting an incorrect Endpoint should trigger its recreation with a correct IP address.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagermembersinconsistent"
+  }
+]

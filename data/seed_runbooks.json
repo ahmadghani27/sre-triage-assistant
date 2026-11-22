@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Prometheus Alert: CPUThrottlingHigh",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Prometheus Alert: CPUThrottlingHigh\nAlert: CPUThrottlingHigh\nProcesses experience elevated CPU throttling.\nThe alert is purely informative and unless there is some other issue with\nthe application, it can be skipped.",
+    "root_cause": "Processes experience elevated CPU throttling.",
+    "resolution_steps": "**Notice**:\nUser shouldn't increase CPU limits unless the application is behaving\nerratically (another alert firing).\nFor this particular reason, the alert is inhibited by default in\nkube-prometheus and can be sent only if another alert in the same namespace\nis firing.\n**When mixed with other alerts**:\nGive specific container in the pod more CPU limits. Requests can stay the same.\nIn specific cases kubernetes node has too old kernel which is known to have\nissues with assigning CPU resources to the process [see here](https://github.com/kubernetes/kubernetes/issues/67577)\nIn certain scenarios ensure to use CPU Pinning and isolation - in short give\nto the container full CPU cores.\nAlso ensure to update app so that it is aware it runs in cgroups,\nor explicitly set number of CPU it can use, or limit number of threads.\nLonger and more detailed info - [PDF from Intel](https://builders.intel.com/docs/networkbuilders/cpu-pin-and-isolation-in-kubernetes-app-note.pdf)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/cputhrottlinghigh",
+    "content_hash": "91b1ccc99bb31701c9f0399ade0d591766cfe2dc29a287822fd6f57618ae2e0c"
+  },
+  {
+    "title": "Prometheus Alert: KubeAPIErrorBudgetBurn",
+    "category": "deployment",
+    "severity": "SEV1",
+    "symptoms_log": "Prometheus Alert: KubeAPIErrorBudgetBurn\nAlert: KubeAPIErrorBudgetBurn\nThe overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.\n**This is always important; the only deciding factor is how urgent it is at the current rate**\nFull context\nThis alert essentially means that a higher-than-expected percentage of the operations kube-apiserver is performing are erroring. Since random errors are inevitable, kube-apiserver has a \"budget\" of errors that it is allowed to make before triggering this alert.\nLearn more about Multiple Burn Rate Alerts in the [SRE Workbook Chapter 5](https://sre.google/workbook/alerting-on-slos/#recommended_time_windows_and_burn_rates_f).",
+    "root_cause": "The overall availability of your Kubernetes cluster isn't guaranteed any more.",
+    "resolution_steps": "# KubeAPIErrorBudgetBurn\n## Impact\nThe overall availability of your Kubernetes cluster isn't guaranteed any more.\nThere may be **too many errors** returned by the APIServer and/or **responses take too long** for guarantee proper reconciliation.\n**This is always important; the only deciding factor is how urgent it is at the current rate**\nFull context\nThis alert essentially means that a higher-than-expected percentage of the operations kube-apiserver is performing are erroring. Since random errors are inevitable, kube-apiserver has a \"budget\" of errors that it is allowed to make before triggering this alert.\nLearn more about Multiple Burn Rate Alerts in the [SRE Workbook Chapter 5](https://sre.google/workbook/alerting-on-slos/#recommended_time_windows_and_burn_rates_f).\n## Critical\nFirst check the labels `long` and `short`.\n* `long: 1h` and `short: 5m`: less than **~2 days** -- You should fix the problem as soon as possible!\n* `long: 6h`",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn",
+    "content_hash": "3b5c5482e9acf79e66245ae91e52d172f9632332f502a907e66357de3bd16701"
+  },
+  {
+    "title": "Prometheus Alert: KubeCPUOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Prometheus Alert: KubeCPUOvercommit\nAlert: KubeCPUOvercommit\nCluster has overcommitted CPU resource requests for Pods\nand cannot tolerate node failure.\nFull context\nTotal number of CPU requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.\nThe cluster cannot tolerate node failure. In the event of a node failure, some Pods will be in `Pending` state.",
+    "root_cause": "Cluster has overcommitted CPU resource requests for Pods\nand cannot tolerate node failure.\nFull context\nTotal number of CPU requests for pods exceeds cluster capacity.\nIn case of node failure some pods will not fit in the remaining nodes.",
+    "resolution_steps": "- Add more nodes to the cluster - usually it is better to have more smaller\nnodes, than few bigger.\n- Add different node pools with different instance types to avoid problem\nwhen using only one instance type in the cloud.\n- Use pod priorities to avoid important services from losing performance,\nsee [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n- Prepare performance tests for the expected workload, plan cluster capacity\naccordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuovercommit",
+    "content_hash": "5ce60b3b95bf83f455f7d68666c4190bdda464924cea76ac43e740cb62040fd4"
+  },
+  {
+    "title": "Prometheus Alert: KubeCPUQuotaOvercommit",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Prometheus Alert: KubeCPUQuotaOvercommit\nAlert: KubeCPUQuotaOvercommit\nCluster has overcommitted CPU resource requests for Namespaces and cannot tolerate node failure.\nIn the event of a node failure, some Pods will be in `Pending` state due to a lack of available CPU resources.",
+    "root_cause": "Cluster has overcommitted CPU resource requests for Namespaces and cannot tolerate node failure.",
+    "resolution_steps": "- Review existing quota for given namespace and adjust it accordingly.\n- Add more nodes to the cluster - usually it is better to have more smaller\nnodes, than few bigger.\n- Add different node pools with different instance types to avoid problem\nwhen using only one instance type in the cloud.\n- Use pod priorities to avoid important services from losing performance,\nsee [pod priority and preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)\n- Fine tune settings for special pods used with [cluster-autoscaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-cluster-autoscaler-work-with-pod-priority-and-preemption)\n- Prepare performance tests for the expected workload, plan cluster capacity\naccordingly.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuquotaovercommit",
+    "content_hash": "363d39b5abdae7989fc9efe50b70591f6332182ec1ced8478e47bf27671296ac"
+  },
+  {
+    "title": "Prometheus Alert: KubeClientCertificateExpiration",
+    "category": "network",
+    "severity": "SEV2",
+    "symptoms_log": "Prometheus Alert: KubeClientCertificateExpiration\nAlert: KubeClientCertificateExpiration\nA client certificate used to authenticate to the apiserver is expiring in less than 7 days (warning alert) or 24 hours (critical alert).\nClient will not be able to interact with the cluster.\nIn cluster services communicating with Kubernetes API may degrade or become unavailable.",
+    "root_cause": "A client certificate used to authenticate to the apiserver is expiring in less than 7 days (warning alert) or 24 hours (critical alert).",
+    "resolution_steps": "Update client certificate.\nFor in-cluster clients recreate pods.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeclientcertificateexpiration",
+    "content_hash": "496eb6ee4feda5981b87bd239d1ada3937da7f9c24a1cb9097b6c786c256fa1d"
+  },
+  {
+    "title": "Prometheus Alert: KubeControllerManagerDown",
+    "category": "deployment",
+    "severity": "SEV1",
+    "symptoms_log": "Prometheus Alert: KubeControllerManagerDown\nAlert: KubeControllerManagerDown\nKubeControllerManager has disappeared from Prometheus target discovery.\nThe cluster is not functional and Kubernetes resources cannot be reconciled.\nFull context\nMore about kube-controller-manager function can be found at https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/",
+    "root_cause": "KubeControllerManager has disappeared from Prometheus target discovery.",
+    "resolution_steps": "See old CoreOS docs in [Web Archive](http://web.archive.org/web/20201026205154/https://coreos.com/tectonic/docs/latest/troubleshooting/controller-recovery.html)",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecontrollermanagerdown",
+    "content_hash": "4a59d93070afa6e602ea65eba9d2e9d9ed585ee5fe69cede746b313c5f934e1e"
+  },
+  {
+    "title": "Prometheus Alert: TargetDown",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Prometheus Alert: TargetDown\nAlert: TargetDown\nThe alert means that one or more prometheus scrape targets are down. It fires when at least 10% of scrape targets in a Service are unreachable.\nFull context\nPrometheus works by sending an HTTP GET request to all of its \"targets\" every few seconds. So TargetDown really means that Prometheus just can't access your service, which may or may not mean it's actually down. If your service appears to be running fine, a common cause could be a misconfigured ServiceMonitor (maybe the port or path is incorrect), a misconfigured NetworkPolicy, or Service with incorrect labelSelectors that isn't selecting any Pods.\nMetrics from a particular target cannot be scraped as such there is no data for this target in Prometheus and alerting can be hindered.",
+    "root_cause": "The alert means that one or more prometheus scrape targets are down. It fires when at least 10% of scrape targets in a Service are unreachable.\nFull context\nPrometheus works by sending an HTTP GET request to all of its \"targets\" every few seconds. So TargetDown really means that Prometheus just can't access your service, which may or may not mean it's actually down. If your service appears to be r",
+    "resolution_steps": "Mitigation depends on the error reported by prometheus and there is no generic one.",
+    "source_ref": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/targetdown",
+    "content_hash": "dee07bb0f0620c0ff5841c62a31f4a9cb3964e3fbbed2a5e659d795dd863b773"
+  },
+  {
+    "title": "jQuery AJAX call results in error status 403",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "jQuery AJAX call results in error status 403\nI'm making a query to a web service using jQuery AJAX. My query looks like this:\nWhen I execute this, I get a status error of 403. I do not understand why my call results in having the status code 403. I'm in control of the security on my service and it is marked as wide-open. I know the key is valid, because I'm using it in another call, which works. Here is the call that works:\nI know these are two different endpoints. But I'm 100% convinced th\nLog/Config:\nvar serviceEndpoint = 'http://example.com/object/details?version=1.1';\n$.ajax({\ntype: 'GET',\nurl: serviceEndpoint,\ndataType: 'jsonp',\ncontentType: 'jsonp',\nheaders: { 'api-key':'myKey' },\nsuccess: onSuccess,\nerror: onFailure\n});\nvar endpoint = 'http://example.com/object/data/item?version=1.1';\n$.ajax({\ntype: 'POST',\nurl: endpoint,\ncache: 'false',\ncontentType:'application/json',\nheaders: {\n'api-key':'myKey',\n'Content-Type':'application/json'\n},\ndata: JSON.stringify({\nid: 5,\ncount:true\n}),\nsuccess\nError code: 403 | Location: Cors",
+    "root_cause": "The reason of 403 error is you are not sending headers . Since you are making a CORS request, you cannot send any custom headers unless server enables these header by adding Access-Control-Allow-Headers to the response.",
+    "resolution_steps": "The reason of 403 error is you are not sending headers . Since you are making a CORS request, you cannot send any custom headers unless server enables these header by adding Access-Control-Allow-Headers to the response.\nIn a preflighted-request , client makes 2 requests to the server. First one is preflight (with OPTIONS method) and the second one is the real request. The server sends Access-Control-Allow-Headers header as a response of the preflight request. So it enables some headers to be sent. By this way your POST request can work because the POST request is a preflight-request. But for a GET request, there is no preflight to gather Access-Control-Allow-Headers header and browser doesn't send your custom headers in this case.\nA workaround for this issue:\nAs a workaround, set your dataType and contentType to json as the following:\nvar serviceEndpoint = 'http://example.com/object/details?version=1.1';\n$.ajax({\ntype: 'GET',\nurl: serviceEndpoint,\ndataType: 'json',\ncontentType: 'json',\nheaders: { 'api-key':'myKey' },\nsuccess: onSuccess,\nerror: onFailure\n});\nBy this way, your get request will be a preflighted request . If your server enables the api-key with Access-Control-Allow-H",
+    "source_ref": "https://stackoverflow.com/questions/36666256/jquery-ajax-call-results-in-error-status-403",
+    "content_hash": "36a584c89f21a654a9fe9cafead947d3ac5b742da8a5d2749333dd566e6277f4"
+  },
+  {
+    "title": "Meaning of 'locks rec but not gap waiting' in deadlock report",
+    "category": "database",
+    "severity": "SEV2",
+    "symptoms_log": "Meaning of 'locks rec but not gap waiting' in deadlock report\nAbout the meaning of locks rec but not gap waiting in TRANSACTION(1), which one is correct?\nAlready granted gap lock, waiting for clustered index X lock?\nAlready granted clustered index X lock, waiting for gap lock?\nThere are 31 rows in Transaction(1). What is the meaning of those rows? Does this represent a gap lock?\nLATEST DETECTED DEADLOCK Report\nTable Schema\nLog/Config:\n0: len 4; hex 800c20d6; asc ;;\n....\n29: SQL NULL;\n30: SQL NULL;\nLATEST DETECTED DEADLOCK\n------------------------\n2015-09-25 15:27:24 1b8084000\n*** (1) TRANSACTION:\nTRANSACTION 5226928, ACTIVE 0 sec fetching rows\nmysql tables in use 1, locked 1\nLOCK WAIT 31 lock struct(s), heap size 6544, 548 row lock(s)\nMySQL thread id 71, OS thread handle 0x1b45be000, query id 4085356 localhost root Creating sort index\nSELECT `rpush_notifications`.* FROM `rpush_notifications` WHERE (processing = 0 AND delivere\nError code: deadlock, DEADLOCK | Location: MySQL",
+    "root_cause": "Question 1: InnoDB is trying to get an exclusive lock on the row (it's actually a lock on the clustered index record, the PK), but not the surrounding gap (a gap lock). You can read more about record and gap locks here:",
+    "resolution_steps": "Question 1: InnoDB is trying to get an exclusive lock on the row (it's actually a lock on the clustered index record, the PK), but not the surrounding gap (a gap lock). You can read more about record and gap locks here:\nhttps://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html#innodb-record-locks\nThe exclusive lock request is coming from the \"for update\" clause added to the SELECT statement. Keep in mind that when using the repeatable-read isolation level (select @@session.tx_isolation), which is the default, the exclusive lock will be placed on every row examined for the SELECT, not just those that are returned (those that match all the predicates in the WHERE clause). So you may be able to reduce the number of rows examined, and thus the locks held which will greatly reduce the chances of conflicts, by using a composite index on:\nprocessing, delivered, failed, deliver_after\nI don't know what the cardinality (number of unique values) is for those columns, but you should generally list them in the composite index from highest cardinality to lowest.\nQuestion 2: 31 is the number of fields in the index record (or row, logically) that it's trying/waiting to get an exclusive lock on.",
+    "source_ref": "https://dba.stackexchange.com/questions/116113/meaning-of-locks-rec-but-not-gap-waiting-in-deadlock-report",
+    "content_hash": "16d0e2b2be12c4d08cfa1f57b0a9933a0855832e2df625b618c1c69536270b81"
+  },
+  {
+    "title": "View last several innodb deadlocks",
+    "category": "database",
+    "severity": "SEV2",
+    "symptoms_log": "View last several innodb deadlocks\nI see that I can view the latest deadlock in mysql/innodb, but is there a way to view past deadlocks? We have two deadlock issues, one being important and the other not. The less important deadlock happens several times a day so it becomes the \"latest\" deadlock.\nError code: deadlock | Location: MySQL",
+    "root_cause": "There is a setting that was introduced in MySQL 5.5.30 : innodb_print_all_deadlocks",
+    "resolution_steps": "There is a setting that was introduced in MySQL 5.5.30 : innodb_print_all_deadlocks\nWhen this option is enabled, information about all deadlocks in InnoDB user transactions is recorded in the mysqld error log. Otherwise, you see information about only the last deadlock, using the SHOW ENGINE INNODB STATUS command. An occasional InnoDB deadlock is not necessarily an issue, because InnoDB detects the condition immediately, and rolls back one of the transactions automatically. You might use this option to troubleshoot why deadlocks are happening if an application does not have appropriate error-handling logic to detect the rollback and retry its operation. A large number of deadlocks might indicate the need to restructure transactions that issue DML or SELECT ... FOR UPDATE statements for multiple tables, so that each transaction accesses the tables in the same order, thus avoiding the deadlock condition.\nJust add this setting to my.cnf\n[mysqld]\ninnodb_print_all_deadlocks = 1\nor\n[mysqld]\ninnodb_print_all_deadlocks = on\nYou don't have to restart mysql. Just login to mysql and run\nmysql> SET GLOBAL innodb_print_all_deadlocks = 1;\nor\nmysql> SET GLOBAL innodb_print_all_deadlocks = 'O",
+    "source_ref": "https://dba.stackexchange.com/questions/87350/view-last-several-innodb-deadlocks",
+    "content_hash": "3b1d180e9b51ef076562907cbfc4e94497db1fd1703f11e4d492e8f81bf0036d"
+  },
+  {
+    "title": "Trouble deciphering a deadlock in an innodb status log",
+    "category": "database",
+    "severity": "SEV2",
+    "symptoms_log": "Trouble deciphering a deadlock in an innodb status log\nWe are accessing MySQL from the Microsoft ADO.NET connector.\nOccasionally we are seeing the following deadlock in our innodb status and haven't been able to identify the cause of the problem. It looks like transaction (2) is waiting for and holding the same lock?\nWe read this article on next key locking, but it doesn't seem to apply to us because we aren't doing selects for update.\nUpdate\nThis morning I discovered a slightly different deadlock si\nLog/Config:\n------------------------\nLATEST DETECTED DEADLOCK\n------------------------\n110606 5:35:09\n*** (1) TRANSACTION:\nTRANSACTION 0 45321452, ACTIVE 0 sec, OS thread id 3804 starting index read\nmysql tables in use 1, locked 1\nLOCK WAIT 2 lock struct(s), heap size 368, 1 row lock(s)\nMySQL thread id 84, query id 3265713 localhost 127.0.0.1 famdev Updating\nUPDATE people SET company_id = 1610, name = ' ', password = ' ', temp_password = NULL, reset_password_hash = NULL, email = ' @yahoo.\nError code: deadlock, DEADLOCK | Location: MySQL",
+    "root_cause": "Rolando 's answer was certainly helpful in getting us on the path to the right solution. However we didn't ultimately adjust our autocommit configuration, our isolation levels or the innodb_locks_unsafe_for_binlog configuration.",
+    "resolution_steps": "Rolando 's answer was certainly helpful in getting us on the path to the right solution. However we didn't ultimately adjust our autocommit configuration, our isolation levels or the innodb_locks_unsafe_for_binlog configuration.\nWe believe the deadlock log we posted on this first question is a result of the deadlock we subsequently found and posted here . Since we resolved the issue with those two queries, we haven't seen any deadlocks since.",
+    "source_ref": "https://dba.stackexchange.com/questions/3179/trouble-deciphering-a-deadlock-in-an-innodb-status-log",
+    "content_hash": "046251115b0455fb192f86f22c8b44d6ce8bc6219cf8193723d5c4771958ec8c"
+  },
+  {
+    "title": "MySQL: Safe to kill transaction that is stuck in \"Waiting for table metadata lock\"",
+    "category": "database",
+    "severity": "SEV2",
+    "symptoms_log": "MySQL: Safe to kill transaction that is stuck in \"Waiting for table metadata lock\"\nGood morning/afternoon/night.\nI attempted to add a column to a table with a good few million rows. Here is the full query:\nHowever it seems to be stuck.\nIs it safe for me to kill the query or will it corrupt my table (it has been in this state for about a half hour)?\nLog/Config:\nalter table date_tasks_mark add column noDuplicate int unsigned not null default 0\n| 28893 | root | localhost | database_name | Query | 10668 | Waiting for table metadata lock | alter table date_tasks_marks add column noDuplicate int unsigned not null default 0\nError code: General Error | Location: MySQL",
+    "root_cause": "Yes, it's safe. Your alter table query hasn't even started.",
+    "resolution_steps": "Yes, it's safe. Your alter table query hasn't even started.\nHowever, the waiting for table metadata lock means, that there's another transaction operating on that table for a long time and you should rather kill that one to solve the problem. (read more about it here: 8.11.4 Metadata Locking )\nTo find this transaction, this thread is probably helpful: How do I find which transaction is causing a “Waiting for table metadata lock” state?",
+    "source_ref": "https://dba.stackexchange.com/questions/195018/mysql-safe-to-kill-transaction-that-is-stuck-in-waiting-for-table-metadata-loc",
+    "content_hash": "08c32a27e4b30f2851771fff885b9341529ae7dffa1c9dc0a7958e53ba06fd27"
+  },
+  {
+    "title": "MySql Gap Lock Deadlock on Inserts",
+    "category": "database",
+    "severity": "SEV2",
+    "symptoms_log": "MySql Gap Lock Deadlock on Inserts\nI'm getting Deadlocks from gap locks on a table when inserting into it frequently from multiple sources. Here is an overview of my processes.\nThe output of SHOW Create table vehicle_image; is:\nAnd the last Deadlock given by SHOW engine innodb status :\nI am running many of these processes simultaneously but never running two process that are using the same VehicleID . I'm really confused as to why I'm getting Deadlocks.\nI have temporarily solved t\nLog/Config:\nSTART TRANSACTION\nUPDATE vehicle_image\nSET active = 0\nWHERE vehicleID = SOMEID AND active = 1\nLoop:\nINSERT INTO vehicle_image (vehicleID, vehicleImageFilePath, vehicleImageSplashFilePath\n,vehicleImageThumbnailFilePath, vehicleImageMiniFilePath, mainVehicleImage, active)\nVALUES (%s, %s, %s, %s, %s, %s, 1);\nEND TRANSACTION\nCREATE TABLE `vehicle_image` (\n`vehicleImageID` int(11) NOT NULL AUTO_INCREMENT,\n`vehicleID` int(11) DEFAULT NULL,\n`vehicleImageFilePath` varchar(200) DEFAULT NULL,\n`vehicleImag\nError code: Deadlock | Location: MySQL",
+    "root_cause": "I'm not a MySQL expert, but by the look of your Deadlock logs,",
+    "resolution_steps": "I'm not a MySQL expert, but by the look of your Deadlock logs,\neven though you are INSERTing different vehicle IDs per statement,\nthose require the whole datapage (238326) of the VehicleID non-clustered index to be locked .\nThe fact you are occasionally getting deadlocks means that\nwithin 1 page you have multiple vehicle IDs,\nso there is a small chance that 2 different processes will need a lock for the same page.\nBest thing to advise is to keep your transactions as small as possible .\nIf there is some way you can do the following, it'll help lessen the chance of a deadlock:\nSTART TRANSACTION;\nUPDATE vehicle_image\nSET active = 0\nWHERE vehicleID = SomeID\nAND active = 1;\nEND TRANSACTION;\nLoop:\nSTART TRANSACTION;\nINSERT INTO vehicle_image (\nvehicleID\n,vehicleImageFilePath\n,vehicleImageSplashFilePath\n,vehicleImageThumbnailFilePath\n,vehicleImageMiniFilePath\n,mainVehicleImage\n,active\n)\nVALUES (%s, %s, %s, %s, %s, %s, 1);\nEND TRANSACTION;\n--EndLoop here\nIf you can, try to change that index's fill factor to 95% , and test to see if you get fewer deadlocks.\nA more extreme test would be to remove that index completely while INSERTing,\nthen recreate it when done.",
+    "source_ref": "https://dba.stackexchange.com/questions/202455/mysql-gap-lock-deadlock-on-inserts",
+    "content_hash": "6c4ad591c410a06e2992e0f0333805af8fe53e0767d76c8ac09e193fd9d36bcf"
+  },
+  {
+    "title": "Nginx - Customizing 404 page",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Nginx - Customizing 404 page\nNginx+PHP (on fastCGI) works great for me. When I enter a path to a PHP file which doesn't exist, instead of getting the default 404 error page (which comes for any invalid .html file), I simply get a \"No input file specified.\".\nHow can I customize this 404 error page?\nError code: 404 | Location: Nginx",
+    "root_cause": "You use the error_page property in the nginx config .",
+    "resolution_steps": "You use the error_page property in the nginx config .\nFor example, if you intend to set the 404 error page to /404.html , use\nerror_page 404 /404.html;\nSetting the 500 error page to /500.html is just as easy as:\nerror_page 500 /500.html;",
+    "source_ref": "https://stackoverflow.com/questions/1024199/nginx-customizing-404-page",
+    "content_hash": "b4c7d468f12f21b292b5560c963fc5692278068e636be5b1a22dad923048da08"
+  },
+  {
+    "title": "How do I force redirect all 404's (or every page, whether invalid or not) to the homepage?",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "How do I force redirect all 404's (or every page, whether invalid or not) to the homepage?\nCurrently every invalid page is 500 (Internal Server Error) because I probably messed up with my server block configuration.\nI decided to shut down my website a while ago and created a simple one-page, thank-you homepage. However old links and external sites are still trying to access other parts of the site, which no longer exists.\nHow do I force redirect all non-homepage (any invalid URL) to the homepage?\nI tried with the following block, but i\nLog/Config:\nlocation / {\ntry_files $uri $uri/ $document_uri/index.html;\n}\nserver {\nserver_name www.example.com example.com;\naccess_log /srv/www/example.com/logs/access.log;\nerror_log /srv/www/example.com/logs/error.log;\nroot /srv/www/example.com/public_html;\nindex index.php index.html;\nlocation / {\ntry_files $uri $uri/ $document_uri/index.html;\n}\n# Disable favicon.ico logging\nlocation = /favicon.ico {\nlog_not_found off;\naccess_log off;\n}\n# Allow robots and disable logging\nlocation = /robots.txt {\nallow all;\nError code: 404, 500 | Location: Nginx",
+    "root_cause": "Setting the error page to the home page like this",
+    "resolution_steps": "Setting the error page to the home page like this\nerror_page 404 /index.html;\nhas a small problem, the status code of the home page will be \"404 not found\", if you want to load the home page with a \"200 ok\" status code you should do it like this\nerror_page 404 =200 /index.html;\nThis will convert the \"404 not found\" error code to a \"200 ok\" code, and load the home page\nThe second method which @jvperrin mentioned is good too,\ntry_files $uri $uri/ /index.html;\nbut you need to keep 1 thing in mind, since it's the location / any asset that doesn't match another location and is not found will also load the index.html , for example missing images, css, js files, but in your case I can see you already have another location that's matching the assets' extensions, so you shouldn't face this problem.",
+    "source_ref": "https://stackoverflow.com/questions/19487365/how-do-i-force-redirect-all-404s-or-every-page-whether-invalid-or-not-to-the",
+    "content_hash": "6b84dc78a58dafd7b010fddb115c601a49d624867337f3f77ceeff1f32744f56"
+  },
+  {
+    "title": "One location block for all Nginx error codes",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "One location block for all Nginx error codes\nIs it possible to have the 40x and 50x errors served by a single location rule? Something like:\nLog/Config:\nerror_page 403 /403.html;\nerror_page 404 /404.html;\nerror_page 405 /405.html;\nerror_page 500 501 502 503 504 /5xx.html;\nlocation ~ /(?:40[345]|5xx)[.]html$ {\nroot /var/www/default/error;\n}\nError code: 403, 404, 405 | Location: Nginx",
+    "root_cause": "error_page 403 /error/403.html;",
+    "resolution_steps": "error_page 403 /error/403.html;\nerror_page 404 /error/404.html;\nerror_page 405 /error/405.html;\nerror_page 500 501 502 503 504 /error/5xx.html;\nlocation ^~ /error/ {\ninternal;\nroot /var/www/default;\n}\nhttp://nginx.org/r/location\nhttp://nginx.org/r/error_page\nhttp://nginx.org/r/root",
+    "source_ref": "https://stackoverflow.com/questions/13621915/one-location-block-for-all-nginx-error-codes",
+    "content_hash": "ad543f7d67b65c0218ae4a884f7c08e5f497f1825a4333e4e2082b9459d57df7"
+  },
+  {
+    "title": "HTTP 444 (No Response) instead of 404, 403 error pages?",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "HTTP 444 (No Response) instead of 404, 403 error pages?\nI always use \"return 444\" in the nginx config to stop crawlers that access my servers directly via IP or via the wrong hostname. It just closes the connection. Perfect.\nNow I want to use this response instead of the standard 404.html pages that nginx throws, but I fail at configuring.\nThis works fine, but I can't \"return 444\" like here:\nDoes anybody know a way to combine these two?\nLog/Config:\nerror_page 500 502 503 504 /custom_50x.html;\nserver {\nlisten 80;\nserver_name \"\";\nreturn 444;\n}\nError code: 404, 403, 500 | Location: Nginx",
+    "root_cause": "Redirect request then you can return status code easily:",
+    "resolution_steps": "Redirect request then you can return status code easily:\nserver {\nerror_page 500 502 503 504 @blackhole;\nlocation @blackhole {\nreturn 444;\n}\n}",
+    "source_ref": "https://stackoverflow.com/questions/41421111/http-444-no-response-instead-of-404-403-error-pages",
+    "content_hash": "3b805c916b07187f39658fdcc390e148d19f487d3c45161e93ea27eeb95e14b0"
+  },
+  {
+    "title": "Nginx rewrite in subfolder (404)",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Nginx rewrite in subfolder (404)\nI has a site host on a NGINX server which used to work fine to remove index.php in nginx site config using try_files .\nBut now I am going to add a blog on it, where the URL will be www.foo.com/blog , I can access the blog and use index.php?p= .\nBut, once I use pretty permalink with Nginx Helper, www.foo.com/blog/2013/07/bar , I get 404 .\nLog/Config:\nserver {\n# don't forget to tell on which port this server listens\nlisten 80;\n# listen on the www host\nserver_name foo.com;\n# and redirect to the non-www host (declared below)\nreturn 301 $scheme://www.ultra-case.com$request_uri;\n}\nserver {\n# listen 80 default_server deferred; # for Linux\n# listen 80 default_server accept_filter=httpready; # for FreeBSD\nlisten 80;\n# The host name to respond to\nserver_name www.foo.com;\n# Path for static files\nroot /web/foo.com\n#index file\nindex index.php;\n#Specify\nError code: 404 | Location: Nginx / Linux",
+    "root_cause": "The accepted answer routes everything through index.php .",
+    "resolution_steps": "The accepted answer routes everything through index.php .\nThis will break certain script includes, the wp-admin script being one of them.\nYou can use:\nlocation /blog/ {\nindex index.php;\ntry_files $uri $uri/ /blog/index.php?$args;\n}",
+    "source_ref": "https://stackoverflow.com/questions/17805576/nginx-rewrite-in-subfolder-404",
+    "content_hash": "1ea32f5b4ebc1002c84a06b05b69a0f79e223cf2cbc139ec1663b8d398bf4f40"
+  }
+]

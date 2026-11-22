@@ -1,0 +1,682 @@
+[
+  {
+    "title": "Kubernetes Debug: Debug Init Containers — Checking the status of Init Containers",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Checking the status of Init Containers\nContext: Debug Init Containers\nDisplay the status of your pod:\n\n```shell\nkubectl get pod <pod-name>\n```",
+    "root_cause": "For example, a status of `Init:1/2` indicates that one of two Init Containers",
+    "resolution_steps": "Display the status of your pod:\n\n```shell\nkubectl get pod <pod-name>\n```\n\nFor example, a status of `Init:1/2` indicates that one of two Init Containers\nhas completed successfully:\n\n```\nNAME         READY     STATUS     RESTARTS   AGE\n<pod-name>   0/1       Init:1/2   0          7s\n```\n\nSee [Understanding Pod status](#understanding-pod-status) for more examples of\nstatus values and their meanings.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/",
+    "content_hash": "378dcd5a82c16a4c038f082fbc3c6a0930a89f00504aa3a4263b5a606b9d4a84"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Init Containers — Getting details about Init Containers",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Getting details about Init Containers\nContext: Debug Init Containers\nView more detailed information about Init Container execution:\n\n```shell\nkubectl describe pod <pod-name>\n```",
+    "root_cause": "You can also access the Init Container statuses programmatically by reading the",
+    "resolution_steps": "View more detailed information about Init Container execution:\n\n```shell\nkubectl describe pod <pod-name>\n```\n\nFor example, a Pod with two Init Containers might show the following:\n\n```\nInit Containers:\n  <init-container-1>:\n    Container ID:    ...\n    ...\n    State:           Terminated\n      Reason:        Completed\n      Exit Code:     0\n      Started:       ...\n      Finished:      ...\n    Ready:           True\n    Restart Count:   0\n    ...\n  <init-container-2>:\n    Container ID:    ...\n    ...\n    State:           Waiting\n      Reason:        CrashLoopBackOff\n    Last State:      Terminated\n      Reason:        Error\n      Exit Code:     1\n      Started:       ...\n      Finished:      ...\n    Ready:           False\n    Restart Count:   3\n    ...\n```\n\nYou can also access the Init Container statuses programmatically by reading the\n`status.initContainerStatuses` field on the Pod Spec:\n\n```shell\nkubectl get pod <pod-name> --template '{{.status.initContainerStatuses}}'\n```\n\nThis command will return the same information as above, formatted using a [Go template](https://pkg.go.dev/text/template).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/",
+    "content_hash": "8dffdfacc924d15bbdfdf87adea22946cdc3bf7737a0e900116d9299286f8df8"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Init Containers — Accessing logs from Init Containers",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Accessing logs from Init Containers\nContext: Debug Init Containers\nPass the Init Container name along with the Pod name\nto access its logs.\n\n```shell\nkubectl logs <pod-name> -c <init-container-2>\n```",
+    "root_cause": "Pass the Init Container name along with the Pod name",
+    "resolution_steps": "Pass the Init Container name along with the Pod name\nto access its logs.\n\n```shell\nkubectl logs <pod-name> -c <init-container-2>\n```\n\nInit Containers that run a shell script print\ncommands as they're executed. For example, you can do this in Bash by running\n`set -x` at the beginning of the script.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/",
+    "content_hash": "422872b21e7a364093d058a2fc5333d138898a06e8da4e8856d9b572f0c06528"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Init Containers — Understanding Pod status",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Understanding Pod status\nContext: Debug Init Containers\nA Pod status beginning with `Init:` summarizes the status of Init Container\nexecution. The table below describes some example status values that you might\nsee while debugging Init Containers.\n\nStatus | Meaning\n------ | -------\n`Init:N/M` | The Pod has `M` Init Containers, and `N` have completed so far.\n`Init:Error` | An Init Container has failed to execute.\n`Init:CrashLoopBackOff` | An Init Container has failed repeatedly.\n`Pending` | The Pod has not yet begun executing Init Containers.\n`PodInitializing` or `Running` | The Pod has already finished executing Init Containers.",
+    "root_cause": "A Pod status beginning with `Init:` summarizes the status of Init Container",
+    "resolution_steps": "A Pod status beginning with `Init:` summarizes the status of Init Container\nexecution. The table below describes some example status values that you might\nsee while debugging Init Containers.\n\nStatus | Meaning\n------ | -------\n`Init:N/M` | The Pod has `M` Init Containers, and `N` have completed so far.\n`Init:Error` | An Init Container has failed to execute.\n`Init:CrashLoopBackOff` | An Init Container has failed repeatedly.\n`Pending` | The Pod has not yet begun executing Init Containers.\n`PodInitializing` or `Running` | The Pod has already finished executing Init Containers.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/",
+    "content_hash": "f25ee31b0cd2f5e1dc0613d505f14fa94f509c4a5005e0da62ab1044a9c78327"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Pods",
+    "category": "resource",
+    "severity": "SEV1",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debug Pods\nThis guide is to help users debug applications that are deployed into Kubernetes\nand not behaving correctly. This is *not* a guide for people who want to debug their cluster.\nFor that you should check out [this guide](/docs/tasks/debug/debug-cluster).",
+    "root_cause": "This guide is to help users debug applications that are deployed into Kubernetes",
+    "resolution_steps": "This guide is to help users debug applications that are deployed into Kubernetes\nand not behaving correctly. This is *not* a guide for people who want to debug their cluster.\nFor that you should check out [this guide](/docs/tasks/debug/debug-cluster).\n\n## Diagnosing the problem\nThe first step in troubleshooting is triage. What is the problem?\nIs it your Pods, your Replication Controller or your Service?\n\n   * [Debugging Pods](#debugging-pods)\n   * [Debugging Replication Controllers](#debugging-replication-controllers)\n   * [Debugging Services](#debugging-services)\n\n### Debugging Pods\n\nThe first step in debugging a Pod is taking a look at it. Check the current\nstate of the Pod and recent events with the following command:\n\n```shell\nkubectl describe pods ${POD_NAME}\n```\n\nLook at the state of the containers in the pod. Are they all `Running`?\nHave there been recent restarts?\n\nContinue debugging depending on the state of the pods.\n\n#### My pod stays pending\n\nIf a Pod is stuck in `Pending` it means that it can not be scheduled onto a node.\nGenerally this is because there are insufficient resources of one type or another\nthat prevent scheduling. Look at the output of the `kubectl describe ...` command above.\nThere should be messages from the scheduler about why it can not schedule your pod.\nReasons include:\n\n* **You don't have enough resources**: You may have exhausted the supply of CPU\n  or Memory in your cluster, in this case you need to delete Pods, adjust resource\n  requests, o",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/",
+    "content_hash": "54a4cd26173a3bff6bbcc3a39ec4b7bd62e679bd629c25f6ecd487b3b7e47e62"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Using kubectl describe pod to fetch details about pods",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Using kubectl describe pod to fetch details about pods\nContext: Debug Running Pods\nFor this example we'll use a Deployment to create two pods, similar to the earlier example.\n\nCreate deployment by running following command:",
+    "root_cause": "For this example we'll use a Deployment to create two pods, similar to the earlier example.",
+    "resolution_steps": "For this example we'll use a Deployment to create two pods, similar to the earlier example.\n\nCreate deployment by running following command:\n\n```shell\nkubectl apply -f https://k8s.io/examples/application/nginx-with-request.yaml\n```\n\n```none\ndeployment.apps/nginx-deployment created\n```\n\nCheck pod status by following command:\n\n```shell\nkubectl get pods\n```\n\n```none\nNAME                                READY   STATUS    RESTARTS   AGE\nnginx-deployment-67d4bdd6f5-cx2nz   1/1     Running   0          13s\nnginx-deployment-67d4bdd6f5-w6kd7   1/1     Running   0          13s\n```\n\nWe can retrieve a lot more information about each of these pods using `kubectl describe pod`. For example:\n\n```shell\nkubectl describe pod nginx-deployment-67d4bdd6f5-w6kd7\n```\n\n```none\nName:         nginx-deployment-67d4bdd6f5-w6kd7\nNamespace:    default\nPriority:     0\nNode:         kube-worker-1/192.168.0.113\nStart Time:   Thu, 17 Feb 2022 16:51:01 -0500\nLabels:       app=nginx\n              pod-template-hash=67d4bdd6f5\nAnnotations:  <none>\nStatus:       Running\nIP:           10.88.0.3\nIPs:\n  IP:           10.88.0.3\n  IP:           2001:db8::1\nControlled By:  ReplicaSet/nginx-deployment-67d4bdd6f5\nContainers:\n  nginx:\n    Container ID:   containerd://5403af59a2b46ee5a23fb0ae4b1e077f7ca5c5fb7af16e1ab21c00e0e616462a\n    Image:          nginx\n    Image ID:       docker.io/library/nginx@sha256:2834dc507516af02784808c5f48b7cbe38b8ed5d0f4837f16e78d00deb7e7767\n    Port:           80/TCP\n    Host Port:      0/TCP\n ",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "a763852df268ff158a39970818b5855d0b9888121abc6320c8a84e19c4f52c69"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Example: debugging Pending Pods",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Example: debugging Pending Pods\nContext: Debug Running Pods\nA common scenario that you can detect using events is when you've created a Pod that won't fit on any node. For example, the Pod might request more resources than are free on any node, or it might specify a label selector that doesn't match any nodes. Let's say we created the previous Deployment with 5 replicas (instead of 2) and requesting 600 millicores instead of 500, on a four-node cluster where each (virtual) machine has 1 CPU. In that case one of the Pods will not be able to schedule. (Note that because of the cluster addon pods such as fluentd, skydns, etc., that run on each node, if we requested 1000 millicores then none of the Pods w",
+    "root_cause": "A common scenario that you can detect using events is when you've created a Pod that won't fit on any node. For example, the Pod might request more resources than are free on any node, or it might specify a label selector that doesn't match any nodes. Let's say we created the previous Deployment with 5 replicas (instead of 2) and requesting 600 millicores instead of 500, on a four-node cluster whe",
+    "resolution_steps": "A common scenario that you can detect using events is when you've created a Pod that won't fit on any node. For example, the Pod might request more resources than are free on any node, or it might specify a label selector that doesn't match any nodes. Let's say we created the previous Deployment with 5 replicas (instead of 2) and requesting 600 millicores instead of 500, on a four-node cluster where each (virtual) machine has 1 CPU. In that case one of the Pods will not be able to schedule. (Note that because of the cluster addon pods such as fluentd, skydns, etc., that run on each node, if we requested 1000 millicores then none of the Pods would be able to schedule.)\n\n```shell\nkubectl get pods\n```\n\n```none\nNAME                                READY     STATUS    RESTARTS   AGE\nnginx-deployment-1006230814-6winp   1/1       Running   0          7m\nnginx-deployment-1006230814-fmgu3   1/1       Running   0          7m\nnginx-deployment-1370807587-6ekbw   1/1       Running   0          1m\nnginx-deployment-1370807587-fg172   0/1       Pending   0          1m\nnginx-deployment-1370807587-fz9sd   0/1       Pending   0          1m\n```\n\nTo find out why the nginx-deployment-1370807587-fz9sd pod is not running, we can use `kubectl describe pod` on the pending Pod and look at its events:\n\n```shell\nkubectl describe pod nginx-deployment-1370807587-fz9sd\n```\n\n```none\n  Name:\t\tnginx-deployment-1370807587-fz9sd\n  Namespace:\tdefault\n  Node:\t\t/\n  Labels:\t\tapp=nginx,pod-template-hash=1370807587\n  S",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "266170f6807ede0a7149ea24f59edd6f8e3f97fba42d30b57108375dbccf4198"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Examining pod logs {examine-pod-logs}",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Examining pod logs {examine-pod-logs}\nContext: Debug Running Pods\nFirst, look at the logs of the affected container:\n\n```shell\nkubectl logs ${POD_NAME} -c ${CONTAINER_NAME}\n```",
+    "root_cause": "Kegagalan konfigurasi, resource, atau runtime pada komponen Kubernetes (Examining pod logs {examine-pod-logs}).",
+    "resolution_steps": "First, look at the logs of the affected container:\n\n```shell\nkubectl logs ${POD_NAME} -c ${CONTAINER_NAME}\n```\n\nIf your container has previously crashed, you can access the previous container's crash log with:\n\n```shell\nkubectl logs ${POD_NAME} -c ${CONTAINER_NAME} --previous\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "dbebec6202aebc7f879e8adb2b4b4912b78dc275df9819909cec74424fbb3df7"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Debugging with container exec {container-exec}",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging with container exec {container-exec}\nContext: Debug Running Pods\nIf the  includes\ndebugging utilities, as is the case with images built from Linux and Windows OS\nbase images, you can run commands inside a specific container with\n`kubectl exec`:\n\n```shell\nkubectl exec ${POD_NAME} -c ${CONTAINER_NAME} -- ${CMD} ${ARG1} ${ARG2} ... ${ARGN}\n```",
+    "root_cause": "debugging utilities, as is the case with images built from Linux and Windows OS",
+    "resolution_steps": "If the  includes\ndebugging utilities, as is the case with images built from Linux and Windows OS\nbase images, you can run commands inside a specific container with\n`kubectl exec`:\n\n```shell\nkubectl exec ${POD_NAME} -c ${CONTAINER_NAME} -- ${CMD} ${ARG1} ${ARG2} ... ${ARGN}\n```\n\n`-c ${CONTAINER_NAME}` is optional. You can omit it for Pods that only contain a single container.\n\nAs an example, to look at the logs from a running Cassandra pod, you might run\n\n```shell\nkubectl exec cassandra -- cat /var/log/cassandra/system.log\n```\n\nYou can run a shell that's connected to your terminal using the `-i` and `-t`\narguments to `kubectl exec`, for example:\n\n```shell\nkubectl exec -it cassandra -- sh\n```\n\nFor more details, see [Get a Shell to a Running Container](\n/docs/tasks/debug/debug-application/get-shell-running-container/).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "77a0d38cdc7776305e17c2a9a9fa703ae5ed9685632c1ca1491d2d092d069ac4"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Debugging with an ephemeral debug container {ephemeral-container}",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging with an ephemeral debug container {ephemeral-container}\nContext: Debug Running Pods\nare useful for interactive troubleshooting when `kubectl exec` is insufficient\nbecause a container has crashed or a container image doesn't include debugging\nutilities, such as with [distroless images](\nhttps://github.com/GoogleContainerTools/distroless).\n\n### Permissions for ephemeral containers {#ephemeral-container-permissions}",
+    "root_cause": "are useful for interactive troubleshooting when `kubectl exec` is insufficient",
+    "resolution_steps": "are useful for interactive troubleshooting when `kubectl exec` is insufficient\nbecause a container has crashed or a container image doesn't include debugging\nutilities, such as with [distroless images](\nhttps://github.com/GoogleContainerTools/distroless).\n\n### Permissions for ephemeral containers {#ephemeral-container-permissions}\n\nFor security reasons, adding an ephemeral container to a running Pod uses the Pod's\n`ephemeralcontainers` subresource. At the API level this is an\n**update** request on `pods/ephemeralcontainers`. Just being authorized to **patch**\na Pod does not allow users to add ephemeral containers to that Pod.\n\nThe `pods/ephemeralcontainers` subresource is intentionally not part of the\ndefault `admin` and `edit`\n[user-facing ClusterRoles](/docs/reference/access-authn-authz/rbac/#user-facing-roles).\nFor background on why, see\n[Ephemeral Containers: Access control](/docs/concepts/workloads/pods/ephemeral-containers/#access-control).\n\nIf you run `kubectl debug` to add an ephemeral container without the required\npermission, you will see an error similar to:\n\n```\nError from server (Forbidden): pods \"example\" is forbidden: User \"alice\" cannot\npatch resource \"pods/ephemeralcontainers\" in API group \"\" in the namespace \"example-ns\"\n```\n\nIf you're managing cluster access and your cluster uses [Kubernetes RBAC](/docs/reference/access-authn-authz/rbac/), you can grant this permission in one of two ways.\n\nTo extend the built-in `edit` and `admin` ClusterRoles cluster-wide,",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "4b1dac60deeda64d294d5ecae9154adf5dd05d38309d6bed8267b92b8e1061c5"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Debugging using a copy of the Pod",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging using a copy of the Pod\nContext: Debug Running Pods\nSometimes Pod configuration options make it difficult to troubleshoot in certain\nsituations. For example, you can't run `kubectl exec` to troubleshoot your\ncontainer if your container image does not include a shell or if your application\ncrashes on startup. In these situations you can use `kubectl debug` to create a\ncopy of the Pod with configuration values changed to aid debugging.\n\n### Copying a Pod while adding a new container",
+    "root_cause": "Sometimes Pod configuration options make it difficult to troubleshoot in certain",
+    "resolution_steps": "Sometimes Pod configuration options make it difficult to troubleshoot in certain\nsituations. For example, you can't run `kubectl exec` to troubleshoot your\ncontainer if your container image does not include a shell or if your application\ncrashes on startup. In these situations you can use `kubectl debug` to create a\ncopy of the Pod with configuration values changed to aid debugging.\n\n### Copying a Pod while adding a new container\n\nAdding a new container can be useful when your application is running but not\nbehaving as you expect and you'd like to add additional troubleshooting\nutilities to the Pod.\n\nFor example, maybe your application's container images are built on `busybox`\nbut you need debugging utilities not included in `busybox`. You can simulate\nthis scenario using `kubectl run`:\n\n```shell\nkubectl run myapp --image=busybox:1.28 --restart=Never -- sleep 1d\n```\n\nRun this command to create a copy of `myapp` named `myapp-debug` that adds a\nnew Ubuntu container for debugging:\n\n```shell\nkubectl debug myapp -it --image=ubuntu --share-processes --copy-to=myapp-debug\n```\n\n```\nDefaulting debug container name to debugger-w7xmf.\nIf you don't see a command prompt, try pressing enter.\nroot@myapp-debug:/#\n```\n\n* `kubectl debug` automatically generates a container name if you don't choose\n  one using the `--container` flag.\n* The `-i` flag causes `kubectl debug` to attach to the new container by\n  default.  You can prevent this by specifying `--attach=false`. If your session\n  becomes",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "917ec7865be69a9e3723d940f0ac5cd77fc99b0ec51eb5a49d5644098bbb2b25"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Debugging via a shell on the node {node-shell-session}",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging via a shell on the node {node-shell-session}\nContext: Debug Running Pods\nIf none of these approaches work, you can find the Node on which the Pod is\nrunning and create a Pod running on the Node. To create\nan interactive shell on a Node using `kubectl debug`, run:\n\n```shell\nkubectl debug node/mynode -it --image=ubuntu\n```",
+    "root_cause": "If none of these approaches work, you can find the Node on which the Pod is",
+    "resolution_steps": "If none of these approaches work, you can find the Node on which the Pod is\nrunning and create a Pod running on the Node. To create\nan interactive shell on a Node using `kubectl debug`, run:\n\n```shell\nkubectl debug node/mynode -it --image=ubuntu\n```\n\n```\nCreating debugging pod node-debugger-mynode-pdx84 with container debugger on node mynode.\nIf you don't see a command prompt, try pressing enter.\nroot@ek8s:/#\n```\n\nWhen creating a debugging session on a node, keep in mind that:\n\n* `kubectl debug` automatically generates the name of the new Pod based on\n  the name of the Node.\n* The root filesystem of the Node will be mounted at `/host`.\n* The container runs in the host IPC, Network, and PID namespaces, although\n  the pod isn't privileged, so reading some process information may fail,\n  and `chroot /host` may fail.\n* If you need a privileged pod, create it manually or use the `--profile=sysadmin` flag.\n\nDon't forget to clean up the debugging Pod when you're finished with it:\n\n```shell\nkubectl delete pod node-debugger-mynode-pdx84\n```\n\n### Capturing and analyzing Node/Pod traffic\n\nWhen debugging networking issues, capturing and analyzing network traffic from Nodes/Pods can provide valuable insights\ninto connectivity problems, DNS resolution failures, or unexpected network behavior.\n\nYou can use `kubectl debug` with the `--profile=sysadmin` flag to run network capture tools on a node.\nFirst, create a debugging session on the node where your Pod is running:\n\n```shell\nkubectl debug",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "b2be0575b91986d857a2e03049ebe84ddf561a826c33c23dd49540236234c012"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Running Pods — Debugging a Pod or Node while applying a profile {debugging-profiles}",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging a Pod or Node while applying a profile {debugging-profiles}\nContext: Debug Running Pods\nWhen using `kubectl debug` to debug a node via a debugging Pod, a Pod via an ephemeral container, \nor a copied Pod, you can apply a profile to them.\nBy applying a profile, specific properties such as [securityContext](/docs/tasks/configure-pod-container/security-context/)\nare set, allowing for adaptation to various scenarios.\nThere are two types of profiles, static profile and custom profile.\n\n### Applying a Static Profile {#static-profile}",
+    "root_cause": "When using `kubectl debug` to debug a node via a debugging Pod, a Pod via an ephemeral container,",
+    "resolution_steps": "When using `kubectl debug` to debug a node via a debugging Pod, a Pod via an ephemeral container, \nor a copied Pod, you can apply a profile to them.\nBy applying a profile, specific properties such as [securityContext](/docs/tasks/configure-pod-container/security-context/)\nare set, allowing for adaptation to various scenarios.\nThere are two types of profiles, static profile and custom profile.\n\n### Applying a Static Profile {#static-profile}\n\nA static profile is a set of predefined properties, and you can apply them using the `--profile` flag.\nThe available profiles are as follows:\n\n| Profile      | Description                                                     |\n| ------------ | --------------------------------------------------------------- |\n| legacy       | A set of properties backwards compatibility with 1.22 behavior |\n| general      | A reasonable set of generic properties for each debugging journey |\n| baseline     | A set of properties compatible with [PodSecurityStandard baseline policy](/docs/concepts/security/pod-security-standards/#baseline) |\n| restricted   | A set of properties compatible with [PodSecurityStandard restricted policy](/docs/concepts/security/pod-security-standards/#restricted) |\n| netadmin     | A set of properties including Network Administrator privileges |\n| sysadmin     | A set of properties including System Administrator (root) privileges |\n\nIf you don't specify `--profile`, the `legacy` profile is used by default, but it is planned to be de",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+    "content_hash": "fde2ad07787578b36c30895d92a145e21fe7a7dbb64f0fa88fa4cc8a9517d3b0"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Running commands in a Pod",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Running commands in a Pod\nContext: Debug Services\nFor many steps here you will want to see what a Pod running in the cluster\nsees.  The simplest way to do this is to run an interactive busybox Pod:\n\n```none\nkubectl run -it --rm --restart=Never busybox --image=registry.k8s.io/busybox:1.27.2 sh\n```",
+    "root_cause": "For many steps here you will want to see what a Pod running in the cluster",
+    "resolution_steps": "For many steps here you will want to see what a Pod running in the cluster\nsees.  The simplest way to do this is to run an interactive busybox Pod:\n\n```none\nkubectl run -it --rm --restart=Never busybox --image=registry.k8s.io/busybox:1.27.2 sh\n```\n\nIf you don't see a command prompt, try pressing enter.\n\nIf you already have a running Pod that you prefer to use, you can run a\ncommand in it using:\n\n```shell\nkubectl exec <POD-NAME> -c <CONTAINER-NAME> -- <COMMAND>\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "43dc029fd6523f17b470828e8adc38b0f87281eedcb2032c3c6965584e3c6091"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Setup",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Setup\nContext: Debug Services\nFor the purposes of this walk-through, let's run some Pods.  Since you're\nprobably debugging your own Service you can substitute your own details, or you\ncan follow along and get a second data point.\n\n```shell\nkubectl create deployment hostnames --image=registry.k8s.io/serve_hostname\n```\n```none\ndeployment.apps/hostnames created\n```",
+    "root_cause": "For the purposes of this walk-through, let's run some Pods.  Since you're",
+    "resolution_steps": "For the purposes of this walk-through, let's run some Pods.  Since you're\nprobably debugging your own Service you can substitute your own details, or you\ncan follow along and get a second data point.\n\n```shell\nkubectl create deployment hostnames --image=registry.k8s.io/serve_hostname\n```\n```none\ndeployment.apps/hostnames created\n```\n\n`kubectl` commands will print the type and name of the resource created or mutated, which can then be used in subsequent commands.\n\nLet's scale the deployment to 3 replicas.\n```shell\nkubectl scale deployment hostnames --replicas=3\n```\n```none\ndeployment.apps/hostnames scaled\n```\n\nNote that this is the same as if you had started the Deployment with the following\nYAML:\n\n```yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  labels:\n    app: hostnames\n  name: hostnames\nspec:\n  selector:\n    matchLabels:\n      app: hostnames\n  replicas: 3\n  template:\n    metadata:\n      labels:\n        app: hostnames\n    spec:\n      containers:\n      - name: hostnames\n        image: registry.k8s.io/serve_hostname\n```\n\nThe label \"app\" is automatically set by `kubectl create deployment` to the name of the\nDeployment.\n\nYou can confirm your Pods are running:\n\n```shell\nkubectl get pods -l app=hostnames\n```\n```none\nNAME                        READY     STATUS    RESTARTS   AGE\nhostnames-632524106-bbpiw   1/1       Running   0          2m\nhostnames-632524106-ly40y   1/1       Running   0          2m\nhostnames-632524106-tlaok   1/1       Running   0          2m\n```\n\nYou ca",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "6c48b4a0b940b839eff0305cff2af982d2c26858da622762e77bd8e835b38b06"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Does the Service exist?",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Does the Service exist?\nContext: Debug Services\nThe astute reader will have noticed that you did not actually create a Service\nyet - that is intentional.  This is a step that sometimes gets forgotten, and\nis the first thing to check.\n\nWhat would happen if you tried to access a non-existent Service?  If\nyou have another Pod that consumes this Service by name you would get\nsomething like:",
+    "root_cause": "The astute reader will have noticed that you did not actually create a Service",
+    "resolution_steps": "The astute reader will have noticed that you did not actually create a Service\nyet - that is intentional.  This is a step that sometimes gets forgotten, and\nis the first thing to check.\n\nWhat would happen if you tried to access a non-existent Service?  If\nyou have another Pod that consumes this Service by name you would get\nsomething like:\n\n```shell\nwget -O- hostnames\n```\n```none\nResolving hostnames (hostnames)... failed: Name or service not known.\nwget: unable to resolve host address 'hostnames'\n```\n\nThe first thing to check is whether that Service actually exists:\n\n```shell\nkubectl get svc hostnames\n```\n```none\nNo resources found.\nError from server (NotFound): services \"hostnames\" not found\n```\n\nLet's create the Service.  As before, this is for the walk-through - you can\nuse your own Service's details here.\n\n```shell\nkubectl expose deployment hostnames --port=80 --target-port=9376\n```\n```none\nservice/hostnames exposed\n```\n\nAnd read it back:\n\n```shell\nkubectl get svc hostnames\n```\n```none\nNAME        TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE\nhostnames   ClusterIP   10.0.1.175   <none>        80/TCP    5s\n```\n\nNow you know that the Service exists.\n\nAs before, this is the same as if you had started the Service with YAML:\n\n```yaml\napiVersion: v1\nkind: Service\nmetadata:\n  labels:\n    app: hostnames\n  name: hostnames\nspec:\n  selector:\n    app: hostnames\n  ports:\n  - name: default\n    protocol: TCP\n    port: 80\n    targetPort: 9376\n```\n\nIn order to highlight the full ra",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "dc557cc95e7eaf39917ddf75d62073f773a2ad62f7c6865a7f4a79104e7e1f36"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Any Network Policy Ingress rules affecting the target Pods?",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Any Network Policy Ingress rules affecting the target Pods?\nContext: Debug Services\nIf you have deployed any Network Policy Ingress rules which may affect incoming\ntraffic to `hostnames-*` Pods, these need to be reviewed.\n\nPlease refer to [Network Policies](/docs/concepts/services-networking/network-policies/) for more details.",
+    "root_cause": "If you have deployed any Network Policy Ingress rules which may affect incoming",
+    "resolution_steps": "If you have deployed any Network Policy Ingress rules which may affect incoming\ntraffic to `hostnames-*` Pods, these need to be reviewed.\n\nPlease refer to [Network Policies](/docs/concepts/services-networking/network-policies/) for more details.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "962deb29ff816e9fd1c3492c5032d38910077a40b4716b0a026ca054aa99abbb"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Does the Service work by DNS name?",
+    "category": "network",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Does the Service work by DNS name?\nContext: Debug Services\nOne of the most common ways that clients consume a Service is through a DNS\nname.\n\nFrom a Pod in the same Namespace:",
+    "root_cause": "One of the most common ways that clients consume a Service is through a DNS",
+    "resolution_steps": "One of the most common ways that clients consume a Service is through a DNS\nname.\n\nFrom a Pod in the same Namespace:\n\n```shell\nnslookup hostnames\n```\n```none\nAddress 1: 10.0.0.10 kube-dns.kube-system.svc.cluster.local\n\nName:      hostnames\nAddress 1: 10.0.1.175 hostnames.default.svc.cluster.local\n```\n\nIf this fails, perhaps your Pod and Service are in different\nNamespaces, try a namespace-qualified name (again, from within a Pod):\n\n```shell\nnslookup hostnames.default\n```\n```none\nAddress 1: 10.0.0.10 kube-dns.kube-system.svc.cluster.local\n\nName:      hostnames.default\nAddress 1: 10.0.1.175 hostnames.default.svc.cluster.local\n```\n\nIf this works, you'll need to adjust your app to use a cross-namespace name, or\nrun your app and Service in the same Namespace.  If this still fails, try a\nfully-qualified name:\n\n```shell\nnslookup hostnames.default.svc.cluster.local\n```\n```none\nAddress 1: 10.0.0.10 kube-dns.kube-system.svc.cluster.local\n\nName:      hostnames.default.svc.cluster.local\nAddress 1: 10.0.1.175 hostnames.default.svc.cluster.local\n```\n\nNote the suffix here: \"default.svc.cluster.local\".  The \"default\" is the\nNamespace you're operating in.  The \"svc\" denotes that this is a Service.\nThe \"cluster.local\" is your cluster domain, which COULD be different in your\nown cluster.\n\nYou can also try this from a Node in the cluster:\n\n10.0.0.10 is the cluster's DNS Service IP, yours might be different.\n\n```shell\nnslookup hostnames.default.svc.cluster.local 10.0.0.10\n```\n```none\nServer:     ",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "1fd8040f967f02e8a0bcb562c70c69917f7f93d17e38369d7dedf7179e7b1a34"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Does the Service work by IP?",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Does the Service work by IP?\nContext: Debug Services\nAssuming you have confirmed that DNS works, the next thing to test is whether your\nService works by its IP address.  From a Pod in your cluster, access the\nService's IP (from `kubectl get` above).\n\n```shell\nfor i in $(seq 1 3); do \n    wget -qO- 10.0.1.175:80\ndone\n```",
+    "root_cause": "Assuming you have confirmed that DNS works, the next thing to test is whether your",
+    "resolution_steps": "Assuming you have confirmed that DNS works, the next thing to test is whether your\nService works by its IP address.  From a Pod in your cluster, access the\nService's IP (from `kubectl get` above).\n\n```shell\nfor i in $(seq 1 3); do \n    wget -qO- 10.0.1.175:80\ndone\n```\n\nThis should produce something like:\n\n```\nhostnames-632524106-bbpiw\nhostnames-632524106-ly40y\nhostnames-632524106-tlaok\n```\n\nIf your Service is working, you should get correct responses.  If not, there\nare a number of things that could be going wrong.  Read on.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "3e9bacd9ab592d267c69a75e6d6360fd53cee745d7a203b6191d0f616344a3f3"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Is the Service defined correctly?",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Is the Service defined correctly?\nContext: Debug Services\nIt might sound silly, but you should really double and triple check that your\nService is correct and matches your Pod's port.  Read back your Service\nand verify it:\n\n```shell\nkubectl get service hostnames -o json\n```\n```json\n{\n    \"kind\": \"Service\",\n    \"apiVersion\": \"v1\",\n    \"metadata\": {\n        \"name\": \"hostnames\",\n        \"namespace\": \"default\",\n        \"uid\": \"428c8b6c-24bc-11e5-936d-42010af0a9bc\",\n        \"resourceVersion\": \"347189\",\n        \"creationTimestamp\": \"2015-07-07T15:24:29Z\",\n        \"labels\": {\n            \"app\": \"hostnames\"\n        }\n    },\n    \"spec\": {\n        \"ports\": [\n            {\n                \"name\": \"default\",",
+    "root_cause": "It might sound silly, but you should really double and triple check that your",
+    "resolution_steps": "It might sound silly, but you should really double and triple check that your\nService is correct and matches your Pod's port.  Read back your Service\nand verify it:\n\n```shell\nkubectl get service hostnames -o json\n```\n```json\n{\n    \"kind\": \"Service\",\n    \"apiVersion\": \"v1\",\n    \"metadata\": {\n        \"name\": \"hostnames\",\n        \"namespace\": \"default\",\n        \"uid\": \"428c8b6c-24bc-11e5-936d-42010af0a9bc\",\n        \"resourceVersion\": \"347189\",\n        \"creationTimestamp\": \"2015-07-07T15:24:29Z\",\n        \"labels\": {\n            \"app\": \"hostnames\"\n        }\n    },\n    \"spec\": {\n        \"ports\": [\n            {\n                \"name\": \"default\",\n                \"protocol\": \"TCP\",\n                \"port\": 80,\n                \"targetPort\": 9376,\n                \"nodePort\": 0\n            }\n        ],\n        \"selector\": {\n            \"app\": \"hostnames\"\n        },\n        \"clusterIP\": \"10.0.1.175\",\n        \"type\": \"ClusterIP\",\n        \"sessionAffinity\": \"None\"\n    },\n    \"status\": {\n        \"loadBalancer\": {}\n    }\n}\n```\n\n* Is the Service port you are trying to access listed in `spec.ports[]`?\n* Is the `targetPort` correct for your Pods (some Pods use a different port than the Service)?\n* If you meant to use a numeric port, is it a number (9376) or a string \"9376\"?\n* If you meant to use a named port, do your Pods expose a port with the same name?\n* Is the port's `protocol` correct for your Pods?",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "2a1c619505826d695ee73f8e32f5442dd60c05f992719824fd13a201f17c99b0"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Does the Service have any EndpointSlices?",
+    "category": "network",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Does the Service have any EndpointSlices?\nContext: Debug Services\nIf you got this far, you have confirmed that your Service is correctly\ndefined and is resolved by DNS.  Now let's check that the Pods you ran are\nactually being selected by the Service.\n\nEarlier you saw that the Pods were running.  You can re-check that:",
+    "root_cause": "If you got this far, you have confirmed that your Service is correctly",
+    "resolution_steps": "If you got this far, you have confirmed that your Service is correctly\ndefined and is resolved by DNS.  Now let's check that the Pods you ran are\nactually being selected by the Service.\n\nEarlier you saw that the Pods were running.  You can re-check that:\n\n```shell\nkubectl get pods -l app=hostnames\n```\n```none\nNAME                        READY     STATUS    RESTARTS   AGE\nhostnames-632524106-bbpiw   1/1       Running   0          1h\nhostnames-632524106-ly40y   1/1       Running   0          1h\nhostnames-632524106-tlaok   1/1       Running   0          1h\n```\n\nThe `-l app=hostnames` argument is a label selector configured on the Service.\n\nThe \"AGE\" column says that these Pods are about an hour old, which implies that\nthey are running fine and not crashing.\n\nThe \"RESTARTS\" column says that these pods are not crashing frequently or being\nrestarted.  Frequent restarts could lead to intermittent connectivity issues.\nIf the restart count is high, read more about how to [debug pods](/docs/tasks/debug/debug-application/debug-pods).\n\nInside the Kubernetes system is a control loop which evaluates the selector of\nevery Service and saves the results into one or more EndpointSlice objects.\n\n```shell\nkubectl get endpointslices -l kubernetes.io/service-name=hostnames\n\nNAME              ADDRESSTYPE   PORTS   ENDPOINTS\nhostnames-ytpni   IPv4          9376    10.244.0.5,10.244.0.6,10.244.0.7\n```\n\nThis confirms that the EndpointSlice controller has found the correct Pods for\nyour Service.  If th",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "cab703d5f955a6e02cbc3637c1580913098cf531c5d644b3c86775c893ae5e11"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Are the Pods working?",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Are the Pods working?\nContext: Debug Services\nAt this point, you know that your Service exists and has selected your Pods.\nAt the beginning of this walk-through, you verified the Pods themselves.\nLet's check again that the Pods are actually working - you can bypass the\nService mechanism and go straight to the Pods, as listed by the Endpoints\nabove.\n\nThese commands use the Pod port (9376), rather than the Service port (80).",
+    "root_cause": "At this point, you know that your Service exists and has selected your Pods.",
+    "resolution_steps": "At this point, you know that your Service exists and has selected your Pods.\nAt the beginning of this walk-through, you verified the Pods themselves.\nLet's check again that the Pods are actually working - you can bypass the\nService mechanism and go straight to the Pods, as listed by the Endpoints\nabove.\n\nThese commands use the Pod port (9376), rather than the Service port (80).\n\nFrom within a Pod:\n\n```shell\nfor ep in 10.244.0.5:9376 10.244.0.6:9376 10.244.0.7:9376; do\n    wget -qO- $ep\ndone\n```\n\nThis should produce something like:\n\n```\nhostnames-632524106-bbpiw\nhostnames-632524106-ly40y\nhostnames-632524106-tlaok\n```\n\nYou expect each Pod in the endpoints list to return its own hostname.  If\nthis is not what happens (or whatever the correct behavior is for your own\nPods), you should investigate what's happening there.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "fb222857a829f9d2e272e896c1302391173ab864a87feba835360aa854b946b1"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Is the kube-proxy working?",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Is the kube-proxy working?\nContext: Debug Services\nIf you get here, your Service is running, has EndpointSlices, and your Pods\nare actually serving.  At this point, the whole Service proxy mechanism is\nsuspect.  Let's confirm it, piece by piece.\n\nThe default implementation of Services, and the one used on most clusters, is\nkube-proxy.  This is a program that runs on every node and configures one of a\nsmall set of mechanisms for providing the Service abstraction.  If your\ncluster does not use kube-proxy, the following sections will not apply, and you\nwill have to investigate whatever implementation of Services you are using.",
+    "root_cause": "If you get here, your Service is running, has EndpointSlices, and your Pods",
+    "resolution_steps": "If you get here, your Service is running, has EndpointSlices, and your Pods\nare actually serving.  At this point, the whole Service proxy mechanism is\nsuspect.  Let's confirm it, piece by piece.\n\nThe default implementation of Services, and the one used on most clusters, is\nkube-proxy.  This is a program that runs on every node and configures one of a\nsmall set of mechanisms for providing the Service abstraction.  If your\ncluster does not use kube-proxy, the following sections will not apply, and you\nwill have to investigate whatever implementation of Services you are using.\n\n### Is kube-proxy running?\n\nConfirm that `kube-proxy` is running on your Nodes.  Running directly on a\nNode, you should get something like the below:\n\n```shell\nps auxw | grep kube-proxy\n```\n```none\nroot  4194  0.4  0.1 101864 17696 ?    Sl Jul04  25:43 /usr/local/bin/kube-proxy --master=https://kubernetes-master --kubeconfig=/var/lib/kube-proxy/kubeconfig --v=2\n```\n\nNext, confirm that it is not failing something obvious, like contacting the\nmaster.  To do this, you'll have to look at the logs.  Accessing the logs\ndepends on your Node OS.  On some OSes it is a file, such as\n/var/log/kube-proxy.log, while other OSes use `journalctl` to access logs.  You\nshould see something like:\n\n```none\nI1027 22:14:53.995134    5063 server.go:200] Running in resource-only container \"/kube-proxy\"\nI1027 22:14:53.998163    5063 server.go:247] Using iptables Proxier.\nI1027 22:14:54.038140    5063 proxier.go:352] Setting endpo",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "20b59be5eb08f4e0700d0f298af9113b1b6c1811c658242ff1d8a8e0ef962e89"
+  },
+  {
+    "title": "Kubernetes Debug: Debug Services — Seek help",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Seek help\nContext: Debug Services\nIf you get this far, something very strange is happening.  Your Service is\nrunning, has EndpointSlices, and your Pods are actually serving.  You have DNS\nworking, and `kube-proxy` does not seem to be misbehaving.  And yet your\nService is not working.  Please let us know what is going on, so we can help\ninvestigate!\n\nContact us on\n[Slack](https://slack.k8s.io/) or\n[Forum](https://discuss.kubernetes.io) or\n[GitHub](https://github.com/kubernetes/kubernetes).",
+    "root_cause": "If you get this far, something very strange is happening.  Your Service is",
+    "resolution_steps": "If you get this far, something very strange is happening.  Your Service is\nrunning, has EndpointSlices, and your Pods are actually serving.  You have DNS\nworking, and `kube-proxy` does not seem to be misbehaving.  And yet your\nService is not working.  Please let us know what is going on, so we can help\ninvestigate!\n\nContact us on\n[Slack](https://slack.k8s.io/) or\n[Forum](https://discuss.kubernetes.io) or\n[GitHub](https://github.com/kubernetes/kubernetes).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "content_hash": "ab385f8f08efe837466455ac18ab6e7753e9228e123b85302f76a78adbfd8489"
+  },
+  {
+    "title": "Kubernetes Debug: Debug a StatefulSet",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debug a StatefulSet\nThis task shows you how to debug a StatefulSet.",
+    "root_cause": "This task shows you how to debug a StatefulSet.",
+    "resolution_steps": "This task shows you how to debug a StatefulSet.\n\n## Debugging a StatefulSet\nIn order to list all the pods which belong to a StatefulSet, which have a label `app.kubernetes.io/name=MyApp` set on them,\nyou can use the following:\n\n```shell\nkubectl get pods -l app.kubernetes.io/name=MyApp\n```\n\nIf you find that any Pods listed are in `Unknown` or `Terminating` state for an extended period of time,\nrefer to the [Deleting StatefulSet Pods](/docs/tasks/run-application/delete-stateful-set/) task for\ninstructions on how to deal with them.\nYou can debug individual Pods in a StatefulSet using the\n[Debugging Pods](/docs/tasks/debug/debug-application/debug-pods/) guide.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-statefulset/",
+    "content_hash": "b6b4891c19f3a0e450903f9c3b7c4c25bb16ecf0687bf6b2858c5ee67750d77c"
+  },
+  {
+    "title": "Kubernetes Debug: Determine the Reason for Pod Failure — Writing and reading a termination message",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Writing and reading a termination message\nContext: Determine the Reason for Pod Failure\nIn this exercise, you create a Pod that runs one container.\nThe manifest for that Pod specifies a command that runs when the container starts:\n\n1. Create a Pod based on the YAML configuration file:",
+    "root_cause": "In this exercise, you create a Pod that runs one container.",
+    "resolution_steps": "In this exercise, you create a Pod that runs one container.\nThe manifest for that Pod specifies a command that runs when the container starts:\n\n1. Create a Pod based on the YAML configuration file:\n\n    ```shell\n    kubectl apply -f https://k8s.io/examples/debug/termination.yaml\n    ```\n    \n    In the YAML file, in the `command` and `args` fields, you can see that the\n    container sleeps for 10 seconds and then writes \"Sleep expired\" to\n    the `/dev/termination-log` file. After the container writes\n    the \"Sleep expired\" message, it terminates.\n\n1. Display information about the Pod:\n\n    ```shell\n    kubectl get pod termination-demo\n    ```\n\n    Repeat the preceding command until the Pod is no longer running.\n\n1. Display detailed information about the Pod:\n\n    ```shell\n    kubectl get pod termination-demo --output=yaml\n    ```\n\n    The output includes the \"Sleep expired\" message:\n\n    ```yaml\n    apiVersion: v1\n    kind: Pod\n    ...\n        lastState:\n          terminated:\n            containerID: ...\n            exitCode: 0\n            finishedAt: ...\n            message: |\n              Sleep expired\n            ...\n    ```\n\n1. Use a Go template to filter the output so that it includes only the termination message:\n\n    ```shell\n    kubectl get pod termination-demo -o go-template=\"{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}\"\n    ```\n\nIf you are running a multi-container Pod, you can use a Go template to include the container's name.\nBy d",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/determine-reason-pod-failure/",
+    "content_hash": "48ac0319057ba8abc3990f60f02353ec9192d2d235e833a957406219c3ee618b"
+  },
+  {
+    "title": "Kubernetes Debug: Determine the Reason for Pod Failure — Customizing the termination message",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Customizing the termination message\nContext: Determine the Reason for Pod Failure\nKubernetes retrieves termination messages from the termination message file\nspecified in the `terminationMessagePath` field of a Container, which has a default\nvalue of `/dev/termination-log`. By customizing this field, you can tell Kubernetes\nto use a different file. Kubernetes use the contents from the specified file to\npopulate the Container's status message on both success and failure.\n\nThe termination message is intended to be brief final status, such as an assertion failure message.\nThe kubelet truncates messages that are longer than 4096 bytes.",
+    "root_cause": "Kubernetes retrieves termination messages from the termination message file",
+    "resolution_steps": "Kubernetes retrieves termination messages from the termination message file\nspecified in the `terminationMessagePath` field of a Container, which has a default\nvalue of `/dev/termination-log`. By customizing this field, you can tell Kubernetes\nto use a different file. Kubernetes use the contents from the specified file to\npopulate the Container's status message on both success and failure.\n\nThe termination message is intended to be brief final status, such as an assertion failure message.\nThe kubelet truncates messages that are longer than 4096 bytes.\n\nThe total message length across all containers is limited to 12KiB, divided equally among each container.\nFor example, if there are 12 containers (`initContainers` or `containers`), each has 1024 bytes of available termination message space.\n\nThe default termination message path is `/dev/termination-log`.\nYou cannot set the termination message path after a Pod is launched.\n\nIn the following example, the container writes termination messages to\n`/tmp/my-log` for Kubernetes to retrieve:\n\n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\n  name: msg-path-demo\nspec:\n  containers:\n  - name: msg-path-demo-container\n    image: debian\n    terminationMessagePath: \"/tmp/my-log\"\n```\n\nMoreover, users can set the `terminationMessagePolicy` field of a Container for\nfurther customization. This field defaults to \"`File`\" which means the termination\nmessages are retrieved only from the termination message file. By setting the\n`terminationMessagePolicy",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/determine-reason-pod-failure/",
+    "content_hash": "405c5e841e4227b19e6e0a299dca0227fd14f4b9f2a203b83e9a302309cbf27b"
+  },
+  {
+    "title": "Kubernetes Debug: Get a Shell to a Running Container — Getting a shell to a container",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Getting a shell to a container\nContext: Get a Shell to a Running Container\nIn this exercise, you create a Pod that has one container. The container\nruns the nginx image. Here is the configuration file for the Pod:\n\nCreate the Pod:",
+    "root_cause": "In this exercise, you create a Pod that has one container. The container",
+    "resolution_steps": "In this exercise, you create a Pod that has one container. The container\nruns the nginx image. Here is the configuration file for the Pod:\n\nCreate the Pod:\n\n```shell\nkubectl apply -f https://k8s.io/examples/application/shell-demo.yaml\n```\n\nVerify that the container is running:\n\n```shell\nkubectl get pod shell-demo\n```\n\nGet a shell to the running container:\n\n```shell\nkubectl exec --stdin --tty shell-demo -- /bin/bash\n```\n\nThe double dash (`--`) separates the arguments you want to pass to the command from the kubectl arguments.\n\nIn your shell, list the root directory:\n\n```shell\n# Run this inside the container\nls /\n```\n\nIn your shell, experiment with other commands. Here are\nsome examples:\n\n```shell\n# You can run these example commands inside the container\nls /\ncat /proc/mounts\ncat /proc/1/maps\napt-get update\napt-get install -y tcpdump\ntcpdump\napt-get install -y lsof\nlsof\napt-get install -y procps\nps aux\nps aux | grep nginx\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/",
+    "content_hash": "089fd4a3325db4a39c7e257c7971d0b889347c073ba77aa784a2fc8d38f94aff"
+  },
+  {
+    "title": "Kubernetes Debug: Get a Shell to a Running Container — Writing the root page for nginx",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Writing the root page for nginx\nContext: Get a Shell to a Running Container\nLook again at the configuration file for your Pod. The Pod\nhas an `emptyDir` volume, and the container mounts the volume\nat `/usr/share/nginx/html`.\n\nIn your shell, create an `index.html` file in the `/usr/share/nginx/html`\ndirectory:",
+    "root_cause": "Look again at the configuration file for your Pod. The Pod",
+    "resolution_steps": "Look again at the configuration file for your Pod. The Pod\nhas an `emptyDir` volume, and the container mounts the volume\nat `/usr/share/nginx/html`.\n\nIn your shell, create an `index.html` file in the `/usr/share/nginx/html`\ndirectory:\n\n```shell\n# Run this inside the container\necho 'Hello shell demo' > /usr/share/nginx/html/index.html\n```\n\nIn your shell, send a GET request to the nginx server:\n\n```shell\n# Run this in the shell inside your container\napt-get update\napt-get install curl\ncurl http://localhost/\n```\n\nThe output shows the text that you wrote to the `index.html` file:\n\n```\nHello shell demo\n```\n\nWhen you are finished with your shell, enter `exit`.\n\n```shell\nexit # To quit the shell in the container\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/",
+    "content_hash": "f14b8583e8c21c67fa0a5b5d568cae38634e70edd88303ccde6d7ff470277425"
+  },
+  {
+    "title": "Kubernetes Debug: Get a Shell to a Running Container — Running individual commands in a container",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Running individual commands in a container\nContext: Get a Shell to a Running Container\nIn an ordinary command window, not your shell, list the environment\nvariables in the running container:\n\n```shell\nkubectl exec shell-demo -- env\n```",
+    "root_cause": "In an ordinary command window, not your shell, list the environment",
+    "resolution_steps": "In an ordinary command window, not your shell, list the environment\nvariables in the running container:\n\n```shell\nkubectl exec shell-demo -- env\n```\n\nExperiment with running other commands. Here are some examples:\n\n```shell\nkubectl exec shell-demo -- ps aux\nkubectl exec shell-demo -- ls /\nkubectl exec shell-demo -- cat /proc/1/mounts\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/",
+    "content_hash": "f2f4297a90d86ffa5cf4d2c6e5c7cd91d79f85c519e52d420229c2a96cc89ec1"
+  },
+  {
+    "title": "Kubernetes Debug: Get a Shell to a Running Container — Opening a shell when a Pod has more than one container",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Opening a shell when a Pod has more than one container\nContext: Get a Shell to a Running Container\nIf a Pod has more than one container, use `--container` or `-c` to\nspecify a container in the `kubectl exec` command. For example,\nsuppose you have a Pod named my-pod, and the Pod has two containers\nnamed _main-app_ and _helper-app_. The following command would open a\nshell to the _main-app_ container.\n\n```shell\nkubectl exec -i -t my-pod --container main-app -- /bin/bash\n```",
+    "root_cause": "If a Pod has more than one container, use `--container` or `-c` to",
+    "resolution_steps": "If a Pod has more than one container, use `--container` or `-c` to\nspecify a container in the `kubectl exec` command. For example,\nsuppose you have a Pod named my-pod, and the Pod has two containers\nnamed _main-app_ and _helper-app_. The following command would open a\nshell to the _main-app_ container.\n\n```shell\nkubectl exec -i -t my-pod --container main-app -- /bin/bash\n```\n\nThe short options `-i` and `-t` are the same as the long options `--stdin` and `--tty`",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/",
+    "content_hash": "0c76cec677a658465425f54c84f0ced40bb732b0027a2d2028f895c144e0af66"
+  },
+  {
+    "title": "Kubernetes Debug: Auditing — Audit policy",
+    "category": "resource",
+    "severity": "SEV1",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Audit policy\nContext: Auditing\nAudit policy defines rules about what events should be recorded and what data\nthey should include. The audit policy object structure is defined in the\n[`audit.k8s.io` API group](/docs/reference/config-api/apiserver-audit.v1/#audit-k8s-io-v1-Policy).\nWhen an event is processed, it's\ncompared against the list of rules in order. The first matching rule sets the\n_audit level_ of the event. The defined audit levels are:\n\n- `None` - don't log events that match this rule.\n- `Metadata` - log events with metadata (requesting user, timestamp, resource,\n  verb, etc.) but not request or response body.\n- `Request` - log events with request metadata and bo",
+    "root_cause": "Audit policy defines rules about what events should be recorded and what data",
+    "resolution_steps": "Audit policy defines rules about what events should be recorded and what data\nthey should include. The audit policy object structure is defined in the\n[`audit.k8s.io` API group](/docs/reference/config-api/apiserver-audit.v1/#audit-k8s-io-v1-Policy).\nWhen an event is processed, it's\ncompared against the list of rules in order. The first matching rule sets the\n_audit level_ of the event. The defined audit levels are:\n\n- `None` - don't log events that match this rule.\n- `Metadata` - log events with metadata (requesting user, timestamp, resource,\n  verb, etc.) but not request or response body.\n- `Request` - log events with request metadata and body but not response body.\n  This does not apply for non-resource requests.\n- `RequestResponse` - log events with request metadata, request body and response body.\n  This does not apply for non-resource requests.\n\nYou can pass a file with the policy to `kube-apiserver`\nusing the `--audit-policy-file` flag. If the flag is omitted, no events are logged.\nNote that the `rules` field __must__ be provided in the audit policy file.\nA policy with no (0) rules is treated as illegal.\n\nBelow is an example audit policy file:\n\nYou can use a minimal audit policy file to log all requests at the `Metadata` level:\n\n```yaml\n# Log all requests at the Metadata level.\napiVersion: audit.k8s.io/v1\nkind: Policy\nrules:\n- level: Metadata\n```\n\nIf you're crafting your own audit profile, you can use the audit profile for Google Container-Optimized OS as a starting poi",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+    "content_hash": "634bcdc2d4d80d37b19807662699efca5195af3c5a8f00386bce21680ad5a6ab"
+  },
+  {
+    "title": "Kubernetes Debug: Auditing — Audit backends",
+    "category": "network",
+    "severity": "SEV1",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Audit backends\nContext: Auditing\nAudit backends persist audit events to an external storage.\nOut of the box, the kube-apiserver provides two backends:\n\n- Log backend, which writes events into the filesystem\n- Webhook backend, which sends events to an external HTTP API",
+    "root_cause": "Audit backends persist audit events to an external storage.",
+    "resolution_steps": "Audit backends persist audit events to an external storage.\nOut of the box, the kube-apiserver provides two backends:\n\n- Log backend, which writes events into the filesystem\n- Webhook backend, which sends events to an external HTTP API\n\nIn all cases, audit events follow a structure defined by the Kubernetes API in the\n[`audit.k8s.io` API group](/docs/reference/config-api/apiserver-audit.v1/#audit-k8s-io-v1-Event).\n\nIn case of patches, request body is a JSON array with patch operations, not a JSON object\nwith an appropriate Kubernetes API object. For example, the following request body is a valid patch\nrequest to `/apis/batch/v1/namespaces/some-namespace/jobs/some-job-name`:\n\n```json\n[\n  {\n    \"op\": \"replace\",\n    \"path\": \"/spec/parallelism\",\n    \"value\": 0\n  },\n  {\n    \"op\": \"remove\",\n    \"path\": \"/spec/template/spec/containers/0/terminationMessagePolicy\"\n  }\n]\n```\n\n### Log backend\n\nThe log backend writes audit events to a file in [JSONlines](https://jsonlines.org/) format.\nYou can configure the log audit backend using the following `kube-apiserver` flags:\n\n- `--audit-log-path` specifies the log file path that log backend uses to write\n  audit events. Not specifying this flag disables log backend. `-` means standard out\n- `--audit-log-maxage` defined the maximum number of days to retain old audit log files\n- `--audit-log-maxbackup` defines the maximum number of audit log files to retain\n- `--audit-log-maxsize` defines the maximum size in megabytes of the audit log file before",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+    "content_hash": "b9a81cfb21178f1f07642e8ef56d6d8958306b1eb32a4f0be66c33f76a2cd15f"
+  },
+  {
+    "title": "Kubernetes Debug: Auditing — Event batching {batching}",
+    "category": "deployment",
+    "severity": "SEV1",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Event batching {batching}\nContext: Auditing\nBoth `log` and `webhook` backends support batching. Below is a list of\navailable flags specific to each backend. \nBy default, batching and throttling are **enabled** for the `webhook` backend and **disabled** for the `log` backend.\n\n- `--audit-webhook-mode` defines the buffering strategy. One of the following:\n  - `batch` - buffer events and asynchronously process them in batches. This is the default mode for the `webhook` backend.\n  - `blocking` - block API server responses on processing each individual event.\n  - `blocking-strict` - Same as blocking, but when there is a failure during audit logging at the\n    RequestReceived stage, the whol",
+    "root_cause": "Both `log` and `webhook` backends support batching. Below is a list of",
+    "resolution_steps": "Both `log` and `webhook` backends support batching. Below is a list of\navailable flags specific to each backend. \nBy default, batching and throttling are **enabled** for the `webhook` backend and **disabled** for the `log` backend.\n\n- `--audit-webhook-mode` defines the buffering strategy. One of the following:\n  - `batch` - buffer events and asynchronously process them in batches. This is the default mode for the `webhook` backend.\n  - `blocking` - block API server responses on processing each individual event.\n  - `blocking-strict` - Same as blocking, but when there is a failure during audit logging at the\n    RequestReceived stage, the whole request to the kube-apiserver fails.\n\nThe following flags are used only in the `batch` mode:\n\n- `--audit-webhook-batch-buffer-size` defines the number of events to buffer before batching.\n  If the rate of incoming events overflows the buffer, events are dropped. The default value is 10000.\n- `--audit-webhook-batch-max-size` defines the maximum number of events in one batch. The default value is 400.\n- `--audit-webhook-batch-max-wait` defines the maximum amount of time to wait before unconditionally\n  batching events in the queue. The default value is 30 seconds.\n- `--audit-webhook-batch-throttle-enable` defines whether batching throttling is enabled. Throttling is enabled by default.\n- `--audit-webhook-batch-throttle-qps` defines the maximum average number of batches generated\n  per second. The default value is 10.\n- `--audit-webhook-ba",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+    "content_hash": "1ee6d38cd0379c99e23f601ff011da90ac3e6ea4a96fc25071f4364118894b8c"
+  },
+  {
+    "title": "Kubernetes Debug: Auditing — Parameter tuning",
+    "category": "deployment",
+    "severity": "SEV1",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Parameter tuning\nContext: Auditing\nParameters should be set to accommodate the load on the API server.\n\nFor example, if kube-apiserver receives 100 requests each second, and each request is audited only\non `ResponseStarted` and `ResponseComplete` stages, you should account for ≅200 audit\nevents being generated each second. Assuming that there are up to 100 events in a batch,\nyou should set throttling level at least 2 queries per second. Assuming that the backend can take up to\n5 seconds to write events, you should set the buffer size to hold up to 5 seconds of events;\nthat is: 10 batches, or 1000 events.",
+    "root_cause": "Parameters should be set to accommodate the load on the API server.",
+    "resolution_steps": "Parameters should be set to accommodate the load on the API server.\n\nFor example, if kube-apiserver receives 100 requests each second, and each request is audited only\non `ResponseStarted` and `ResponseComplete` stages, you should account for ≅200 audit\nevents being generated each second. Assuming that there are up to 100 events in a batch,\nyou should set throttling level at least 2 queries per second. Assuming that the backend can take up to\n5 seconds to write events, you should set the buffer size to hold up to 5 seconds of events;\nthat is: 10 batches, or 1000 events.\n\nIn most cases however, the default parameters should be sufficient and you don't have to worry about\nsetting them manually. You can look at the following Prometheus metrics exposed by kube-apiserver\nand in the logs to monitor the state of the auditing subsystem.\n\n- `apiserver_audit_event_total` metric contains the total number of audit events exported.\n- `apiserver_audit_error_total` metric contains the total number of events dropped due to an error\n  during exporting.\n\n### Log entry truncation {#truncate}\n\nBoth log and webhook backends support limiting the size of events that are logged.\nAs an example, the following is the list of flags available for the log backend:\n\n- `audit-log-truncate-enabled` whether event and batch truncating is enabled.\n- `audit-log-truncate-max-batch-size` maximum size in bytes of the batch sent to the underlying backend.\n- `audit-log-truncate-max-event-size` maximum size in bytes o",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+    "content_hash": "c97f82b81c3a699eeb4d8222403a549516a21a5e4c6bb8cfb7fcee6a746b84f6"
+  },
+  {
+    "title": "Kubernetes Debug: Debugging Kubernetes nodes with crictl — Installing crictl",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Installing crictl\nContext: Debugging Kubernetes nodes with crictl\nYou can download a compressed archive `crictl` from the cri-tools\n[release page](https://github.com/kubernetes-sigs/cri-tools/releases), for several\ndifferent architectures. Download the version that corresponds to your version\nof Kubernetes. Extract it and move it to a location on your system path, such as\n`/usr/local/bin/`.",
+    "root_cause": "You can download a compressed archive `crictl` from the cri-tools",
+    "resolution_steps": "You can download a compressed archive `crictl` from the cri-tools\n[release page](https://github.com/kubernetes-sigs/cri-tools/releases), for several\ndifferent architectures. Download the version that corresponds to your version\nof Kubernetes. Extract it and move it to a location on your system path, such as\n`/usr/local/bin/`.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/",
+    "content_hash": "ae35d2e900fcd7b13be595d394bda49442e7674dec7c999fffb054358724f2de"
+  },
+  {
+    "title": "Kubernetes Debug: Debugging Kubernetes nodes with crictl — General usage",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: General usage\nContext: Debugging Kubernetes nodes with crictl\nThe `crictl` command has several subcommands and runtime flags. Use\n`crictl help` or `crictl <subcommand> help` for more details.\n\nYou can set the endpoint for `crictl` by doing one of the following:",
+    "root_cause": "The `crictl` command has several subcommands and runtime flags. Use",
+    "resolution_steps": "The `crictl` command has several subcommands and runtime flags. Use\n`crictl help` or `crictl <subcommand> help` for more details.\n\nYou can set the endpoint for `crictl` by doing one of the following:\n\n* Set the `--runtime-endpoint` and `--image-endpoint` flags.\n* Set the `CONTAINER_RUNTIME_ENDPOINT` and `IMAGE_SERVICE_ENDPOINT` environment\n  variables.\n* Set the endpoint in the configuration file `/etc/crictl.yaml`. To specify a\n  different file, use the `--config=PATH_TO_FILE` flag when you run `crictl`.\n\nIf you don't set an endpoint, `crictl` attempts to connect to a list of known\nendpoints, which might result in an impact to performance.\n\nYou can also specify timeout values when connecting to the server and enable or\ndisable debugging, by specifying `timeout` or `debug` values in the configuration\nfile or using the `--timeout` and `--debug` command-line flags.\n\nTo view or edit the current configuration, view or edit the contents of\n`/etc/crictl.yaml`. For example, the configuration when using the `containerd`\ncontainer runtime would be similar to this:\n\n```\nruntime-endpoint: unix:///var/run/containerd/containerd.sock\nimage-endpoint: unix:///var/run/containerd/containerd.sock\ntimeout: 10\ndebug: true\n```\n\nTo learn more about `crictl`, refer to the [`crictl`\ndocumentation](https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/",
+    "content_hash": "29c78ecb6e585068304a9acd6fae2972174fadd6c46fe34cfe09e25f39de9b45"
+  },
+  {
+    "title": "Kubernetes Debug: Debugging Kubernetes nodes with crictl — Example crictl commands",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Example crictl commands\nContext: Debugging Kubernetes nodes with crictl\nThe following examples show some `crictl` commands and example output.\n\n### List pods",
+    "root_cause": "The following examples show some `crictl` commands and example output.",
+    "resolution_steps": "The following examples show some `crictl` commands and example output.\n\n### List pods\n\nList all pods:\n\n```shell\ncrictl pods\n```\n\nThe output is similar to this:\n\n```\nPOD ID              CREATED              STATE               NAME                         NAMESPACE           ATTEMPT\n926f1b5a1d33a       About a minute ago   Ready               sh-84d7dcf559-4r2gq          default             0\n4dccb216c4adb       About a minute ago   Ready               nginx-65899c769f-wv2gp       default             0\na86316e96fa89       17 hours ago         Ready               kube-proxy-gblk4             kube-system         0\n919630b8f81f1       17 hours ago         Ready               nvidia-device-plugin-zgbbv   kube-system         0\n```\n\nList pods by name:\n\n```shell\ncrictl pods --name nginx-65899c769f-wv2gp\n```\n\nThe output is similar to this:\n\n```\nPOD ID              CREATED             STATE               NAME                     NAMESPACE           ATTEMPT\n4dccb216c4adb       2 minutes ago       Ready               nginx-65899c769f-wv2gp   default             0\n```\n\nList pods by label:\n\n```shell\ncrictl pods --label run=nginx\n```\n\nThe output is similar to this:\n\n```\nPOD ID              CREATED             STATE               NAME                     NAMESPACE           ATTEMPT\n4dccb216c4adb       2 minutes ago       Ready               nginx-65899c769f-wv2gp   default             0\n```\n\n### List images\n\nList all images:\n\n```shell\ncrictl images\n```\n\nThe output is similar to this:\n\n```\nIM",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/",
+    "content_hash": "1c40219fa4089ec2c4f208b1d8bfd59f1a8c89e3dbde9d27294ebe37828be3bc"
+  },
+  {
+    "title": "Kubernetes Debug: Debugging Kubernetes Nodes With Kubectl",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Debugging Kubernetes Nodes With Kubectl\nThis page shows how to debug a [node](/docs/concepts/architecture/nodes/)\nrunning on the Kubernetes cluster using `kubectl debug` command.",
+    "root_cause": "This page shows how to debug a [node](/docs/concepts/architecture/nodes/)",
+    "resolution_steps": "This page shows how to debug a [node](/docs/concepts/architecture/nodes/)\nrunning on the Kubernetes cluster using `kubectl debug` command.\n\n## Debugging a Node using kubectl debug node\nUse the `kubectl debug node` command to deploy a Pod to a Node that you want to troubleshoot.\nThis command is helpful in scenarios where you can't access your Node by using an SSH connection.\nWhen the Pod is created, the Pod opens an interactive shell on the Node.\nTo create an interactive shell on a Node named “mynode”, run:\n\n```shell\nkubectl debug node/mynode -it --image=ubuntu\n```\n\n```console\nCreating debugging pod node-debugger-mynode-pdx84 with container debugger on node mynode.\nIf you don't see a command prompt, try pressing enter.\nroot@mynode:/#\n```\n\nThe debug command helps to gather information and troubleshoot issues. Commands \nthat you might use include `ip`, `ifconfig`, `nc`, `ping`, and `ps` and so on. You can also\ninstall other tools, such as `mtr`, `tcpdump`, and `curl`, from the respective package manager.\n\nThe debug commands may differ based on the image the debugging pod is using and\nthese commands might need to be installed.\n\nThe debugging Pod can access the root filesystem of the Node, mounted at `/host` in the Pod.\nIf you run your kubelet in a filesystem namespace,\nthe debugging Pod sees the root for that namespace, not for the entire node. For a typical Linux node,\nyou can look at the following paths to find relevant logs:\n\n`/host/var/log/kubelet.log`\n: Logs from the `kubele",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/kubectl-node-debug/",
+    "content_hash": "8039766426fc0fb81ac4570d01423d3896063e5f5a8a74deff02c3011a993fb6"
+  },
+  {
+    "title": "Kubernetes Debug: Developing and debugging services locally using telepresence — Connecting your local machine to a remote Kubernetes cluster",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Connecting your local machine to a remote Kubernetes cluster\nContext: Developing and debugging services locally using telepresence\nAfter installing `telepresence`, run `telepresence connect` to launch\nits Daemon and connect your local workstation to the cluster.\n\n```\n$ telepresence connect\n \nLaunching Telepresence Daemon\n...\nConnected to context default (https://<cluster public IP>)\n```",
+    "root_cause": "After installing `telepresence`, run `telepresence connect` to launch",
+    "resolution_steps": "After installing `telepresence`, run `telepresence connect` to launch\nits Daemon and connect your local workstation to the cluster.\n\n```\n$ telepresence connect\n \nLaunching Telepresence Daemon\n...\nConnected to context default (https://<cluster public IP>)\n```\n\nYou can curl services using the Kubernetes syntax e.g. `curl -ik https://kubernetes.default`",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/local-debugging/",
+    "content_hash": "0ba4a3f84ed4af6a28a0dccd339178d3140863e14784f06a91fd12dc406c3405"
+  },
+  {
+    "title": "Kubernetes Debug: Developing and debugging services locally using telepresence — Developing or debugging an existing service",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Developing or debugging an existing service\nContext: Developing and debugging services locally using telepresence\nWhen developing an application on Kubernetes, you typically program\nor debug a single service. The service might require access to other\nservices for testing and debugging. One option is to use the continuous\ndeployment pipeline, but even the fastest deployment pipeline introduces\na delay in the program or debug cycle.\n \nUse the `telepresence intercept $SERVICE_NAME --port $LOCAL_PORT:$REMOTE_PORT`\ncommand to create an \"intercept\" for rerouting remote service traffic.\n \nWhere:\n\n-   `$SERVICE_NAME`  is the name of your local service\n-   `$LOCAL_PORT` is the port that your service is running on your local workstation\n-   And `$REMOTE_PORT` is t",
+    "root_cause": "When developing an application on Kubernetes, you typically program",
+    "resolution_steps": "When developing an application on Kubernetes, you typically program\nor debug a single service. The service might require access to other\nservices for testing and debugging. One option is to use the continuous\ndeployment pipeline, but even the fastest deployment pipeline introduces\na delay in the program or debug cycle.\n \nUse the `telepresence intercept $SERVICE_NAME --port $LOCAL_PORT:$REMOTE_PORT`\ncommand to create an \"intercept\" for rerouting remote service traffic.\n \nWhere:\n\n-   `$SERVICE_NAME`  is the name of your local service\n-   `$LOCAL_PORT` is the port that your service is running on your local workstation\n-   And `$REMOTE_PORT` is the port your service listens to in the cluster\n\nRunning this command tells Telepresence to send remote traffic to your\nlocal service instead of the service in the remote Kubernetes cluster.\nMake edits to your service source code locally, save, and see the corresponding\nchanges when accessing your remote application take effect immediately.\nYou can also run your local service using a debugger or any other local development tool.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/local-debugging/",
+    "content_hash": "4974a4ab5048871f37e5b732295585240ede891b7b6694d79e046c0e7696eab3"
+  },
+  {
+    "title": "Kubernetes Debug: Developing and debugging services locally using telepresence — How does Telepresence work?",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: How does Telepresence work?\nContext: Developing and debugging services locally using telepresence\nTelepresence installs a traffic-agent sidecar next to your existing\napplication's container running in the remote cluster. It then captures\nall traffic requests going into the Pod, and instead of forwarding this\nto the application in the remote cluster, it routes all traffic (when you\ncreate a [global intercept](https://www.getambassador.io/docs/telepresence/latest/concepts/intercepts/#global-intercept)\nor a subset of the traffic (when you create a\n[personal intercept](https://www.getambassador.io/docs/telepresence/latest/concepts/intercepts/#personal-intercept))\nto your local development environment.",
+    "root_cause": "Telepresence installs a traffic-agent sidecar next to your existing",
+    "resolution_steps": "Telepresence installs a traffic-agent sidecar next to your existing\napplication's container running in the remote cluster. It then captures\nall traffic requests going into the Pod, and instead of forwarding this\nto the application in the remote cluster, it routes all traffic (when you\ncreate a [global intercept](https://www.getambassador.io/docs/telepresence/latest/concepts/intercepts/#global-intercept)\nor a subset of the traffic (when you create a\n[personal intercept](https://www.getambassador.io/docs/telepresence/latest/concepts/intercepts/#personal-intercept))\nto your local development environment.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/local-debugging/",
+    "content_hash": "e39d88a3f72816c46c5133840d17b41aef920b69e35970e76c8ae46b6201cb8d"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Limitations",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Limitations\nContext: Monitor Node Health\n* Node Problem Detector uses the kernel log format for reporting kernel issues.\n  To learn how to extend the kernel log format, see [Add support for another log format](#support-other-log-format).",
+    "root_cause": "Node Problem Detector uses the kernel log format for reporting kernel issues.",
+    "resolution_steps": "* Node Problem Detector uses the kernel log format for reporting kernel issues.\n  To learn how to extend the kernel log format, see [Add support for another log format](#support-other-log-format).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "2a8e248cf63278c6ef3b6128d7cf973f725c6eabede2ed3504a2c961c798abf3"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Enabling Node Problem Detector",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Enabling Node Problem Detector\nContext: Monitor Node Health\nSome cloud providers enable Node Problem Detector as an .\nYou can also enable Node Problem Detector with `kubectl` or by creating an Addon DaemonSet.\n\n### Using kubectl to enable Node Problem Detector {#using-kubectl}",
+    "root_cause": "Some cloud providers enable Node Problem Detector as an .",
+    "resolution_steps": "Some cloud providers enable Node Problem Detector as an .\nYou can also enable Node Problem Detector with `kubectl` or by creating an Addon DaemonSet.\n\n### Using kubectl to enable Node Problem Detector {#using-kubectl}\n\n`kubectl` provides the most flexible management of Node Problem Detector.\nYou can overwrite the default configuration to fit it into your environment or\nto detect customized node problems. For example:\n\n1. Create a Node Problem Detector configuration similar to `node-problem-detector.yaml`:\n\n   \n\n   \n   You should verify that the system log directory is right for your operating system distribution.\n   \n\n1. Start node problem detector with `kubectl`:\n\n   ```shell\n   kubectl apply -f https://k8s.io/examples/debug/node-problem-detector.yaml\n   ```\n\n### Using an Addon pod to enable Node Problem Detector {#using-addon-pod}\n\nIf you are using a custom cluster bootstrap solution and don't need\nto overwrite the default configuration, you can leverage the Addon pod to\nfurther automate the deployment.\n\nCreate `node-problem-detector.yaml`, and save the configuration in the Addon pod's\ndirectory `/etc/kubernetes/addons/node-problem-detector` on a control plane node.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "5b89988650556de72024115d76a0cc818a85fc4e676a277aa4d7e9f89ca1711c"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Overwrite the configuration",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Overwrite the configuration\nContext: Monitor Node Health\nThe [default configuration](https://github.com/kubernetes/node-problem-detector/tree/v0.8.12/config)\nis embedded when building the Docker image of Node Problem Detector.\n\nHowever, you can use a [`ConfigMap`](/docs/tasks/configure-pod-container/configure-pod-configmap/)\nto overwrite the configuration:",
+    "root_cause": "The [default configuration](https://github.com/kubernetes/node-problem-detector/tree/v0.8.12/config)",
+    "resolution_steps": "The [default configuration](https://github.com/kubernetes/node-problem-detector/tree/v0.8.12/config)\nis embedded when building the Docker image of Node Problem Detector.\n\nHowever, you can use a [`ConfigMap`](/docs/tasks/configure-pod-container/configure-pod-configmap/)\nto overwrite the configuration:\n\n1. Change the configuration files in `config/`\n1. Create the `ConfigMap` `node-problem-detector-config`:\n\n   ```shell\n   kubectl create configmap node-problem-detector-config --from-file=config/\n   ```\n\n1. Change the `node-problem-detector.yaml` to use the `ConfigMap`:\n\n   \n\n1. Recreate the Node Problem Detector with the new configuration file:\n\n   ```shell\n   # If you have a node-problem-detector running, delete before recreating\n   kubectl delete -f https://k8s.io/examples/debug/node-problem-detector.yaml\n   kubectl apply -f https://k8s.io/examples/debug/node-problem-detector-configmap.yaml\n   ```\n\nThis approach only applies to a Node Problem Detector started with `kubectl`.\n\nOverwriting a configuration is not supported if a Node Problem Detector runs as a cluster Addon.\nThe Addon manager does not support `ConfigMap`.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "5e6014bb43216319d16796501ae31f8305f184277f6e7d064b7385c4d8a8ffdd"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Problem Daemons",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Problem Daemons\nContext: Monitor Node Health\nA problem daemon is a sub-daemon of the Node Problem Detector. It monitors specific kinds of node\nproblems and reports them to the Node Problem Detector.\nThere are several types of supported problem daemons.\n\n- A `SystemLogMonitor` type of daemon monitors the system logs and reports problems and metrics\n  according to predefined rules. You can customize the configurations for different log sources\n  such as [filelog](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/kernel-monitor-filelog.json),\n  [kmsg](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/kernel-monitor.json),\n  [kernel](https://githu",
+    "root_cause": "A problem daemon is a sub-daemon of the Node Problem Detector. It monitors specific kinds of node",
+    "resolution_steps": "A problem daemon is a sub-daemon of the Node Problem Detector. It monitors specific kinds of node\nproblems and reports them to the Node Problem Detector.\nThere are several types of supported problem daemons.\n\n- A `SystemLogMonitor` type of daemon monitors the system logs and reports problems and metrics\n  according to predefined rules. You can customize the configurations for different log sources\n  such as [filelog](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/kernel-monitor-filelog.json),\n  [kmsg](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/kernel-monitor.json),\n  [kernel](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/kernel-monitor-counter.json),\n  [abrt](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/abrt-adaptor.json),\n  and [systemd](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/systemd-monitor-counter.json).\n\n- A `SystemStatsMonitor` type of daemon collects various health-related system stats as metrics.\n  You can customize its behavior by updating its\n  [configuration file](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/system-stats-monitor.json).\n\n- A `CustomPluginMonitor` type of daemon invokes and checks various node problems by running\n  user-defined scripts. You can use different custom plugin monitors to monitor different\n  problems and customize the daemon behavior by updating the\n  [configuration file](htt",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "2eae14c895abf6e41a0ad170e1ed59b4969dbf7419e57aeac9a3eae101d8437d"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Exporter",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Exporter\nContext: Monitor Node Health\nAn exporter reports the node problems and/or metrics to certain backends.\nThe following exporters are supported:\n\n- **Kubernetes exporter**: this exporter reports node problems to the Kubernetes API server.\n  Temporary problems are reported as Events and permanent problems are reported as Node Conditions.",
+    "root_cause": "An exporter reports the node problems and/or metrics to certain backends.",
+    "resolution_steps": "An exporter reports the node problems and/or metrics to certain backends.\nThe following exporters are supported:\n\n- **Kubernetes exporter**: this exporter reports node problems to the Kubernetes API server.\n  Temporary problems are reported as Events and permanent problems are reported as Node Conditions.\n\n- **Prometheus exporter**: this exporter reports node problems and metrics locally as Prometheus\n  (or OpenMetrics) metrics. You can specify the IP address and port for the exporter using command\n  line arguments.\n\n- **Stackdriver exporter**: this exporter reports node problems and metrics to the Stackdriver\n  Monitoring API. The exporting behavior can be customized using a\n  [configuration file](https://github.com/kubernetes/node-problem-detector/blob/v0.8.12/config/exporter/stackdriver-exporter.json).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "138f1a3d3508068ab4591845ecca877881f2dcf0346b2e943441a2bd0d35d59b"
+  },
+  {
+    "title": "Kubernetes Debug: Monitor Node Health — Recommendations and restrictions",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Recommendations and restrictions\nContext: Monitor Node Health\nIt is recommended to run the Node Problem Detector in your cluster to monitor node health.\nWhen running the Node Problem Detector, you can expect extra resource overhead on each node.\nUsually this is fine, because:\n\n* The kernel log grows relatively slowly.\n* A resource limit is set for the Node Problem Detector.\n* Even under high load, the resource usage is acceptable. For more information, see the Node Problem Detector\n  [benchmark result](https://github.com/kubernetes/node-problem-detector/issues/2#issuecomment-220255629).",
+    "root_cause": "It is recommended to run the Node Problem Detector in your cluster to monitor node health.",
+    "resolution_steps": "It is recommended to run the Node Problem Detector in your cluster to monitor node health.\nWhen running the Node Problem Detector, you can expect extra resource overhead on each node.\nUsually this is fine, because:\n\n* The kernel log grows relatively slowly.\n* A resource limit is set for the Node Problem Detector.\n* Even under high load, the resource usage is acceptable. For more information, see the Node Problem Detector\n  [benchmark result](https://github.com/kubernetes/node-problem-detector/issues/2#issuecomment-220255629).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/monitor-node-health/",
+    "content_hash": "9cf930865b896a9d00e83b0705d2c077dc4c3376e731896148d673c9f3b7fcc1"
+  },
+  {
+    "title": "Kubernetes Debug: Resource metrics pipeline — Metrics API",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Metrics API\nContext: Resource metrics pipeline\nThe metrics-server implements the Metrics API. This API allows you to access CPU and memory usage\nfor the nodes and pods in your cluster. Its primary role is to feed resource usage metrics to K8s\nautoscaler components.\n\nHere is an example of the Metrics API request for a `minikube` node piped through `jq` for easier\nreading:",
+    "root_cause": "The metrics-server implements the Metrics API. This API allows you to access CPU and memory usage",
+    "resolution_steps": "The metrics-server implements the Metrics API. This API allows you to access CPU and memory usage\nfor the nodes and pods in your cluster. Its primary role is to feed resource usage metrics to K8s\nautoscaler components.\n\nHere is an example of the Metrics API request for a `minikube` node piped through `jq` for easier\nreading:\n\n```shell\nkubectl get --raw \"/apis/metrics.k8s.io/v1/nodes/minikube\" | jq '.'\n```\n\nHere is the same API call using `curl`:\n\n```shell\ncurl http://localhost:8080/apis/metrics.k8s.io/v1/nodes/minikube\n```\n\nSample response:\n\n```json\n{\n  \"kind\": \"NodeMetrics\",\n  \"apiVersion\": \"metrics.k8s.io/v1\",\n  \"metadata\": {\n    \"name\": \"minikube\",\n    \"selfLink\": \"/apis/metrics.k8s.io/v1/nodes/minikube\",\n    \"creationTimestamp\": \"2022-01-27T18:48:43Z\"\n  },\n  \"timestamp\": \"2022-01-27T18:48:33Z\",\n  \"window\": \"30s\",\n  \"usage\": {\n    \"cpu\": \"487558164n\",\n    \"memory\": \"732212Ki\"\n  }\n}\n```\n\nHere is an example of the Metrics API request for a `kube-scheduler-minikube` pod contained in the\n`kube-system` namespace and piped through `jq` for easier reading:\n\n```shell\nkubectl get --raw \"/apis/metrics.k8s.io/v1/namespaces/kube-system/pods/kube-scheduler-minikube\" | jq '.'\n```\n\nHere is the same API call using `curl`:\n\n```shell\ncurl http://localhost:8080/apis/metrics.k8s.io/v1/namespaces/kube-system/pods/kube-scheduler-minikube\n```\n\nSample response:\n\n```json\n{\n  \"kind\": \"PodMetrics\",\n  \"apiVersion\": \"metrics.k8s.io/v1\",\n  \"metadata\": {\n    \"name\": \"kube-scheduler-minikube\",\n    \"names",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/",
+    "content_hash": "5c386bd79fbba6cbe5fca6b052c8e0cb803656440dbe01c6f94d0f4f34a5c280"
+  },
+  {
+    "title": "Kubernetes Debug: Resource metrics pipeline — Measuring resource usage",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Measuring resource usage\nContext: Resource metrics pipeline\n### CPU\n\nCPU is reported as the average core usage measured in cpu units. One cpu, in Kubernetes, is\nequivalent to 1 vCPU/Core for cloud providers, and 1 hyper-thread on bare-metal Intel processors.",
+    "root_cause": "CPU is reported as the average core usage measured in cpu units. One cpu, in Kubernetes, is",
+    "resolution_steps": "### CPU\n\nCPU is reported as the average core usage measured in cpu units. One cpu, in Kubernetes, is\nequivalent to 1 vCPU/Core for cloud providers, and 1 hyper-thread on bare-metal Intel processors.\n\nThis value is derived by taking a rate over a cumulative CPU counter provided by the kernel (in\nboth Linux and Windows kernels). The time window used to calculate CPU is shown under window field\nin Metrics API.\n\nTo learn more about how Kubernetes allocates and measures CPU resources, see\n[meaning of CPU](/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu).\n\n### Memory\n\nMemory is reported as the working set, measured in bytes, at the instant the metric was collected.\n\nIn an ideal world, the \"working set\" is the amount of memory in-use that cannot be freed under\nmemory pressure. However, calculation of the working set varies by host OS, and generally makes\nheavy use of heuristics to produce an estimate.\n\nThe Kubernetes model for a container's working set expects that the container runtime counts\nanonymous memory associated with the container in question. The working set metric typically also\nincludes some cached (file-backed) memory, because the host OS cannot always reclaim pages.\n\nTo learn more about how Kubernetes allocates and measures memory resources, see\n[meaning of memory](/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/",
+    "content_hash": "679e488f59d8f994cfaddc11e7a2f4a34480c0bab75fbf5a8ad79fc83c7bb7ec"
+  },
+  {
+    "title": "Kubernetes Debug: Resource metrics pipeline — Metrics Server",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Metrics Server\nContext: Resource metrics pipeline\nThe metrics-server fetches resource metrics from the kubelets and exposes them in the Kubernetes\nAPI server through the Metrics API for use by the HPA and VPA. You can also view these metrics\nusing the `kubectl top` command.\n\nThe metrics-server uses the Kubernetes API to track nodes and pods in your cluster. The\nmetrics-server queries each node over HTTP to fetch metrics. The metrics-server also builds an\ninternal view of pod metadata, and keeps a cache of pod health. That cached pod health information\nis available via the extension API that the metrics-server makes available.",
+    "root_cause": "The metrics-server fetches resource metrics from the kubelets and exposes them in the Kubernetes",
+    "resolution_steps": "The metrics-server fetches resource metrics from the kubelets and exposes them in the Kubernetes\nAPI server through the Metrics API for use by the HPA and VPA. You can also view these metrics\nusing the `kubectl top` command.\n\nThe metrics-server uses the Kubernetes API to track nodes and pods in your cluster. The\nmetrics-server queries each node over HTTP to fetch metrics. The metrics-server also builds an\ninternal view of pod metadata, and keeps a cache of pod health. That cached pod health information\nis available via the extension API that the metrics-server makes available.\n\nFor example with an HPA query, the metrics-server needs to identify which pods fulfill the label\nselectors in the deployment.\n\nThe metrics-server calls the [kubelet](/docs/reference/command-line-tools-reference/kubelet/) API\nto collect metrics from each node. Depending on the metrics-server version it uses:\n\n* Metrics resource endpoint `/metrics/resource` in version v0.6.0+ or\n* Summary API endpoint `/stats/summary` in older versions",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/",
+    "content_hash": "763c97ca402ea77f52c523197795562699b9beeb49112eb8b09cd7ab5abd8a4b"
+  },
+  {
+    "title": "Kubernetes Debug: Tools for Monitoring Resources — Resource metrics pipeline",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Resource metrics pipeline\nContext: Tools for Monitoring Resources\nThe resource metrics pipeline provides a limited set of metrics related to\ncluster components such as the\n[Horizontal Pod Autoscaler](/docs/tasks/run-application/horizontal-pod-autoscale/)\ncontroller, as well as the `kubectl top` utility.\nThese  metrics are collected by the lightweight, short-term, in-memory \n[metrics-server](https://github.com/kubernetes-sigs/metrics-server) and\n are exposed via the `metrics.k8s.io` API.\n\nmetrics-server discovers all nodes on the cluster and \nqueries each node's \n[kubelet](/docs/reference/command-line-tools-reference/kubelet/) for CPU and \nmemory usage. The kubelet acts as a bridge between the Kubernetes mas",
+    "root_cause": "The resource metrics pipeline provides a limited set of metrics related to",
+    "resolution_steps": "The resource metrics pipeline provides a limited set of metrics related to\ncluster components such as the\n[Horizontal Pod Autoscaler](/docs/tasks/run-application/horizontal-pod-autoscale/)\ncontroller, as well as the `kubectl top` utility.\nThese  metrics are collected by the lightweight, short-term, in-memory \n[metrics-server](https://github.com/kubernetes-sigs/metrics-server) and\n are exposed via the `metrics.k8s.io` API. \n\nmetrics-server discovers all nodes on the cluster and \nqueries each node's \n[kubelet](/docs/reference/command-line-tools-reference/kubelet/) for CPU and \nmemory usage. The kubelet acts as a bridge between the Kubernetes master and \nthe nodes, managing the pods and containers running on a machine. The kubelet \ntranslates each pod into its constituent containers and fetches individual \ncontainer usage statistics from the container runtime through the container \nruntime interface. If you use a container runtime that uses Linux cgroups and\nnamespaces to implement containers, and the container runtime does not publish\nusage statistics, then the kubelet can look up those statistics directly\n(using code from [cAdvisor](https://github.com/google/cadvisor)).\nNo matter how those statistics arrive, the kubelet then exposes the aggregated pod\nresource usage statistics through the metrics-server Resource Metrics API.\nThis API is served at `/metrics/resource` on the kubelet's authenticated and \nread-only ports.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/",
+    "content_hash": "7b063fc8bd1944e5fba8058b87d8cd951e264b30bbd1993d4949179d9738d503"
+  },
+  {
+    "title": "Kubernetes Debug: Tools for Monitoring Resources — Full metrics pipeline",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Full metrics pipeline\nContext: Tools for Monitoring Resources\nA full metrics pipeline gives you access to richer metrics. Kubernetes can\nrespond to these metrics by  automatically scaling or adapting the cluster\nbased on its current state, using mechanisms such as the Horizontal Pod\nAutoscaler. The monitoring pipeline fetches metrics from the kubelet and\nthen exposes them to Kubernetes via an adapter by implementing either the\n`custom.metrics.k8s.io` or `external.metrics.k8s.io` API.\n\nKubernetes is designed to work with [OpenMetrics](https://openmetrics.io/), \nwhich is one of the\n[CNCF Observability and Analysis - Monitoring Projects](https://landscape.cncf.io/?group=projects-and-products&view-mode=card",
+    "root_cause": "A full metrics pipeline gives you access to richer metrics. Kubernetes can",
+    "resolution_steps": "A full metrics pipeline gives you access to richer metrics. Kubernetes can\nrespond to these metrics by  automatically scaling or adapting the cluster\nbased on its current state, using mechanisms such as the Horizontal Pod\nAutoscaler. The monitoring pipeline fetches metrics from the kubelet and\nthen exposes them to Kubernetes via an adapter by implementing either the\n`custom.metrics.k8s.io` or `external.metrics.k8s.io` API.\n\nKubernetes is designed to work with [OpenMetrics](https://openmetrics.io/), \nwhich is one of the\n[CNCF Observability and Analysis - Monitoring Projects](https://landscape.cncf.io/?group=projects-and-products&view-mode=card#observability-and-analysis--monitoring),\nbuilt upon and carefully extending [Prometheus exposition format](https://prometheus.io/docs/instrumenting/exposition_formats/)\nin almost 100% backwards-compatible ways.\n\nIf you glance over at the\n[CNCF Landscape](https://landscape.cncf.io/?group=projects-and-products&view-mode=card#observability-and-analysis--monitoring),\nyou can see a number of monitoring projects that can work with Kubernetes by _scraping_\nmetric data and using that to help you observe your cluster. It is up to you to select the tool\nor tools that suit your needs. The CNCF landscape for observability and analytics includes a\nmix of open-source software, paid-for software-as-a-service, and other commercial products.\n\nWhen you design and implement a full metrics pipeline you can make that monitoring data\navailable back to Kuberne",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/",
+    "content_hash": "96553875101dd540e44546b330aaba6c644e2da4029f93b59b25941be357c43a"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting Topology Management — Sources of troubleshooting information",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Sources of troubleshooting information\nContext: Troubleshooting Topology Management\nYou can use the following means to troubleshoot the reason why a pod could not be deployed or\nbecame rejected at a node, in the context of topology management:\n\n- _Pod status_ - indicates topology affinity errors\n- _system logs_ - include valuable information for debugging; for example, about generated hints\n- _kubelet state file_ - the dump of internal state of the Memory Manager\n  (including the _node map_ and _memory maps_)\n- You can use the [device plugin resource API](#device-plugin-resource-api)\n  to retrieve information about the memory reserved for containers",
+    "root_cause": "You can use the following means to troubleshoot the reason why a pod could not be deployed or",
+    "resolution_steps": "You can use the following means to troubleshoot the reason why a pod could not be deployed or\nbecame rejected at a node, in the context of topology management:\n\n- _Pod status_ - indicates topology affinity errors\n- _system logs_ - include valuable information for debugging; for example, about generated hints\n- _kubelet state file_ - the dump of internal state of the Memory Manager\n  (including the _node map_ and _memory maps_)\n- You can use the [device plugin resource API](#device-plugin-resource-api)\n  to retrieve information about the memory reserved for containers",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/topology/",
+    "content_hash": "d3e12642eabf88147c83e41fba39fa4da32de50b8af65861bacbb56b6b6664d1"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting Topology Management — Troubleshoot TopologyAffinityError {TopologyAffinityError}",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Troubleshoot TopologyAffinityError {TopologyAffinityError}\nContext: Troubleshooting Topology Management\nThis error typically occurs in the following situations:\n\n* a node has not enough resources available to satisfy the pod's request\n* the pod's request is rejected due to particular Topology Manager policy constraints",
+    "root_cause": "a node has not enough resources available to satisfy the pod's request",
+    "resolution_steps": "This error typically occurs in the following situations:\n\n* a node has not enough resources available to satisfy the pod's request\n* the pod's request is rejected due to particular Topology Manager policy constraints\n\nThe error appears in the status of a pod:\n\n```shell\nkubectl get pods\n```\n\n```none\nNAME         READY   STATUS                  RESTARTS   AGE\nguaranteed   0/1     TopologyAffinityError   0          113s\n```\n\nUse `kubectl describe pod <id>` or `kubectl events` to obtain a detailed error message:\n\n```none\nWarning  TopologyAffinityError  10m   kubelet, dell8  Resources cannot be allocated with Topology locality\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/topology/",
+    "content_hash": "12bc0b7e37ceb864781ea7fa10366f082d6b74ece8b289cb94f54f0582e8c6e1"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting Topology Management — Examine system logs",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Examine system logs\nContext: Troubleshooting Topology Management\nSearch system logs with respect to a particular pod.\n\nThe set of hints generated by CPU Manager should be present in the logs.\nAlso, the set of hints that Memory Manager generated for the pod can be found in the logs.",
+    "root_cause": "Search system logs with respect to a particular pod.",
+    "resolution_steps": "Search system logs with respect to a particular pod.\n\nThe set of hints generated by CPU Manager should be present in the logs.\nAlso, the set of hints that Memory Manager generated for the pod can be found in the logs.\n\nTopology Manager merges these hints to calculate a single best hint.\nThe best hint should also be present in the logs.\n\nThe best hint indicates where to allocate all the resources.\nTopology Manager tests this hint against its current policy, and based on the verdict,\nit either admits the pod to the node or rejects it.\n\nAlso, search the logs for occurrences associated with the Memory Manager;\nfor example to find out information about `cgroups` and `cpuset.mems` updates.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/topology/",
+    "content_hash": "f18414c199877762e05a38d0106eb75d86139beadbe80a9cde1d9398b3ee5992"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting Topology Management — Examples",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Examples\nContext: Troubleshooting Topology Management\n### Examine the memory manager state on a node\n\nLet us first deploy a sample `Guaranteed` pod whose specification is as follows:",
+    "root_cause": "Examine the memory manager state on a node",
+    "resolution_steps": "### Examine the memory manager state on a node\n\nLet us first deploy a sample `Guaranteed` pod whose specification is as follows:\n\n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\n  name: guaranteed\nspec:\n  containers:\n  - name: guaranteed\n    image: consumer\n    imagePullPolicy: Never\n    resources:\n      limits:\n        cpu: \"2\"\n        memory: 150Gi\n      requests:\n        cpu: \"2\"\n        memory: 150Gi\n    command: [\"sleep\",\"infinity\"]\n```\n\nNext, log into the node where it was deployed and examine the state file in\n`/var/lib/kubelet/memory_manager_state`:\n\n```json\n{\n   \"policyName\":\"Static\",\n   \"machineState\":{\n      \"0\":{\n         \"numberOfAssignments\":1,\n         \"memoryMap\":{\n            \"hugepages-1Gi\":{\n               \"total\":0,\n               \"systemReserved\":0,\n               \"allocatable\":0,\n               \"reserved\":0,\n               \"free\":0\n            },\n            \"memory\":{\n               \"total\":134987354112,\n               \"systemReserved\":3221225472,\n               \"allocatable\":131766128640,\n               \"reserved\":131766128640,\n               \"free\":0\n            }\n         },\n         \"nodes\":[\n            0,\n            1\n         ]\n      },\n      \"1\":{\n         \"numberOfAssignments\":1,\n         \"memoryMap\":{\n            \"hugepages-1Gi\":{\n               \"total\":0,\n               \"systemReserved\":0,\n               \"allocatable\":0,\n               \"reserved\":0,\n               \"free\":0\n            },\n            \"memory\":{\n               \"total\":135286722560,",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/topology/",
+    "content_hash": "12534831cd4cfe1e7de8f815bfb534001b77ea733ca0bb4bcee233eafba883d6"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting Topology Management — Check the device plugin resource API {device-plugin-resource-api}",
+    "category": "resource",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Check the device plugin resource API {device-plugin-resource-api}\nContext: Troubleshooting Topology Management\nThe kubelet provides a `PodResourceLister` gRPC service to enable discovery of resources and associated metadata.\nBy using its [List gRPC endpoint](/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/#grpc-endpoint-list),\ninformation about reserved memory for each container can be retrieved, which is contained\nin protobuf `ContainerMemory` message.\n\nThis information can be retrieved solely for pods in Guaranteed QoS class.",
+    "root_cause": "The kubelet provides a `PodResourceLister` gRPC service to enable discovery of resources and associated metadata.",
+    "resolution_steps": "The kubelet provides a `PodResourceLister` gRPC service to enable discovery of resources and associated metadata.\nBy using its [List gRPC endpoint](/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/#grpc-endpoint-list),\ninformation about reserved memory for each container can be retrieved, which is contained\nin protobuf `ContainerMemory` message.\n\nThis information can be retrieved solely for pods in Guaranteed QoS class.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/topology/",
+    "content_hash": "5c84ab10f589d259d160391879c804dd48fadb61d283fd015728c4d9462e7963"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Verify kubectl setup",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Verify kubectl setup\nContext: Troubleshooting kubectl\nMake sure you have installed and configured `kubectl` correctly on your local machine.\nCheck the `kubectl` version to ensure it is up-to-date and compatible with your cluster.\n\nCheck kubectl version:",
+    "root_cause": "Make sure you have installed and configured `kubectl` correctly on your local machine.",
+    "resolution_steps": "Make sure you have installed and configured `kubectl` correctly on your local machine.\nCheck the `kubectl` version to ensure it is up-to-date and compatible with your cluster.\n\nCheck kubectl version:\n\n```shell\nkubectl version\n```\n\nYou'll see a similar output:\n\n```console\nClient Version: version.Info{Major:\"1\", Minor:\"27\", GitVersion:\"v1.27.4\",GitCommit:\"fa3d7990104d7c1f16943a67f11b154b71f6a132\", GitTreeState:\"clean\",BuildDate:\"2023-07-19T12:20:54Z\", GoVersion:\"go1.20.6\", Compiler:\"gc\", Platform:\"linux/amd64\"}\nKustomize Version: v5.0.1\nServer Version: version.Info{Major:\"1\", Minor:\"27\", GitVersion:\"v1.27.3\",GitCommit:\"25b4e43193bcda6c7328a6d147b1fb73a33f1598\", GitTreeState:\"clean\",BuildDate:\"2023-06-14T09:47:40Z\", GoVersion:\"go1.20.5\", Compiler:\"gc\", Platform:\"linux/amd64\"}\n\n```\n\nIf you see `Unable to connect to the server: dial tcp <server-ip>:8443: i/o timeout`,\ninstead of `Server Version`, you need to troubleshoot kubectl connectivity with your cluster.\n\nMake sure you have installed the kubectl by following the\n[official documentation for installing kubectl](/docs/tasks/tools/#kubectl), and you have\nproperly configured the `$PATH` environment variable.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "576cfbd58ce3460772590c03c15431336408e7493f6013b13261b2ef080c3847"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Check kubeconfig",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Check kubeconfig\nContext: Troubleshooting kubectl\nThe `kubectl` requires a `kubeconfig` file to connect to a Kubernetes cluster. The\n`kubeconfig` file is usually located under the `~/.kube/config` directory. Make sure\nthat you have a valid `kubeconfig` file. If you don't have a `kubeconfig` file, you can\nobtain it from your Kubernetes administrator, or you can copy it from your Kubernetes\ncontrol plane's `/etc/kubernetes/admin.conf` directory. If you have deployed your\nKubernetes cluster on a cloud platform and lost your `kubeconfig` file, you can\nre-generate it using your cloud provider's tools. Refer the cloud provider's\ndocumentation for re-generating a `kubeconfig` file.\n\nCheck if the `$",
+    "root_cause": "The `kubectl` requires a `kubeconfig` file to connect to a Kubernetes cluster. The",
+    "resolution_steps": "The `kubectl` requires a `kubeconfig` file to connect to a Kubernetes cluster. The\n`kubeconfig` file is usually located under the `~/.kube/config` directory. Make sure\nthat you have a valid `kubeconfig` file. If you don't have a `kubeconfig` file, you can\nobtain it from your Kubernetes administrator, or you can copy it from your Kubernetes\ncontrol plane's `/etc/kubernetes/admin.conf` directory. If you have deployed your\nKubernetes cluster on a cloud platform and lost your `kubeconfig` file, you can\nre-generate it using your cloud provider's tools. Refer the cloud provider's\ndocumentation for re-generating a `kubeconfig` file.\n\nCheck if the `$KUBECONFIG` environment variable is configured correctly. You can set\n`$KUBECONFIG`environment variable or use the `--kubeconfig` parameter with the kubectl\nto specify the directory of a `kubeconfig` file.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "1a4468c6b11dfe2098dd5736cf6a3ccd7261bd5cf97685a1603f9e308bdda867"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Check VPN connectivity",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Check VPN connectivity\nContext: Troubleshooting kubectl\nIf you are using a Virtual Private Network (VPN) to access your Kubernetes cluster,\nmake sure that your VPN connection is active and stable. Sometimes, VPN disconnections\ncan lead to connection issues with the cluster. Reconnect to the VPN and try accessing\nthe cluster again.",
+    "root_cause": "If you are using a Virtual Private Network (VPN) to access your Kubernetes cluster,",
+    "resolution_steps": "If you are using a Virtual Private Network (VPN) to access your Kubernetes cluster,\nmake sure that your VPN connection is active and stable. Sometimes, VPN disconnections\ncan lead to connection issues with the cluster. Reconnect to the VPN and try accessing\nthe cluster again.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "4ac7c687786d9e42709ccfba0d190eed4e938997bbbe7121c5572a17fd2eba28"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Authentication and authorization",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Authentication and authorization\nContext: Troubleshooting kubectl\nIf you are using the token based authentication and the kubectl is returning an error\nregarding the authentication token or authentication server address, validate the\nKubernetes authentication token and the authentication server address are configured\nproperly.\n\nIf kubectl is returning an error regarding the authorization, make sure that you are\nusing the valid user credentials. And you have the permission to access the resource\nthat you have requested.",
+    "root_cause": "If you are using the token based authentication and the kubectl is returning an error",
+    "resolution_steps": "If you are using the token based authentication and the kubectl is returning an error\nregarding the authentication token or authentication server address, validate the\nKubernetes authentication token and the authentication server address are configured\nproperly.\n\nIf kubectl is returning an error regarding the authorization, make sure that you are\nusing the valid user credentials. And you have the permission to access the resource\nthat you have requested.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "9b80c48cb2fc9f2f073f52f58187ba74a5323ecdacbedea866f9751848673925"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Verify contexts",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Verify contexts\nContext: Troubleshooting kubectl\nKubernetes supports [multiple clusters and contexts](/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).\nEnsure that you are using the correct context to interact with your cluster.\n\nList available contexts:",
+    "root_cause": "Kubernetes supports [multiple clusters and contexts](/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).",
+    "resolution_steps": "Kubernetes supports [multiple clusters and contexts](/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).\nEnsure that you are using the correct context to interact with your cluster.\n\nList available contexts:\n\n```shell\nkubectl config get-contexts\n```\n\nSwitch to the appropriate context:\n\n```shell\nkubectl config use-context <context-name>\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "8b57c708b878db0b45d39177cd157b2b0df14a355fd4b5fd0facaa20fedb4361"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — API server and load balancer",
+    "category": "network",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: API server and load balancer\nContext: Troubleshooting kubectl\nThe  server is the\ncentral component of a Kubernetes cluster. If the API server or the load balancer that\nruns in front of your API servers is not reachable or not responding, you won't be able\nto interact with the cluster.\n\nCheck the if the API server's host is reachable by using `ping` command. Check cluster's\nnetwork connectivity and firewall. If your are using a cloud provider for deploying\nthe cluster, check your cloud provider's health check status for the cluster's\nAPI server.",
+    "root_cause": "central component of a Kubernetes cluster. If the API server or the load balancer that",
+    "resolution_steps": "The  server is the\ncentral component of a Kubernetes cluster. If the API server or the load balancer that\nruns in front of your API servers is not reachable or not responding, you won't be able\nto interact with the cluster.\n\nCheck the if the API server's host is reachable by using `ping` command. Check cluster's\nnetwork connectivity and firewall. If your are using a cloud provider for deploying\nthe cluster, check your cloud provider's health check status for the cluster's\nAPI server.\n\nVerify the status of the load balancer (if used) to ensure it is healthy and forwarding\ntraffic to the API server.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "f026de7bc5875c21adecd438c9b811ad8797776e6d2f4c09fc9dff4f8d076277"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — TLS problems",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: TLS problems\nContext: Troubleshooting kubectl\n* Additional tools required - `base64` and `openssl` version 3.0 or above.\n\nThe Kubernetes API server only serves HTTPS requests by default. In that case TLS problems\nmay occur due to various reasons, such as certificate expiry or chain of trust validity.",
+    "root_cause": "Additional tools required - `base64` and `openssl` version 3.0 or above.",
+    "resolution_steps": "* Additional tools required - `base64` and `openssl` version 3.0 or above.\n\nThe Kubernetes API server only serves HTTPS requests by default. In that case TLS problems\nmay occur due to various reasons, such as certificate expiry or chain of trust validity.\n\nYou can find the TLS certificate in the kubeconfig file, located in the `~/.kube/config`\ndirectory. The `certificate-authority` attribute contains the CA certificate and the\n`client-certificate` attribute contains the client certificate.\n\nVerify the expiry of these certificates:\n\n```shell\nkubectl config view --flatten --output 'jsonpath={.clusters[0].cluster.certificate-authority-data}' | base64 -d | openssl x509 -noout -dates\n```\n\noutput:\n```console\nnotBefore=Feb 13 05:57:47 2024 GMT\nnotAfter=Feb 10 06:02:47 2034 GMT\n```\n\n```shell\nkubectl config view --flatten --output 'jsonpath={.users[0].user.client-certificate-data}'| base64 -d | openssl x509 -noout -dates\n```\n\noutput:\n```console\nnotBefore=Feb 13 05:57:47 2024 GMT\nnotAfter=Feb 12 06:02:50 2025 GMT\n```",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "648a12d5f3c67915267f15cb7faabb51c5e831731580f0e20cdc96e444262e35"
+  },
+  {
+    "title": "Kubernetes Debug: Troubleshooting kubectl — Verify kubectl helpers",
+    "category": "deployment",
+    "severity": "SEV3",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Verify kubectl helpers\nContext: Troubleshooting kubectl\nSome kubectl authentication helpers provide easy access to Kubernetes clusters. If you\nhave used such helpers and are facing connectivity issues, ensure that the necessary\nconfigurations are still present.\n\nCheck kubectl configuration for authentication details:",
+    "root_cause": "Some kubectl authentication helpers provide easy access to Kubernetes clusters. If you",
+    "resolution_steps": "Some kubectl authentication helpers provide easy access to Kubernetes clusters. If you\nhave used such helpers and are facing connectivity issues, ensure that the necessary\nconfigurations are still present.\n\nCheck kubectl configuration for authentication details:\n\n```shell\nkubectl config view\n```\n\nIf you previously used a helper tool (for example, `kubectl-oidc-login`), ensure that it is still\ninstalled and configured correctly.",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/troubleshoot-kubectl/",
+    "content_hash": "86c00774a3edcdc3964b9bdf58920425c5cb703e232afc857b685a8e1048ac8d"
+  },
+  {
+    "title": "Kubernetes Debug: Windows debugging tips — Node-level troubleshooting {troubleshooting-node}",
+    "category": "deployment",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Node-level troubleshooting {troubleshooting-node}\nContext: Windows debugging tips\n1. My Pods are stuck at \"Container Creating\" or restarting over and over\n\nEnsure that your pause image is compatible with your Windows OS version.\n   See [Pause container](/docs/concepts/windows/intro/#pause-container)\n   to see the latest / recommended pause image and/or get more information.",
+    "root_cause": "1. My Pods are stuck at \"Container Creating\" or restarting over and over",
+    "resolution_steps": "1. My Pods are stuck at \"Container Creating\" or restarting over and over\n\n   Ensure that your pause image is compatible with your Windows OS version.\n   See [Pause container](/docs/concepts/windows/intro/#pause-container)\n   to see the latest / recommended pause image and/or get more information.\n\n   \n   If using containerd as your container runtime the pause image is specified in the\n   `plugins.plugins.cri.sandbox_image` field of the of config.toml configuration file.\n   \n\n1. My pods show status as `ErrImgPull` or `ImagePullBackOff`\n\n   Ensure that your Pod is getting scheduled to a\n   [compatible](https://docs.microsoft.com/virtualization/windowscontainers/deploy-containers/version-compatibility)\n   Windows Node.\n\n   More information on how to specify a compatible node for your Pod can be found in\n   [this guide](/docs/concepts/windows/user-guide/#ensuring-os-specific-workloads-land-on-the-appropriate-container-host).",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/windows/",
+    "content_hash": "5c6376b0cde0699e3d0b90ea3f9adea94fe5b8bb55223df4a2e6799734a7aaa5"
+  },
+  {
+    "title": "Kubernetes Debug: Windows debugging tips — Network troubleshooting {troubleshooting-network}",
+    "category": "resource",
+    "severity": "SEV2",
+    "symptoms_log": "Kubernetes Pod/Cluster Debugging & Failure Diagnosis: Network troubleshooting {troubleshooting-network}\nContext: Windows debugging tips\n1. My Windows Pods do not have network connectivity\n\nIf you are using virtual machines, ensure that MAC spoofing is **enabled** on all\n   the VM network adapter(s).",
+    "root_cause": "1. My Windows Pods do not have network connectivity",
+    "resolution_steps": "1. My Windows Pods do not have network connectivity\n\n   If you are using virtual machines, ensure that MAC spoofing is **enabled** on all\n   the VM network adapter(s).\n\n1. My Windows Pods cannot ping external resources\n\n   Windows Pods do not have outbound rules programmed for the ICMP protocol. However,\n   TCP/UDP is supported. When trying to demonstrate connectivity to resources\n   outside of the cluster, substitute `ping <IP>` with corresponding\n   `curl <IP>` commands.\n\n   If you are still facing problems, most likely your network configuration in\n   [cni.conf](https://github.com/Microsoft/SDN/blob/master/Kubernetes/flannel/l2bridge/cni/config/cni.conf)\n   deserves some extra attention. You can always edit this static file. The\n   configuration update will apply to any new Kubernetes resources.\n\n   One of the Kubernetes networking requirements\n   (see [Kubernetes model](/docs/concepts/cluster-administration/networking/)) is\n   for cluster communication to occur without\n   NAT internally. To honor this requirement, there is an\n   [ExceptionList](https://github.com/Microsoft/SDN/blob/master/Kubernetes/flannel/l2bridge/cni/config/cni.conf#L20)\n   for all the communication where you do not want outbound NAT to occur. However,\n   this also means that you need to exclude the external IP you are trying to query\n   from the `ExceptionList`. Only then will the traffic originating from your Windows\n   pods be SNAT'ed correctly to receive a response from the outside world. In this\n ",
+    "source_ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/windows/",
+    "content_hash": "e2944aa70ae270770771cd6fd375ec317e12739ca175853574a47bf62611a33b"
+  }
+]
