@@ -52,9 +52,9 @@ cp .env.example .env
 Isi `.env` dengan minimal:
 
 ```ini
-SECRET_KEY=ganti-dengan-kunci-rahasia
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=<GEMINI_API_KEY>
+CUSTOM_API_KEY=<CUSTOM_API_KEY_second_llm_api>
+STACKEXCHANGE_API_KEY=<STACKEXCHANGE_API_KEY>
 ```
 
 > `GEMINI_API_KEY` opsional: jika tidak diisi, aplikasi tetap berjalan dengan graceful degradation (fallback ke hasil FTS5 lokal).
