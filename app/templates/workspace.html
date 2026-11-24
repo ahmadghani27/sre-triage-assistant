@@ -526,9 +526,18 @@ endblock %}
       toast("Tidak ada hasil triase untuk disimpan.");
       return;
     }
+    // Ambil token CSRF dari atribut hx-headers pada <body> (ditempel Flask secara global)
+    let token = "";
+    try {
+      const hxHeaders = JSON.parse(document.body.getAttribute("hx-headers") || "{}");
+      token = hxHeaders["X-CSRFToken"] || "";
+    } catch (_) {}
     const res = await fetch("{{ url_for('triage.save_report') }}", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        ...(token ? { "X-CSRFToken": token } : {}),
+      },
       body: new URLSearchParams({
         query,
         category,
