@@ -267,12 +267,22 @@ def init_db_getter(getter):
 
 def _ensure_schema(conn: sqlite3.Connection) -> None:
     """Bootstrap idempotens: aplikasi tetap jalan meski `scripts/seed.py` belum dijalankan
-    (`CREATE TABLE IF NOT EXISTS` aman untuk dipanggul berulang kali)."""
+    (`CREATE TABLE IF NOT EXISTS` aman untuk dipanggul berulang kali).
+    Juga menjalankan migration ringan untuk kolom baru pada tabel yang sudah ada."""
     try:
         with open(_SCHEMA_PATH, "r", encoding="utf-8") as f:
             conn.executescript(f.read())
         conn.commit()
     except FileNotFoundError:
+        pass
+
+    # Migration ringan: tambah kolom `title` pada triage_history jika belum ada
+    try:
+        cols = [row[1] for row in conn.execute("PRAGMA table_info(triage_history)").fetchall()]
+        if "title" not in cols:
+            conn.execute("ALTER TABLE triage_history ADD COLUMN title TEXT NOT NULL DEFAULT 'Tanpa Judul'")
+            conn.commit()
+    except sqlite3.OperationalError:
         pass
 
 
