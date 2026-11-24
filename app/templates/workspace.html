@@ -375,6 +375,28 @@ endblock %}
   sync();
   rawLog.addEventListener("input", sync);
 
+  // Pulihkan riwayat yang dimuat dari halaman History (via sessionStorage)
+  const pending = sessionStorage.getItem("sre_pending_history_load");
+  if (pending) {
+    try {
+      const data = JSON.parse(pending);
+      const stateSanitized = document.getElementById("state-sanitized-log");
+      const stateLocked = document.getElementById("state-locked-ids");
+      const stateCategory = document.getElementById("state-category");
+      const stateSeverity = document.getElementById("state-severity");
+      if (stateSanitized) stateSanitized.value = data.query || "";
+      if (stateLocked) stateLocked.value = (data.top_runbook_ids || []).join(",");
+      if (stateCategory) stateCategory.value = data.category || "";
+      if (stateSeverity) stateSeverity.value = data.severity || "";
+      const top3Panel = document.getElementById("top3-reference-panel");
+      if (top3Panel && data.top3_html) top3Panel.innerHTML = data.top3_html;
+      const refCount = document.getElementById("ref-count");
+      if (refCount) refCount.textContent = (data.top_runbook_ids || []).length + " ref";
+      sessionStorage.removeItem("sre_pending_history_load");
+      toast("Riwayat dimuat ke workspace.");
+    } catch (_) {}
+  }
+
   // ===== Auto-scroll chat stream =====
   const chatBox = document.getElementById("chat-messages");
   const scrollChat = () => {

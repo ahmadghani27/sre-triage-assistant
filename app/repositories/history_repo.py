@@ -57,3 +57,12 @@ class HistoryRepository:
             (history_id,),
         ).fetchone()
         return dict(row) if row else None
+
+    def delete(self, history_id: int) -> bool:
+        db = get_db()
+        cur = db.execute(
+            "DELETE FROM triage_history WHERE id = ?",
+            (history_id,),
+        )
+        db.commit()
+        return cur.rowcount > 0
