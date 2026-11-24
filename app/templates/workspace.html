@@ -357,14 +357,23 @@ endblock %}
 </form>
 {% endblock %} {% block scripts %}
 <script>
-  // ===== Char counter =====
+  // ===== Char counter ====
   const rawLog = document.getElementById("raw_log");
   const counter = document.getElementById("char-counter");
+  const LS_KEY = "sre_triage_raw_log";
+
   const sync = () => {
     counter.textContent = `${rawLog.value.length} / 5000`;
+    localStorage.setItem(LS_KEY, rawLog.value);
   };
-  rawLog.addEventListener("input", sync);
+
+  // Pulihkan input dari localStorage saat halaman dimuat/refresh
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) {
+    rawLog.value = saved;
+  }
   sync();
+  rawLog.addEventListener("input", sync);
 
   // ===== Auto-scroll chat stream =====
   const chatBox = document.getElementById("chat-messages");
@@ -569,6 +578,7 @@ endblock %}
     document.getElementById("state-category").value = "";
     document.getElementById("state-severity").value = "";
     toast("Workspace dikosongkan.");
+    localStorage.removeItem(LS_KEY);
   });
 </script>
 
