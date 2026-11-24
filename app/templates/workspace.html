@@ -525,7 +525,7 @@ endblock %}
     });  // end quick-btn forEach
   });  // end DOMContentLoaded
 
-  // ===== Save Report / Share / Clear =====
+  // ===== Save Report / Share / Clear ====
   document.getElementById("btn-save-report").addEventListener("click", async () => {
     const query = document.getElementById("state-sanitized-log").value.trim();
     const ids = document.getElementById("state-locked-ids").value.trim();
@@ -535,6 +535,10 @@ endblock %}
       toast("Tidak ada hasil triase untuk disimpan.");
       return;
     }
+    // Minta judul history dari user
+    const title = prompt("Masukkan judul untuk riwayat ini:", query.slice(0, 60) || "Laporan triase");
+    if (title === null) return; // user batal
+    const finalTitle = title.trim() || "Tanpa Judul";
     // Ambil token CSRF dari atribut hx-headers pada <body> (ditempel Flask secara global)
     let token = "";
     try {
@@ -548,6 +552,7 @@ endblock %}
         ...(token ? { "X-CSRFToken": token } : {}),
       },
       body: new URLSearchParams({
+        title: finalTitle,
         query,
         category,
         severity,
@@ -579,7 +584,48 @@ endblock %}
     document.getElementById("state-severity").value = "";
     toast("Workspace dikosongkan.");
     localStorage.removeItem(LS_KEY);
+    localStorage.removeItem("sre_triage_top3");
+    localStorage.removeItem("sre_triage_chat");
+    localStorage.removeItem("sre_triage_ref_count");
   });
+
+  // ===== Persist Top-3 + chat ke localStorage agar tidak hilang refresh ====
+  const TOP3_KEY = "sre_triage_top3";
+  const CHAT_KEY = "sre_triage_chat";
+  const REF_KEY = "sre_triage_ref_count";
+
+  function persistWorkspace() {
+    const top3 = document.getElementById("top3-reference-panel");
+    const chat = document.getElementById("chat-messages");
+    const ref = document.getElementById("ref-count");
+    if (top3) localStorage.setItem(TOP3_KEY, top3.innerHTML);
+    if (chat) localStorage.setItem(CHAT_KEY, chat.innerHTML);
+    if (ref) localStorage.setItem(REF_KEY, ref.textContent);
+  }
+
+  document.body.addEventListener("htmx:afterSwap", (e) => {
+    const target = e.detail.target;
+    if (target && (target.id === "top3-reference-panel" || target.id === "chat-messages")) {
+      persistWorkspace();
+    }
+  });
+
+  // Pulihkan top-3 + chat saat halaman dimuat/refresh
+  const savedTop3 = localStorage.getItem(TOP3_KEY);
+  const savedChat = localStorage.getItem(CHAT_KEY);
+  const savedRef = localStorage.getItem(REF_KEY);
+  if (savedTop3) {
+    const el = document.getElementById("top3-reference-panel");
+    if (el) el.innerHTML = savedTop3;
+  }
+  if (savedRef) {
+    const el = document.getElementById("ref-count");
+    if (el) el.textContent = savedRef;
+  }
+  if (savedChat) {
+    const el = document.getElementById("chat-messages");
+    if (el) el.innerHTML = savedChat;
+  }
 </script>
 
 <style type="text/tailwindcss">

@@ -29,6 +29,7 @@
       <thead>
         <tr class="border-b border-gcp-border bg-gcp-surface/50">
           <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">#</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">Judul</th>
           <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">Query</th>
           <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Kategori</th>
           <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Severity</th>
@@ -39,7 +40,8 @@
         {% for row in rows %}
         <tr class="hover:bg-gcp-elevated/30 transition">
           <td class="px-4 py-3 text-xs font-mono text-gcp-ink-secondary">{{ row.id }}</td>
-          <td class="px-4 py-3 text-xs text-gcp-ink truncate max-w-xs" title="{{ row.query }}">{{ row.query }}</td>
+          <td class="px-4 py-3 text-xs text-gcp-ink font-medium truncate max-w-xs" title="{{ row.title }}">{{ row.title }}</td>
+          <td class="px-4 py-3 text-xs text-gcp-ink-secondary truncate max-w-xs" title="{{ row.query }}">{{ row.query }}</td>
           <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.category }}</td>
           <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.severity }}</td>
           <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink-muted">{{ row.created_at }}</td>

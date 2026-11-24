@@ -10,6 +10,7 @@ class HistoryRepository:
 
     def save(
         self,
+        title: str,
         query: str,
         category: str,
         severity: str,
@@ -18,10 +19,11 @@ class HistoryRepository:
         db = get_db()
         cur = db.execute(
             """
-            INSERT INTO triage_history (query, category, severity, top_runbook_ids)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO triage_history (title, query, category, severity, top_runbook_ids)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
+                title or "Tanpa Judul",
                 query,
                 category,
                 severity,
@@ -35,7 +37,7 @@ class HistoryRepository:
         db = get_db()
         cur = db.execute(
             """
-            SELECT id, query, category, severity, top_runbook_ids, created_at
+            SELECT id, title, query, category, severity, top_runbook_ids, created_at
             FROM triage_history
             ORDER BY created_at DESC
             LIMIT ?
@@ -48,7 +50,7 @@ class HistoryRepository:
         db = get_db()
         row = db.execute(
             """
-            SELECT id, query, category, severity, top_runbook_ids, created_at
+            SELECT id, title, query, category, severity, top_runbook_ids, created_at
             FROM triage_history
             WHERE id = ?
             """,

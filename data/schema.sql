@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS triage_logs (
 
 CREATE TABLE IF NOT EXISTS triage_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL DEFAULT 'Tanpa Judul',
     query TEXT NOT NULL,
     category TEXT NOT NULL,
     severity TEXT NOT NULL,

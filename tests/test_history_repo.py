@@ -11,9 +11,10 @@ def _in_app_context(app, fn):
 def test_history_repo_save_and_list(app):
     def run():
         repo = HistoryRepository()
-        hid = repo.save("nginx timeout", "network", "SEV3", [1, 2, 3])
+        hid = repo.save("Laporan Nginx", "nginx timeout", "network", "SEV3", [1, 2, 3])
         rows = repo.list()
         assert len(rows) == 1
+        assert rows[0]["title"] == "Laporan Nginx"
         assert rows[0]["query"] == "nginx timeout"
         assert rows[0]["id"] == hid
         return hid
@@ -24,10 +25,11 @@ def test_history_repo_save_and_list(app):
 def test_history_repo_get_by_id(app):
     def run():
         repo = HistoryRepository()
-        hid = repo.save("postgres pool exhaustion", "database", "SEV1", [4])
+        hid = repo.save("Laporan Postgres", "postgres pool exhaustion", "database", "SEV1", [4])
         row = repo.get_by_id(hid)
         assert row is not None
         assert row["id"] == hid
+        assert row["title"] == "Laporan Postgres"
         assert row["category"] == "database"
         assert row["severity"] == "SEV1"
         assert row["top_runbook_ids"] == "4"

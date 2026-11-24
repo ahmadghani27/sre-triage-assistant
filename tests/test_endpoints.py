@@ -121,6 +121,7 @@ class TestTriageEndpoint:
 class TestSaveReportEndpoint:
     def test_save_report_endpoint(self, client):
         resp = client.post("/triage/save-report", data={
+            "title": "Laporan Nginx 502",
             "query": "nginx upstream timed out",
             "category": "network",
             "severity": "SEV3",
@@ -133,6 +134,7 @@ class TestSaveReportEndpoint:
 
     def test_save_report_endpoint_validation_fail(self, client):
         resp = client.post("/triage/save-report", data={
+            "title": "",
             "query": "",
             "category": "",
             "severity": "",
@@ -147,6 +149,7 @@ class TestSaveReportEndpoint:
 class TestHistoryEndpoint:
     def test_history_page_renders(self, client):
         client.post("/triage/save-report", data={
+            "title": "Laporan Nginx 502",
             "query": "nginx upstream timed out",
             "category": "network",
             "severity": "SEV3",
@@ -156,6 +159,7 @@ class TestHistoryEndpoint:
         assert resp.status_code == 200
         html = resp.data.decode()
         assert "History Triase" in html
+        assert "Laporan Nginx 502" in html
         assert "nginx upstream timed out" in html
 
 

@@ -133,6 +133,7 @@ def chat():
 @triage_bp.post("/triage/save-report")
 def save_report():
     """Simpan hasil triase ke tabel triage_history agar tidak hilang saat refresh."""
+    title = (request.form.get("title") or "").strip()
     query = (request.form.get("query") or "").strip()
     category = (request.form.get("category") or "").strip()
     severity = (request.form.get("severity") or "").strip()
@@ -140,7 +141,7 @@ def save_report():
     if not query or not category or not severity:
         return jsonify({"ok": False, "error": "Field wajib diisi"}), 400
     ids = [int(i) for i in ids_raw.split(",") if i.strip().isdigit()]
-    hid = _get_history_repo().save(query, category, severity, ids)
+    hid = _get_history_repo().save(title, query, category, severity, ids)
     return jsonify({"ok": True, "id": hid})
 
 
