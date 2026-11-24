@@ -118,6 +118,51 @@ class TestTriageEndpoint:
         assert r.status_code == 400
 
 
+class TestSaveReportEndpoint:
+    def test_save_report_endpoint(self, client):
+        resp = client.post("/triage/save-report", data={
+            "title": "Laporan Nginx 502",
+            "query": "nginx upstream timed out",
+            "category": "network",
+            "severity": "SEV3",
+            "top_runbook_ids": "1,2",
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["ok"] is True
+        assert isinstance(data["id"], int)
+
+    def test_save_report_endpoint_validation_fail(self, client):
+        resp = client.post("/triage/save-report", data={
+            "title": "",
+            "query": "",
+            "category": "",
+            "severity": "",
+            "top_runbook_ids": "",
+        })
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert data["ok"] is False
+        assert "error" in data
+
+
+class TestHistoryEndpoint:
+    def test_history_page_renders(self, client):
+        client.post("/triage/save-report", data={
+            "title": "Laporan Nginx 502",
+            "query": "nginx upstream timed out",
+            "category": "network",
+            "severity": "SEV3",
+            "top_runbook_ids": "1,2",
+        })
+        resp = client.get("/triage/history")
+        assert resp.status_code == 200
+        html = resp.data.decode()
+        assert "History Triase" in html
+        assert "Laporan Nginx 502" in html
+        assert "nginx upstream timed out" in html
+
+
 class TestRefineEndpoint:
     def test_refine_returns_divider_and_oob_updates(self, client):
         r = client.post(

@@ -1,31 +1,53 @@
 {# Hasil triase: kategori, badge SEV, reasoning, & notifikasi redaksi.
-   Dirandomersebagai target utama POST /triage (hx-target="#triage-output-area"). #}
+   Dirender sebagai target utama POST /triage (hx-target="#triage-output-area"). #}
 {% set sev_class = {
      'SEV1': 'bg-gcp-sev1-bg text-gcp-sev1-text ring-gcp-sev1-border',
      'SEV2': 'bg-gcp-sev2-bg text-gcp-sev2-text ring-gcp-sev2-border',
      'SEV3': 'bg-gcp-sev3-bg text-gcp-sev3-text ring-gcp-sev3-border',
      'SEV4': 'bg-gcp-sev4-bg text-gcp-sev4-text ring-gcp-sev4-border',
-   }.get(result.severity, 'bg-gcp-surface text-gcp-ink-secondary ring-gcp-border') %}
+     'SEV-PENDING': 'bg-gcp-pending-bg text-gcp-pending-text ring-gcp-pending-border',
+   }.get(result.severity|default('SEV-PENDING', true), 'bg-gcp-pending-bg text-gcp-pending-text ring-gcp-pending-border') %}
 
-{% if oob %}<div id="triage-output-area" class="space-y-4" hx-swap-oob="true">{% endif %}
-<div class="rounded-lg border border-gcp-border bg-gcp-surface overflow-hidden">
-  <!-- Header: kategori + severity -->
-  <div class="flex flex-wrap items-center gap-2 border-b border-gcp-border bg-gcp-surface/50 px-4 py-3">
-    <span class="text-[10px] uppercase tracking-wider text-gcp-ink-muted">Triage Result</span>
+{% if oob %}<div id="triage-output-area" class="overflow-y-auto max-h-[210px] transition-all duration-200" hx-swap-oob="true">{% endif %}
+<div class="p-3.5 space-y-2.5">
 
-    <span class="inline-flex items-center gap-1 rounded-sm bg-gcp-surface border border-gcp-border-elev px-2.5 py-0.5 text-[11px] font-medium text-gcp-ink-secondary">
-      <span class="h-1.5 w-1.5 rounded-full bg-gcp-blue-light"></span>
-      {{ result.category|default('unclassified', true) }}
-    </span>
-
-    <span class="inline-flex items-center rounded-sm border border-gcp-border-elev px-2.5 py-0.5 text-[11px] font-bold {{ sev_class }}">
+  <!-- Baris 1: Status Chips (Severity, Kategori, Redaction, Fallback) -->
+  <div class="flex flex-wrap items-center gap-1.5">
+    <!-- Severity Badge -->
+    <span class="inline-flex items-center rounded-sm ring-1 px-2 py-0.5 text-[10px] font-bold tracking-wide {{ sev_class }}">
       {{ result.severity|default('SEV-PENDING', true) }}
     </span>
 
+    <!-- Category Badge -->
+    <span class="inline-flex items-center gap-1.5 rounded-sm bg-gcp-elevated border border-gcp-border-elev px-2 py-0.5 text-[10px] font-medium text-gcp-ink">
+      <span class="h-1.5 w-1.5 rounded-full bg-gcp-blue-light" style="width: 6px; height: 6px;" aria-hidden="true"></span>
+      {{ result.category|default('unclassified', true) }}
+    </span>
+
+    <!-- Redaction Status Chip -->
+    {% if result.redaction_count > 0 %}
+    <span class="inline-flex items-center gap-1 rounded-sm border border-gcp-success/30 bg-gcp-success/10 px-2 py-0.5 text-[10px] font-medium text-gcp-success"
+          title="{% if result.redaction_labels %}Pola: {{ result.redaction_labels|join(', ') }}{% endif %}">
+      <svg width="12" height="12" style="width: 12px; height: 12px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 018 0v3" stroke-linecap="round"/>
+      </svg>
+      {{ result.redaction_count }} rahasia disensor
+    </span>
+    {% else %}
+    <span class="inline-flex items-center gap-1 rounded-sm border border-gcp-border bg-gcp-elevated/40 px-2 py-0.5 text-[10px] text-gcp-ink-muted"
+          title="Tidak ada pola sensitif terdeteksi pada input ini.">
+      <svg width="12" height="12" style="width: 12px; height: 12px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      0 sensitif
+    </span>
+    {% endif %}
+
+    <!-- Fallback Warning Chip -->
     {% if result.is_fallback %}
-    <span class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-warning/30 bg-gcp-warning/10 px-2 py-0.5 text-[10px] font-medium text-gcp-warning"
-          title="Layanan AI tidak merespons; hasil memakai peringkat lexical FTS5 murni.">
-      <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <span class="inline-flex items-center gap-1 rounded-sm border border-gcp-warning/30 bg-gcp-warning/10 px-2 py-0.5 text-[10px] font-medium text-gcp-warning"
+          title="AI offline; hasil memakai peringkat lexical FTS5 murni.">
+      <svg width="12" height="12" style="width: 12px; height: 12px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       AI offline &middot; lexical fallback
@@ -33,49 +55,33 @@
     {% endif %}
   </div>
 
-  <div class="p-4 space-y-4">
-    <!-- Redaction notice (F1 — kriteria keberhasilan MVP) -->
-    <div class="flex items-start gap-2.5 rounded-sm border {{ 'border-gcp-success/30 bg-gcp-success/10' if result.redaction_count > 0 else 'border-gcp-border bg-gcp-elevated/30' }} px-3 py-2.5">
-      {% if result.redaction_count > 0 %}
-      <svg class="h-4 w-4 mt-0.5 shrink-0 text-gcp-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 018 0v3" stroke-linecap="round"/>
-      </svg>
-      {% else %}
-      <svg class="h-4 w-4 mt-0.5 shrink-0 text-gcp-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 018 0v3" stroke-linecap="round"/>
-      </svg>
-      {% endif %}
-      <p class="text-xs leading-relaxed">
-        {% if result.redaction_count > 0 %}
-        <span class="text-gcp-success font-semibold">{{ result.redaction_count }} rahasia tersensor otomatis</span>
-        <span class="text-gcp-ink-muted">sebelum diproses/dikirim ke LLM.
-        {%- if result.redaction_labels %} Pola terdeteksi:
-        <span class="font-mono text-[10px] text-gcp-ink-muted">{{ result.redaction_labels|join(', ') }}</span>.
-        {%- endif %}</span>
-        {% else %}
-        <span class="text-gcp-ink-muted">Tidak ada pola sensitif terdeteksi pada input ini.</span>
-        {% endif %}
-      </p>
-    </div>
-
-    <!-- Reasoning -->
-    {% if result.reasoning %}
-    <div>
-      <h3 class="text-[10px] uppercase tracking-wider text-gcp-ink-muted mb-1.5">Reasoning</h3>
-      <p class="text-sm leading-relaxed text-gcp-ink">{{ result.reasoning }}</p>
-    </div>
-    {% endif %}
-
-    <!-- Sanitized log preview -->
-    <details class="rounded-sm border border-gcp-border bg-gcp-elevated/30">
-      <summary class="flex items-center justify-between px-3 py-2 text-[11px] text-gcp-ink-muted hover:text-gcp-ink">
-        <span class="font-medium">Log tersensor (dikirim ke search & LLM)</span>
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </summary>
-      <pre class="log-body max-h-52 overflow-y-auto thin-scroll border-t border-gcp-border px-3 py-2.5 text-[11px] font-mono text-gcp-ink-muted">{{ result.sanitized_log }}</pre>
-    </details>
+  <!-- Baris 2: Reasoning -->
+  {% if result.reasoning %}
+  <div class="rounded-sm border border-gcp-border/60 bg-gcp-elevated/25 px-3 py-2">
+    <p class="text-[10px] font-medium uppercase tracking-wider text-gcp-ink-muted mb-0.5">Reasoning</p>
+    <p class="text-xs leading-relaxed text-gcp-ink">{{ result.reasoning }}</p>
   </div>
+  {% elif result.is_fallback %}
+  <p class="text-[11px] text-gcp-ink-muted leading-relaxed">
+    Klasifikasi AI dilewati karena layanan LLM sedang offline. Pencocokan runbook tetap berjalan menggunakan pencarian lexical FTS5.
+  </p>
+  {% endif %}
+
+  <!-- Baris 3: Accordion Log Tersensor -->
+  <details class="rounded-sm border border-gcp-border bg-gcp-canvas/70 group">
+    <summary class="flex items-center justify-between px-2.5 py-1.5 text-[11px] text-gcp-ink-secondary hover:text-gcp-ink select-none">
+      <span class="flex items-center gap-1.5 font-medium">
+        <span>Log tersensor</span>
+        {% if result.redaction_labels %}
+        <span class="font-mono text-[10px] text-gcp-success">({{ result.redaction_labels|join(', ') }})</span>
+        {% endif %}
+      </span>
+      <svg width="14" height="14" style="width: 14px; height: 14px;" class="shrink-0 text-gcp-ink-muted transition-transform duration-150 group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <pre class="max-h-32 overflow-auto border-t border-gcp-border px-2.5 py-2 text-[11px] font-mono leading-relaxed text-gcp-ink-secondary whitespace-pre-wrap break-all">{{ result.sanitized_log }}</pre>
+  </details>
+
 </div>
 {% if oob %}</div>{% endif %}

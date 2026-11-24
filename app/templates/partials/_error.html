@@ -1,11 +1,11 @@
 {# Pesan error inline untuk kegagalan validasi ringan (bukan HTTP 500).
    Dikirim oleh blueprint dengan header HX-Retarget agar sesuai konteks. #}
-<div class="flex items-start gap-2.5 rounded-lg border border-signal-sev1/30 bg-signal-sev1/10 px-3.5 py-3">
-  <svg class="h-4 w-4 mt-0.5 shrink-0 text-signal-sev1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<div class="flex items-start gap-2.5 rounded-lg border border-gcp-sev1-border/40 bg-gcp-sev1-bg px-3.5 py-3">
+  <svg class="h-4 w-4 mt-0.5 shrink-0 text-gcp-sev1-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
     <circle cx="12" cy="12" r="9" /><path d="M12 8v5m0 3h.01" stroke-linecap="round"/>
   </svg>
   <div>
-    <p class="text-xs font-semibold text-signal-sev1">Input tidak valid</p>
-    <p class="text-[11px] text-slate-400 mt-0.5">{{ message }}</p>
+    <p class="text-xs font-semibold text-gcp-sev1-text">Input tidak valid</p>
+    <p class="text-[11px] text-gcp-ink-secondary mt-0.5">{{ message }}</p>
   </div>
 </div>

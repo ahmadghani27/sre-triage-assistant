@@ -1,7 +1,7 @@
 {# Panel kanan: runbook terkunci Top-3. Mendukung OOB swap (hx-swap-oob="true"). #}
 {% set rank_colors = ['text-gcp-error', 'text-gcp-warning', 'text-gcp-success'] %}
 
-<div id="top3-reference-panel" class="space-y-3" {% if oob %}hx-swap-oob="true"{% endif %}>
+<div id="top3-reference-panel" class="flex-1 overflow-y-auto p-3 space-y-3" {% if oob %}hx-swap-oob="true"{% endif %}>
 {% for rb in runbooks %}
 {% set sev_class = {
      'SEV1': 'bg-gcp-sev1-bg text-gcp-sev1-text ring-gcp-sev1-border',
@@ -32,7 +32,7 @@
       <!-- Resolution steps collapsible -->
       <details class="mt-2">
         <summary class="inline-flex items-center gap-1 text-[11px] font-medium text-gcp-blue-light hover:text-gcp-blue-light">
-          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           View Full Resolution Steps

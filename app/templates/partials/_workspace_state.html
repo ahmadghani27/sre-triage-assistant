@@ -4,4 +4,6 @@
 <form id="workspace-state" class="hidden" aria-hidden="true" {% if oob %}hx-swap-oob="true"{% endif %}>
   <input type="hidden" name="sanitized_log" id="state-sanitized-log" value="{{ sanitized_log }}" />
   <input type="hidden" name="locked_runbook_ids" id="state-locked-ids" value="{{ locked_ids }}" />
+  <input type="hidden" name="category" id="state-category" value="{{ category }}" />
+  <input type="hidden" name="severity" id="state-severity" value="{{ severity }}" />
 </form>

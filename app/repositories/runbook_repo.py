@@ -118,6 +118,18 @@ class RunbookRepository:
         )
         return _rows_to_dicts(cur.fetchall())
 
+    def list_all(self) -> list[dict[str, Any]]:
+        """Semua runbook yang tersedia di DB, urutan terbaru dulu."""
+        db = get_db()
+        cur = db.execute(
+            """
+            SELECT id, title, category, severity, source_ref, created_at
+            FROM runbooks
+            ORDER BY created_at DESC
+            """
+        )
+        return [dict(row) for row in cur.fetchall()]
+
     def count_by_category(self) -> list[dict[str, Any]]:
         """Agregasi jumlah runbook per kategori (untuk dasbor yang memadukan seed + live)."""
         db = get_db()

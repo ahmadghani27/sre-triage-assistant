@@ -1,28 +1,51 @@
 {# Satu bubble chat; user (kanan) atau assistant (kiri). Dikirim sebagai
-   *body partial* dan di-append ke #chat-messages dipakai POST /chat. #}
+   *body partial* dan di-append ke #chat-messages oleh POST /chat. #}
 {% if role == 'user' %}
 <div class="flex justify-end">
-  <div class="max-w-[85%] rounded-sm border border-gcp-blue-light/25 bg-gcp-blue-light/5 px-3.5 py-2">
-    <p class="text-[12px] leading-relaxed text-gcp-ink whitespace-pre-wrap">{{ text }}</p>
-    <p class="mt-1 text-[9px] uppercase tracking-wider text-gcp-blue-light text-right">You</p>
+  <div class="max-w-[82%] rounded-lg rounded-tr-xs border border-gcp-blue-light/30 bg-gcp-blue-light/10 px-3.5 py-2.5 shadow-sm">
+    <p class="text-[12.5px] leading-relaxed text-gcp-ink whitespace-pre-wrap">{{ text }}</p>
+    <p class="mt-1 text-[9px] font-medium uppercase tracking-wider text-gcp-blue-light/80 text-right">You</p>
   </div>
 </div>
 {% else %}
 <div class="flex justify-start">
-  <div class="max-w-[92%] rounded-sm border border-gcp-border bg-gcp-elevated px-3.5 py-2.5">
-    <div class="flex items-center gap-1.5 mb-1.5">
-      <span class="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-gcp-success/15 text-gcp-success">
-        <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="text-[9px] uppercase tracking-wider text-gcp-ink-muted">Strict-RAG Assistant</span>
+  <div class="max-w-[94%] rounded-lg rounded-tl-xs border border-gcp-border bg-gcp-elevated/90 px-4 py-3 shadow-sm">
+    <!-- Header Assistant -->
+    <div class="flex items-center justify-between gap-2 pb-2 mb-2.5 border-b border-gcp-border/70">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-gcp-success/15 border border-gcp-success/30 text-gcp-success">
+          <svg width="12" height="12" style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary">Strict-RAG Assistant</span>
+      </div>
+      <span class="text-[9px] font-mono text-gcp-ink-muted">Grounded</span>
     </div>
-    <div class="text-[12px] leading-relaxed text-gcp-ink space-y-1.5">
-      {%- for block in text.split('\n') %}
-      {%- if not loop.first %}<br/>{% endif %}{{ block }}
-      {%- endfor %}
-    </div>
+
+    <!-- Konten Jawaban (Dirender dari Markdown ke HTML rapi) -->
+    <div class="chat-markdown text-[12.5px] leading-relaxed text-gcp-ink-secondary" data-raw-md>{{ text }}</div>
   </div>
 </div>
+
+<script>
+  (function () {
+    // 1. Hapus placeholder kosong di #chat-messages saat pesan pertama masuk
+    const chatBox = document.getElementById('chat-messages');
+    if (chatBox) {
+      const emptyState = chatBox.querySelector('.h-full.text-center');
+      if (emptyState) emptyState.remove();
+    }
+
+    // 2. Render semua bubble asisten yang belum diproses
+    document.querySelectorAll('.chat-markdown[data-raw-md]').forEach((el) => {
+      const raw = el.textContent;
+      el.removeAttribute('data-raw-md');
+      if (window.marked && window.DOMPurify) {
+        marked.setOptions({ breaks: true, gfm: true });
+        el.innerHTML = DOMPurify.sanitize(marked.parse(raw));
+      }
+    });
+  })();
+</script>
 {% endif %}
