@@ -1,107 +1,260 @@
-{% extends "base.html" %}
-{% block title %}Incident Triage &middot; SRE Console{% endblock %}
-{% block page_title %}Incident Triage{% endblock %}
-{% block page_subtitle %}Paste error log atau stack trace untuk analisis insiden{% endblock %}
+{% extends "base.html" %} {% block title %}Incident Triage &middot; SRE
+Console{% endblock %} {% block page_title %}Incident Triage{% endblock %} {%
+block page_subtitle %}Paste error log atau stack trace untuk analisis insiden{%
+endblock %} 
+{% block toolbar %}
+<div class="flex items-center gap-2">
+  <!-- Save Report -->
+  <button type="button" id="btn-save-report"
+          class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-elevated/70 px-2.5 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue-light/40 hover:text-gcp-blue-light transition">
+    <svg width="14" height="14" style="width: 14px; height: 14px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Save Report</span>
+  </button>
 
+  <!-- Share -->
+  <button type="button" id="btn-share-triage"
+          class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-elevated/70 px-2.5 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue-light/40 hover:text-gcp-blue-light transition">
+    <svg width="14" height="14" style="width: 14px; height: 14px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Share</span>
+  </button>
+
+  <span class="h-4 w-px bg-gcp-border mx-0.5" aria-hidden="true"></span>
+
+  <!-- Clear -->
+  <button type="button" id="btn-clear-workspace"
+          class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-surface px-2.5 py-1.5 text-xs font-medium text-gcp-ink-secondary hover:border-gcp-error/40 hover:text-gcp-error hover:bg-gcp-error/10 transition">
+    <svg width="14" height="14" style="width: 14px; height: 14px;" class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Clear</span>
+  </button>
+</div>
+{% endblock %}
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0">
-
   <!-- ================================================================
        LEFT COLUMN: Triage & Scoped Chat
        ================================================================ -->
-  <section class="lg:col-span-7 space-y-5">
-
-    <!-- ---------- Panel Input Log (GCP Logs Explorer style) ---------- -->
-    <div class="flex-1 min-h-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden">
-      <div class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0">
+  <section class="lg:col-span-7 flex flex-col gap-4 h-full min-h-0">
+    <!-- Panel Input Log -->
+    <div
+      class="flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden shrink-0"
+    >
+      <div
+        class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0"
+      >
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-gcp-blue-light"></div>
-          <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">RAW ERROR LOG / STACK TRACE</h3>
+          <div
+            class="w-2 h-2 rounded-full bg-gcp-blue-light"
+            aria-hidden="true"
+          ></div>
+          <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">
+            RAW ERROR LOG / STACK TRACE
+          </h3>
         </div>
-        <span class="text-[10px] text-gcp-ink-muted font-mono" id="char-counter">0 / 5000</span>
+        <span class="text-[10px] text-gcp-ink-muted font-mono" id="char-counter"
+          >0 / 5000</span
+        >
       </div>
 
-      <form id="triage-form" class="flex-1 p-4 min-h-0 flex flex-col shrink-0"
-            hx-post="{{ url_for('triage.triage') }}"
-            hx-target="#triage-output-area"
-            hx-swap="innerHTML"
-            hx-disabled-this>
-        <textarea id="raw_log" name="raw_log" rows="7" maxlength="5000" required
-                  placeholder="Paste error log atau stack trace di sini&#10;Contoh: 2026-11-20T03:14:02Z error nginx upstream timed out&#10;Authorization: Bearer eyJhbG...prod"
-                  class="flex-1 min-h-[220px] bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none p-3 text-sm font-mono text-gcp-ink placeholder:text-gcp-ink-muted resize-y"></textarea>
+      <form
+        id="triage-form"
+        class="p-4 flex flex-col"
+        hx-post="{{ url_for('triage.triage') }}"
+        hx-target="#triage-output-area"
+        hx-swap="innerHTML"
+        hx-disabled-elt="find button[type='submit']"
+      >
+        <textarea
+          id="raw_log"
+          name="raw_log"
+          rows="6"
+          maxlength="5000"
+          required
+          aria-label="Paste error log atau stack trace"
+          autocomplete="off"
+          placeholder="Paste error log atau stack trace di sini&#10;Contoh: 2026-11-20T03:14:02Z error nginx upstream timed out&#10;Authorization: Bearer ***"
+          class="w-full min-h-[150px] bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none p-3 text-sm font-mono text-gcp-ink placeholder:text-gcp-ink-muted resize-y"
+        ></textarea>
 
-        <div class="mt-3 flex items-center justify-between gap-3 shrink-0">
-          <p class="text-[10px] text-gcp-ink-muted">Kredensial sensitif akan disensor otomatis sebelum diproses dan dikirim ke LLM.</p>
-
+        <div class="mt-3 flex items-center justify-between gap-3">
+          <p class="text-[10px] text-gcp-ink-muted">
+            Kredensial sensitif akan disensor otomatis sebelum diproses dan
+            dikirim ke LLM.
+          </p>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button"
-                    class="px-3 py-1.5 border border-gcp-border rounded-sm text-sm text-gcp-ink-secondary hover:bg-gcp-elevated transition"
-                    onclick="document.getElementById('raw_log').value=''; document.getElementById('char-counter').textContent='0 / 5000';">
+            <button
+              type="button"
+              class="px-3 py-1.5 border border-gcp-border rounded-sm text-sm text-gcp-ink-secondary hover:bg-gcp-elevated transition"
+              onclick="
+                document.getElementById('raw_log').value = '';
+                document.getElementById('char-counter').textContent =
+                  '0 / 5000';
+              "
+            >
               Clear
             </button>
-            <button type="submit"
-                    class="px-4 py-2 bg-gcp-blue text-white text-sm font-medium rounded-sm hover:bg-gcp-blue-light active:scale-[.97] transition disabled:opacity-50 disabled:pointer-events-none shrink-0">
-              Run Triage Analysis
+            <button
+              type="submit"
+              id="triage-submit"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gcp-blue text-white text-sm font-medium rounded-sm hover:bg-gcp-blue-light active:scale-[.97] transition disabled:opacity-70 disabled:cursor-not-allowed shrink-0"
+              aria-label="Run Triage Analysis"
+            >
+              <span
+                class="spinner hidden !w-3.5 !h-3.5 !border-2"
+                id="triage-spinner"
+                aria-hidden="true"
+              ></span>
+              <span class="btn-label">Run Triage Analysis</span>
             </button>
           </div>
         </div>
 
-        <!-- HTMX loading indicator (per-request) -->
-        <div class="htmx-indicator mt-3 flex items-center gap-2 text-[11px] text-gcp-blue-light shrink-0">
-          <div class="h-2 w-2 rounded-full border-2 border-gcp-blue-light border-t-transparent animate-spin"></div>
-          Menjalankan redaction &amp;rarr; FTS5 BM25 &amp;rarr; AI re-ranking...
+        <div
+          class="htmx-indicator mt-3 flex items-center gap-2 text-[11px] text-gcp-blue-light"
+        >
+          <div class="spinner" aria-hidden="true"></div>
+          Menjalankan redaction &rarr; FTS5 BM25 &rarr; AI re-ranking…
         </div>
       </form>
     </div>
 
-    <!-- ---------- Area Hasil Triase (#triage-output-area) ---------- -->
-    <div id="triage-output-area" class="flex-1 min-h-0 flex flex-col">
-      <!-- Empty state awal -->
-      <div class="flex-1 flex flex-col items-center justify-center p-8 border border-dashed border-gcp-border bg-gcp-surface/30 rounded-lg text-center">
-        <div class="w-10 h-10 rounded-full bg-gcp-elevated flex items-center justify-center mb-3 text-gcp-ink-muted">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <p class="text-sm text-gcp-ink">Belum ada diagnosis.</p>
-        <p class="text-[10px] text-gcp-ink-muted mt-1">Tempel error log di panel kiri lalu tekan <span class="text-gcp-blue-light font-medium">Run Triage Analysis</span>.</p>
+    <!-- Top-3 Referensi -->
+    <div
+      id="top3-reference-wrapper"
+      class="flex-1 min-h-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden"
+    >
+      <div
+        class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0"
+      >
+        <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">
+          Locked Top-3 Runbooks
+        </h3>
+        <span class="text-[10px] font-mono text-gcp-ink-muted" id="ref-count"
+          >0 ref</span
+        >
+      </div>
+      <div
+        id="top3-reference-panel"
+        class="flex-1 overflow-y-auto p-3 space-y-3"
+      >
+        <!-- empty state tetap sama -->
       </div>
     </div>
   </section>
 
   <!-- ============================================================
-       RIGHT COLUMN (45%): Tabbed Reference & Scoped Assistant
+       RIGHT COLUMN: Triage Result (atas, kecil, expandable) + Chatbot (tinggi)
        ============================================================ -->
   <aside class="lg:col-span-5 flex flex-col gap-4 h-full min-h-0">
+    <!-- ---------- Triage Result (kanan atas, kecil, expandable) ---------- -->
+    <!-- ---------- Triage Result (kanan atas, compact & expandable) ---------- -->
+    <!-- ---------- Triage Result (3-level: Shrink -> Compact -> Full Expand) ---------- -->
+    <div
+      id="triage-result-wrapper"
+      class="shrink-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden"
+    >
+      <div
+        class="px-4 py-2.5 bg-gcp-surface/50 flex items-center justify-between gap-2 shrink-0"
+        id="triage-header-bar"
+      >
+        <div class="flex items-center gap-2 min-w-0">
+          <h3
+            class="text-xs font-medium text-gcp-ink tracking-wide uppercase shrink-0"
+          >
+            Triage Result
+          </h3>
+          <!-- Mini badge saat mode Shrink agar status tetap terbaca sekilas -->
+          <span
+            id="triage-header-summary"
+            class="hidden text-[10px] font-mono text-gcp-ink-muted truncate"
+          ></span>
+        </div>
 
-    <!-- ---------- Locked Top-3 Runbooks (#top3-reference-panel) ---------- -->
-    <div class="flex-1 min-h-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden">
-      <div class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0">
-        <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">Locked Top-3 Runbooks</h3>
-        <span class="text-[10px] font-mono text-gcp-ink-muted" id="ref-count">0 ref</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            id="triage-shrink-btn"
+            class="px-2 py-0.5 rounded-sm border border-gcp-border bg-gcp-elevated/60 text-[10px] font-medium text-gcp-ink-secondary hover:text-gcp-ink hover:border-gcp-border-elev transition"
+            title="Perkecil panel"
+          >
+            Shrink
+          </button>
+          <button
+            type="button"
+            id="triage-expand-btn"
+            class="px-2 py-0.5 rounded-sm border border-gcp-blue-light/30 bg-gcp-blue-light/10 text-[10px] font-medium text-gcp-blue-light hover:bg-gcp-blue-light/20 transition"
+            title="Perluas tampilan"
+          >
+            Expand
+          </button>
+        </div>
       </div>
-      <div id="top3-reference-panel" class="flex-1 overflow-y-auto p-3 space-y-3 shrink-0">
-        <div class="flex flex-col items-center justify-center h-full text-center p-4">
-          <div class="w-8 h-8 rounded-full bg-gcp-elevated flex items-center justify-center mb-2 text-gcp-ink-muted">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM14 9a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <div
+        id="triage-output-area"
+        class="border-t border-gcp-border overflow-y-auto max-h-[210px] transition-all duration-200"
+      >
+        <!-- Empty state ringkas -->
+        <div class="flex items-center gap-3 p-4 text-left">
+          <div
+            class="w-8 h-8 rounded-full bg-gcp-elevated flex items-center justify-center shrink-0 text-gcp-ink-muted"
+            aria-hidden="true"
+          >
+            <svg
+              width="16"
+              height="16"
+              style="width: 16px; height: 16px"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
-          <p class="text-sm text-gcp-ink-muted">Panel referensi kosong.</p>
-          <p class="text-[10px] text-gcp-ink-muted mt-1">Top-3 runbook akan muncul di sini setelah triase.</p>
+          <div>
+            <p class="text-xs font-medium text-gcp-ink">Belum ada diagnosis</p>
+            <p class="text-[11px] text-gcp-ink-muted mt-0.5">
+              Tempel error log di panel kiri lalu klik
+              <span class="text-gcp-blue-light font-medium"
+                >Run Triage Analysis</span
+              >.
+            </p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ---------- Strict-RAG Mitigation Assistant ---------- -->
-    <div class="flex-1 min-h-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden">
-      <div class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0">
-        <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">Strict-RAG Mitigation Assistant</h3>
-        <span class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-border-elev border border-gcp-border text-gcp-ink-secondary font-medium">Locked to Top-3</span>
+    <!-- ---------- Strict-RAG Mitigation Assistant (tinggi) ---------- -->
+    <div
+      class="flex-1 min-h-0 flex flex-col border border-gcp-border bg-gcp-surface rounded-lg overflow-hidden"
+    >
+      <div
+        class="px-4 py-3 border-b border-gcp-border bg-gcp-surface/50 flex items-center justify-between shrink-0"
+      >
+        <h3 class="text-xs font-medium text-gcp-ink tracking-wide uppercase">
+          Strict-RAG Mitigation Assistant
+        </h3>
+        <span
+          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-border-elev border border-gcp-border text-gcp-ink-secondary font-medium"
+          >Locked to Top-3</span
+        >
       </div>
 
       <!-- Quick action chips -->
-      <div class="px-4 py-3 flex flex-wrap gap-2 border-b border-gcp-border bg-gcp-surface/30 shrink-0">
+      <div
+        class="px-4 py-3 flex flex-wrap gap-2 border-b border-gcp-border bg-gcp-surface/30 shrink-0"
+      >
         <button type="button" class="quick-btn" data-action="checklist">
           Checklist
         </button>
@@ -114,45 +267,79 @@
       </div>
 
       <!-- Chat stream (#chat-messages) -->
-      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 shrink-0">
-        <div class="flex flex-col items-center justify-center h-full p-8 text-center">
-          <p class="text-xs text-gcp-ink-muted">Chat aktif setelah triase pertama dan dikunci pada 3 referensi runbook.</p>
+      <div
+        id="chat-messages"
+        class="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 shrink-0"
+      >
+        <div
+          class="flex flex-col items-center justify-center h-full p-8 text-center"
+        >
+          <p class="text-xs text-gcp-ink-muted">
+            Chat aktif setelah triase pertama dan dikunci pada 3 referensi
+            runbook.
+          </p>
         </div>
       </div>
 
       <!-- Chat input area -->
-      <div class="border-t border-gcp-border bg-gcp-surface p-3 flex flex-col gap-3 shrink-0">
+      <div
+        class="border-t border-gcp-border bg-gcp-surface p-3 flex flex-col gap-3 shrink-0"
+      >
         <!-- Input utama: POST /chat -->
-        <form id="chat-form" class="flex gap-2"
-              hx-post="{{ url_for('triage.chat') }}"
-              hx-target="#chat-messages"
-              hx-swap="beforeend"
-              hx-include="#workspace-state">
-          <input type="text" name="message" autocomplete="off"
-                 placeholder="Tanya sesuatu tentang 3 runbook aktif…"
-                 class="flex-1 bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none px-3 py-2 text-sm text-gcp-ink placeholder:text-gcp-ink-muted" />
-          <button type="submit"
-                  class="px-4 py-2 bg-gcp-surface border border-gcp-border rounded-sm text-sm font-medium text-gcp-ink hover:bg-gcp-elevated transition disabled:opacity-50 disabled:pointer-events-none shrink-0">
+        <form
+          id="chat-form"
+          class="flex gap-2"
+          hx-post="{{ url_for('triage.chat') }}"
+          hx-target="#chat-messages"
+          hx-swap="beforeend"
+          hx-include="#workspace-state"
+        >
+          <input
+            type="text"
+            name="message"
+            autocomplete="off"
+            aria-label="Tanya sesuatu tentang 3 runbook aktif"
+            placeholder="Tanya sesuatu tentang 3 runbook aktif…"
+            class="flex-1 bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none px-3 py-2 text-sm text-gcp-ink placeholder:text-gcp-ink-muted"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-gcp-surface border border-gcp-border rounded-sm text-sm font-medium text-gcp-ink hover:bg-gcp-elevated transition disabled:opacity-50 disabled:pointer-events-none shrink-0"
+          >
             Send
           </button>
         </form>
 
         <!-- Input sekunder: POST /triage/refine -->
-        <form id="refine-form" class="flex gap-2"
-              hx-post="{{ url_for('triage.refine') }}"
-              hx-target="#chat-messages"
-              hx-swap="beforeend"
-              hx-include="#workspace-state">
-          <input type="text" name="refine_note" autocomplete="off"
-                 placeholder="Refine context: mis. “Ternyata pod terkena OOMKilled…”"
-                 class="flex-1 bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none px-3 py-2 text-sm text-gcp-ink placeholder:text-gcp-ink-muted" />
-          <button type="submit"
-                  class="px-4 py-2 border border-gcp-border-elev rounded-sm text-sm font-medium text-gcp-ink-secondary hover:bg-gcp-elevated transition disabled:opacity-50 disabled:pointer-events-none shrink-0">
+        <form
+          id="refine-form"
+          class="flex gap-2"
+          hx-post="{{ url_for('triage.refine') }}"
+          hx-target="#chat-messages"
+          hx-swap="beforeend"
+          hx-include="#workspace-state"
+        >
+          <input
+            type="text"
+            name="refine_note"
+            autocomplete="off"
+            aria-label="Refine konteks runbook"
+            placeholder="Refine context: mis. “Ternyata pod terkena OOMKilled…”"
+            class="flex-1 bg-gcp-canvas border border-gcp-border-elev rounded-sm focus:border-gcp-focus focus:ring-1 focus:ring-gcp-focus/50 outline-none px-3 py-2 text-sm text-gcp-ink placeholder:text-gcp-ink-muted"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 border border-gcp-border-elev rounded-sm text-sm font-medium text-gcp-ink-secondary hover:bg-gcp-elevated transition disabled:opacity-50 disabled:pointer-events-none shrink-0"
+          >
             Refine
           </button>
         </form>
 
-        <p class="text-[10px] text-gcp-ink-muted">Referensi tetap locked sampai Anda menekan <span class="text-gcp-ink font-medium">Refine</span> (explicit re-triage).</p>
+        <p class="text-[10px] text-gcp-ink-muted">
+          Referensi tetap locked sampai Anda menekan
+          <span class="text-gcp-ink font-medium\">Refine</span> (explicit
+          re-triage).
+        </p>
       </div>
     </div>
   </aside>
@@ -161,54 +348,218 @@
 <!-- DOM-Anchored Hidden State (#workspace-state) -->
 <form id="workspace-state" class="hidden" aria-hidden="true">
   <input type="hidden" name="sanitized_log" id="state-sanitized-log" value="" />
-  <input type="hidden" name="locked_runbook_ids" id="state-locked-ids" value="" />
+  <input
+    type="hidden"
+    name="locked_runbook_ids"
+    id="state-locked-ids"
+    value=""
+  />
 </form>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
   // ===== Char counter =====
-  const rawLog = document.getElementById('raw_log');
-  const counter = document.getElementById('char-counter');
-  const sync = () => { counter.textContent = `${rawLog.value.length} / 5000`; };
-  rawLog.addEventListener('input', sync); sync();
+  const rawLog = document.getElementById("raw_log");
+  const counter = document.getElementById("char-counter");
+  const sync = () => {
+    counter.textContent = `${rawLog.value.length} / 5000`;
+  };
+  rawLog.addEventListener("input", sync);
+  sync();
 
   // ===== Auto-scroll chat stream =====
-  const chatBox = document.getElementById('chat-messages');
-  const scrollChat = () => { chatBox.scrollTop = chatBox.scrollHeight; };
-  chatBox.addEventListener('htmx:afterSwap', scrollChat);
-  document.body.addEventListener('htmx:beforeRequest', () => {
+  const chatBox = document.getElementById("chat-messages");
+  const scrollChat = () => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  };
+  chatBox.addEventListener("htmx:afterSwap", scrollChat);
+  document.body.addEventListener("htmx:beforeRequest", () => {
     // Buka ulang scroll untuk setiap request yang menargetkan chat
     setTimeout(scrollChat, 60);
   });
 
+  // ===== Submit button loading spinner =====
+  const submitBtn = document.getElementById("triage-submit");
+  const spinner = document.getElementById("triage-spinner");
+  const btnLabel = submitBtn.querySelector(".btn-label");
+
+  function setSubmitting(isSubmitting) {
+    submitBtn.disabled = isSubmitting;
+    if (isSubmitting) {
+      spinner.classList.remove("hidden");
+      btnLabel.classList.add("hidden");
+    } else {
+      spinner.classList.add("hidden");
+      btnLabel.classList.remove("hidden");
+    }
+  }
+
+  document
+    .getElementById("triage-form")
+    .addEventListener("htmx:request", () => setSubmitting(true));
+  document
+    .getElementById("triage-form")
+    .addEventListener("htmx:afterRequest", () => setSubmitting(false));
+  document
+    .getElementById("triage-form")
+    .addEventListener("htmx:sendError", () => setSubmitting(false));
+
+  // ===== Expand/collapse triage result ====
+  // ===== 3-Level Triage Result (0: Shrink, 1: Compact, 2: Full Expand) =====
+  const shrinkBtn = document.getElementById("triage-shrink-btn");
+  const expandBtn = document.getElementById("triage-expand-btn");
+  const outputArea = document.getElementById("triage-output-area");
+  const headerSummary = document.getElementById("triage-header-summary");
+
+  // Default mulai di level 1 (Compact) atau 0 (Shrink) sesuai selera
+  let triageViewLevel = 1;
+
+  function applyTriageViewLevel() {
+    const logDetails = outputArea.querySelector("details");
+    const summaryData = outputArea.querySelector("[data-triage-summary]");
+
+    // Update teks ringkasan di header saat mode Shrink
+    if (summaryData && triageViewLevel === 0) {
+      headerSummary.textContent = "· " + summaryData.dataset.triageSummary;
+      headerSummary.classList.remove("hidden");
+    } else {
+      headerSummary.classList.add("hidden");
+    }
+
+    if (triageViewLevel === 0) {
+      // LEVEL 0: SHRINK (Hanya tampil judul Triage Result)
+      outputArea.classList.add("hidden");
+      shrinkBtn.disabled = true;
+      shrinkBtn.classList.add("opacity-40", "pointer-events-none");
+      expandBtn.disabled = false;
+      expandBtn.classList.remove("opacity-40", "pointer-events-none");
+      expandBtn.textContent = "Expand";
+    } else if (triageViewLevel === 1) {
+      // LEVEL 1: COMPACT (Muncul kategori, severity, reasoning ringkas)
+      outputArea.classList.remove("hidden", "max-h-[65vh]");
+      outputArea.classList.add("max-h-[210px]");
+      if (logDetails) logDetails.open = false;
+
+      shrinkBtn.disabled = false;
+      shrinkBtn.classList.remove("opacity-40", "pointer-events-none");
+      expandBtn.disabled = false;
+      expandBtn.classList.remove("opacity-40", "pointer-events-none");
+      expandBtn.textContent = "Expand +";
+    } else {
+      // LEVEL 2: FULL EXPAND (Tinggi maksimal + buka detail log tersensor)
+      outputArea.classList.remove("hidden", "max-h-[210px]");
+      outputArea.classList.add("max-h-[65vh]");
+      if (logDetails) logDetails.open = true;
+
+      shrinkBtn.disabled = false;
+      shrinkBtn.classList.remove("opacity-40", "pointer-events-none");
+      expandBtn.disabled = true;
+      expandBtn.classList.add("opacity-40", "pointer-events-none");
+      expandBtn.textContent = "Expanded";
+    }
+  }
+
+  shrinkBtn.addEventListener("click", () => {
+    if (triageViewLevel > 0) {
+      triageViewLevel -= 1;
+      applyTriageViewLevel();
+    }
+  });
+
+  expandBtn.addEventListener("click", () => {
+    if (triageViewLevel < 2) {
+      triageViewLevel += 1;
+      applyTriageViewLevel();
+    }
+  });
+
+  // Saat hasil triase baru masuk lewat HTMX, otomatis buka minimal ke Level 1 agar hasil terlihat
+  document.body.addEventListener("htmx:afterSwap", (e) => {
+    if (e.detail.target && e.detail.target.id === "triage-output-area") {
+      if (triageViewLevel === 0) triageViewLevel = 1;
+      applyTriageViewLevel();
+    }
+  });
+
+  // Inisialisasi tampilan awal
+  applyTriageViewLevel();
+
   // ===== Toast sederhana untuk pesan non-blocking =====
   function toast(msg) {
-    const el = document.createElement('div');
-    el.className = 'fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-sm border border-gcp-border bg-gcp-surface text-xs text-gcp-ink shadow-lg';
+    const el = document.createElement("div");
+    el.className =
+      "fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-sm border border-gcp-border bg-gcp-surface text-xs text-gcp-ink shadow-lg";
+    el.setAttribute("aria-live", "polite");
     el.textContent = msg;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 2800);
   }
 
   // ===== Quick prompt buttons → POST /chat dengan quick_action =====
-  document.querySelectorAll('.quick-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const locked = document.getElementById('state-locked-ids').value.trim();
+  document.querySelectorAll(".quick-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const locked = document.getElementById("state-locked-ids").value.trim();
       if (!locked) {
-        toast('Jalankan Analyze Incident terlebih dahulu agar chat terkunci pada referensi.');
+        toast(
+          "Jalankan Analyze Incident terlebih dahulu agar chat terkunci pada referensi.",
+        );
         return;
       }
-      htmx.ajax('POST', '{{ url_for("triage.chat") }}', {
-        target: '#chat-messages',
-        swap: 'beforeend',
-        source: '#workspace-state',
+      htmx.ajax("POST", '{{ url_for("triage.chat") }}', {
+        target: "#chat-messages",
+        swap: "beforeend",
+        source: "#workspace-state",
         values: {
           quick_action: btn.dataset.action,
-          locked_runbook_ids: locked
-        }
+          locked_runbook_ids: locked,
+        },
       });
+    });  // end quick-btn forEach
+  });  // end DOMContentLoaded
+
+  // ===== Save Report / Share / Clear =====
+  document.getElementById("btn-save-report").addEventListener("click", async () => {
+    const query = document.getElementById("state-sanitized-log").value.trim();
+    const ids = document.getElementById("state-locked-ids").value.trim();
+    const category = document.getElementById("state-category").value.trim();
+    const severity = document.getElementById("state-severity").value.trim();
+    if (!query) {
+      toast("Tidak ada hasil triase untuk disimpan.");
+      return;
+    }
+    const res = await fetch("{{ url_for('triage.save_report') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        query,
+        category,
+        severity,
+        top_runbook_ids: ids,
+      }),
     });
+    const data = await res.json();
+    toast(data.ok ? "Laporan disimpan ke riwayat." : "Gagal menyimpan laporan: " + (data.error || ""));
+  });
+
+  document.getElementById("btn-share-triage").addEventListener("click", () => {
+    const text = document.getElementById("state-sanitized-log").value.trim();
+    if (!text) {
+      toast("Tidak ada konten untuk dibagikan.");
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      toast("Disalin ke clipboard.");
+    });
+  });
+
+  document.getElementById("btn-clear-workspace").addEventListener("click", () => {
+    document.getElementById("raw_log").value = "";
+    document.getElementById("char-counter").textContent = "0 / 5000";
+    document.getElementById("triage-output-area").innerHTML = "";
+    document.getElementById("state-sanitized-log").value = "";
+    document.getElementById("state-locked-ids").value = "";
+    document.getElementById("state-category").value = "";
+    document.getElementById("state-severity").value = "";
+    toast("Workspace dikosongkan.");
   });
 </script>
 

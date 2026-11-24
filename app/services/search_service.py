@@ -122,8 +122,6 @@ class SearchService:
                     "ranked_runbook_ids": {
                         "type": "array",
                         "items": {"type": "integer"},
-                        "minItems": 1,
-                        "maxItems": 3,
                     },
                 },
                 "required": ["category", "severity", "reasoning", "ranked_runbook_ids"],

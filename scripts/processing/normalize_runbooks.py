@@ -12,9 +12,16 @@ FALLBACK_DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
 INPUT_FILES = [
     "raw_prometheus_candidates.json",
     "raw_stackexchange_candidates.json",
+    "raw_gitlab_candidates.json",
+    "raw_kubernetes_candidates.json",
+    "raw_postmortems_candidates.json",
 ]
 
 OUTPUT_FILE = os.path.join(DATA_DIR, "seed_runbooks.json")
+
+REQUIRED_FIELDS = {"title", "category", "severity", "symptoms_log", "root_cause", "resolution_steps"}
+VALID_CATEGORIES = {"network", "database", "deployment", "resource"}
+VALID_SEVERITIES = {"SEV1", "SEV2", "SEV3", "SEV4"}
 
 # Hanya saring alert meta/dummy atau pertanyaan konseptual murni tanpa troubleshooting insiden
 NON_INCIDENT_TITLE_PATTERNS = [
@@ -241,6 +248,56 @@ def normalize_stackexchange(record: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def normalize_existing(record: dict[str, Any]) -> dict[str, Any] | None:
+    """Record yang sudah dalam format akhir (title, symptoms_log, root_cause,
+    resolution_steps, category, severity, content_hash) — cukup dibersihkan &
+    divalidasi, tidak perlu rekonstruksi ulang. Digunakan untuk gitlab,
+    kubernetes, dan postmortem candidates."""
+    title = record.get("title", "").strip()
+    symptoms_log = clean_markup(record.get("symptoms_log", ""))
+    raw_resolution = record.get("resolution_steps", "")
+    raw_root_cause = record.get("root_cause", "")
+
+    ok, _ = is_valid_incident(title, symptoms_log, raw_resolution)
+    if not ok:
+        return None
+
+    resolution_steps = clean_markup(raw_resolution)
+    root_cause = extract_clean_root_cause(raw_root_cause, symptoms_log, resolution_steps)
+
+    category = str(record.get("category", "")).strip().lower()
+    if category not in VALID_CATEGORIES:
+        category = classify_category(title, symptoms_log, "deployment")
+
+    severity = str(record.get("severity", "")).strip().upper()
+    if severity not in VALID_SEVERITIES:
+        severity = calibrate_severity(title, symptoms_log)
+
+    return {
+        "title": title,
+        "category": category,
+        "severity": severity,
+        "symptoms_log": f"{title}\n{symptoms_log}" if symptoms_log else title,
+        "root_cause": root_cause,
+        "resolution_steps": resolution_steps,
+        "source_ref": record.get("source_ref", record.get("source_url", "")),
+        "content_hash": str(record.get("content_hash", "")).strip() or compute_hash(title, symptoms_log),
+    }
+
+
+def _detect_and_normalize(record: dict[str, Any]) -> dict[str, Any] | None:
+    """Cetak record kandidat dari semua 5 sumber ke format akhir."""
+    keys = set(record.keys())
+    # Sudah format akhir (gitlab / kubernetes / postmortem)
+    if REQUIRED_FIELDS.issubset(keys):
+        return normalize_existing(record)
+    # Prometheus-style (symptoms_log, resolution_steps, root_cause)
+    if "symptoms_log" in record:
+        return normalize_prometheus(record)
+    # StackExchange-style (description, resolution)
+    return normalize_stackexchange(record)
+
+
 def load_json(path: str) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -273,8 +330,7 @@ def normalize_all() -> list[dict[str, Any]]:
         accepted = 0
         rejected = 0
         for record in records:
-            is_prom = "Alert:" in str(record.get("title", "")) or "symptoms_log" in record
-            item = normalize_prometheus(record) if is_prom else normalize_stackexchange(record)
+            item = _detect_and_normalize(record)
 
             if item is None or item["content_hash"] in seen_hashes:
                 rejected += 1

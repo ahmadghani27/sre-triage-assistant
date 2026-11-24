@@ -1,7 +1,12 @@
+import json
+import logging
 import os
+import re
 import sqlite3
 from flask import g, current_app
 from flask_wtf.csrf import CSRFProtect
+
+logger = logging.getLogger(__name__)
 
 try:
     from google import genai
@@ -41,7 +46,56 @@ class LLM:
                 self.gemini_client = genai.Client(api_key=api_key)
                 self.gemini_enabled = True
                 self.gemini_model = model
+            except Exception as exc:  # pragma: no cover - client init failure
+                logger.warning("[LLM Init Gemini Error] %s", exc)
+                self.gemini_client = None
+                self.gemini_enabled = False
+        else:
+            self.gemini_enabled = False
+
+        # --- Provider 2: Custom / OpenAI-compatible (hcnsec.cn) ---
+        ckey = os.environ.get("CUSTOM_API_KEY") or app.config.get("CUSTOM_API_KEY")
+        cbase = (
+            os.environ.get("CUSTOM_BASE_URL")
+            or app.config.get("CUSTOM_BASE_URL", "https://api.hcnsec.cn/v1")
+        )
+        cmodel = (
+            os.environ.get("CUSTOM_MODEL")
+            or app.config.get("CUSTOM_MODEL", "Qwen3.8-Flash-Next")
+        )
+        if ckey and OpenAI is not None:
+            try:
+                self.custom_client = OpenAI(api_key=ckey, base_url=cbase, timeout=30.0)
+                self.custom_enabled = True
+                self.custom_model = cmodel
+            except Exception as exc:  # pragma: no cover - client init failure
+                logger.warning("[LLM Init Custom Error] %s", exc)
+                self.custom_client = None
+                self.custom_enabled = False
+        else:
+            self.custom_enabled = False
+
+        # Taruh di paling akhir init_app (di luar try/except) agar selalu tercetak saat startup
+        logger.warning(
+            "[LLM Init] Gemini enabled=%s (model=%s) | Custom enabled=%s (model=%s)",
+            self.gemini_enabled,
+            self.gemini_model,
+            self.custom_enabled,
+            self.custom_model,
+        )
+        # --- Provider 1: Gemini (native google-genai) ---
+        api_key = os.environ.get("GEMINI_API_KEY") or app.config.get("GEMINI_API_KEY")
+        model = (
+            os.environ.get("GEMINI_MODEL")
+            or app.config.get("GEMINI_MODEL", "gemini-2.5-flash")
+        )
+        if api_key and genai is not None:
+            try:
+                self.gemini_client = genai.Client(api_key=api_key)
+                self.gemini_enabled = True
+                self.gemini_model = model
             except Exception:  # pragma: no cover - client init failure
+                logger.warning("[LLM Init Gemini Error] %s", exc)
                 self.gemini_client = None
                 self.gemini_enabled = False
         else:
@@ -68,6 +122,16 @@ class LLM:
         else:
             self.custom_enabled = False
 
+    @staticmethod
+    def _extract_json(raw_text: str) -> dict:
+        """Bersihkan blok <think>...</think> atau ```json ... ``` sebelum json.loads."""
+        cleaned = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL).strip()
+        cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE).strip()
+        match = re.search(r"\{.*\}", cleaned, flags=re.DOTALL)
+        if match:
+            cleaned = match.group(0)
+        return json.loads(cleaned)
+    
     @property
     def enabled(self):
         """Setidaknya satu provider siap."""
