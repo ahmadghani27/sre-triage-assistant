@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Daftar Runbook &middot; SRE Console{% endblock %} {% block page_title %}Runbook{% endblock %} {% block page_subtitle %}Daftar semua runbook yang tersedia di basis knowledge SQLite{% endblock %} {% block content %}
+<div class="space-y-5">
+  <!-- ===== Header + Tombol Kembali ===== -->
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-semibold text-gcp-ink">Daftar Runbook</h2>
+      <p class="text-xs text-gcp-ink-muted mt-0.5">
+        Semua runbook yang tersimpan di SQLite FTS5. Digunakan sebagai referensi
+        saat triase insiden.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a
+        href="{{ url_for('triage.index') }}"
+        class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-surface px-3 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue-light/30 hover:text-gcp-blue-light transition"
+      >
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Kembali ke Triage
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== Daftar Runbook ===== -->
+  <div class="rounded-lg border border-gcp-border bg-gcp-surface overflow-hidden">
+    {% if rows %}
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-gcp-border bg-gcp-surface/50">
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">#</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">Judul</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Kategori</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Severity</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-24">Sumber</th>
+          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-24">Dibuat</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gcp-border">
+        {% for row in rows %}
+        <tr class="hover:bg-gcp-elevated/30 transition">
+          <td class="px-4 py-3 text-xs font-mono text-gcp-ink-secondary">{{ row.id }}</td>
+          <td class="px-4 py-3 text-xs text-gcp-ink truncate max-w-xs" title="{{ row.title }}">{{ row.title }}</td>
+          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.category }}</td>
+          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.severity }}</td>
+          <td class="px-4 py-3 text-xs text-gcp-ink-secondary truncate max-w-xs" title="{{ row.source_ref }}">{{ row.source_ref }}</td>
+          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink-muted">{{ row.created_at }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="px-6 py-10 text-center">
+      <div class="w-12 h-12 rounded-full bg-gcp-elevated flex items-center justify-center mx-auto mb-3 text-gcp-ink-muted">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <p class="text-xs text-gcp-ink-muted">Belum ada runbook yang tersedia.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

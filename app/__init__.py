@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from app.extensions import csrf, llm, get_db, close_db
 from app.blueprints.triage import triage_bp
 from app.blueprints.analytics import analytics_bp
+from app.blueprints.runbook import runbook_bp
 
 
 def create_app():
@@ -27,5 +28,6 @@ def create_app():
 
     app.register_blueprint(triage_bp)
     app.register_blueprint(analytics_bp)
+    app.register_blueprint(runbook_bp)
 
     return app

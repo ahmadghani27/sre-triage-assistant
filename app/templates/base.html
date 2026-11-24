@@ -210,8 +210,7 @@
             <div class="my-1 border-t border-gcp-border" role="separator"></div>
 
             <!-- Kategori 2: Runbook -->
-            <a href="#runbook"
-               onclick="event.preventDefault();"
+            <a href="{{ url_for('runbook.index') }}"
                class="flex items-center gap-3 px-2.5 py-2 rounded-sm transition-colors whitespace-nowrap text-gcp-ink-secondary hover:bg-gcp-elevated hover:text-gcp-ink"
                title="Runbook">
               <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
