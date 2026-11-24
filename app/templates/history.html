@@ -147,14 +147,17 @@
             toast("Gagal memuat riwayat: " + (data.error || ""));
             return;
           }
-          // Simpan ke sessionStorage lalu pindah ke workspace (redirect menghapus DOM)
-          sessionStorage.setItem("sre_pending_history_load", JSON.stringify({
+          // Simpan ke sessionStorage DAN localStorage sebagai fallback
+          const payload = {
             query: data.query || "",
             category: data.category || "",
             severity: data.severity || "",
             top_runbook_ids: data.top_runbook_ids || [],
             top_runbooks: data.top_runbooks || [],
-          }));
+            top3_html: data.top3_html || "",
+          };
+          sessionStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
+          localStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
           window.location.href = "{{ url_for('triage.index') }}";
         });
       });

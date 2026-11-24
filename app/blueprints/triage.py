@@ -181,6 +181,20 @@ def history_load(history_id: int):
         runbooks=top_runbooks,
         oob=False,
     )
+    triage_result = {
+        "severity": row["severity"],
+        "category": row["category"],
+        "redaction_count": 0,
+        "redaction_labels": [],
+        "is_fallback": False,
+        "reasoning": "",
+        "sanitized_log": row["query"],
+    }
+    triage_html = render_template(
+        "partials/_triage_result.html",
+        result=triage_result,
+        oob=False,
+    )
     return jsonify({
         "ok": True,
         "query": row["query"],
@@ -189,5 +203,6 @@ def history_load(history_id: int):
         "top_runbook_ids": ids,
         "top_runbooks": top_runbooks,
         "top3_html": top3_html,
+        "triage_html": triage_html,
     })
 

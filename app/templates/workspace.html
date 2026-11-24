@@ -375,26 +375,30 @@ endblock %}
   sync();
   rawLog.addEventListener("input", sync);
 
-  // Pulihkan riwayat yang dimuat dari halaman History (via sessionStorage)
-  const pending = sessionStorage.getItem("sre_pending_history_load");
+  // Pulihkan riwayat yang dimuat dari halaman History (via sessionStorage atau localStorage)
+  let pending = sessionStorage.getItem("sre_pending_history_load");
+  if (!pending) {
+    pending = localStorage.getItem("sre_pending_history_load");
+  }
   if (pending) {
-    try {
-      const data = JSON.parse(pending);
-      const stateSanitized = document.getElementById("state-sanitized-log");
-      const stateLocked = document.getElementById("state-locked-ids");
-      const stateCategory = document.getElementById("state-category");
-      const stateSeverity = document.getElementById("state-severity");
-      if (stateSanitized) stateSanitized.value = data.query || "";
-      if (stateLocked) stateLocked.value = (data.top_runbook_ids || []).join(",");
-      if (stateCategory) stateCategory.value = data.category || "";
-      if (stateSeverity) stateSeverity.value = data.severity || "";
-      const top3Panel = document.getElementById("top3-reference-panel");
-      if (top3Panel && data.top3_html) top3Panel.innerHTML = data.top3_html;
-      const refCount = document.getElementById("ref-count");
-      if (refCount) refCount.textContent = (data.top_runbook_ids || []).length + " ref";
-      sessionStorage.removeItem("sre_pending_history_load");
-      toast("Riwayat dimuat ke workspace.");
-    } catch (_) {}
+    const data = JSON.parse(pending);
+    const stateSanitized = document.getElementById("state-sanitized-log");
+    const stateLocked = document.getElementById("state-locked-ids");
+    const stateCategory = document.getElementById("state-category");
+    const stateSeverity = document.getElementById("state-severity");
+    if (stateSanitized) stateSanitized.value = data.query || "";
+    if (stateLocked) stateLocked.value = (data.top_runbook_ids || []).join(",");
+    if (stateCategory) stateCategory.value = data.category || "";
+    if (stateSeverity) stateSeverity.value = data.severity || "";
+    const top3Panel = document.getElementById("top3-reference-panel");
+    if (top3Panel && data.top3_html) top3Panel.innerHTML = data.top3_html;
+    const refCount = document.getElementById("ref-count");
+    if (refCount) refCount.textContent = (data.top_runbook_ids || []).length + " ref";
+    const outputArea = document.getElementById("triage-output-area");
+    if (outputArea && data.triage_html) outputArea.innerHTML = data.triage_html;
+    sessionStorage.removeItem("sre_pending_history_load");
+    localStorage.removeItem("sre_pending_history_load");
+    toast("Riwayat dimuat ke workspace.");
   }
 
   // ===== Auto-scroll chat stream =====
@@ -600,6 +604,10 @@ endblock %}
     document.getElementById("raw_log").value = "";
     document.getElementById("char-counter").textContent = "0 / 5000";
     document.getElementById("triage-output-area").innerHTML = "";
+    document.getElementById("top3-reference-panel").innerHTML = "";
+    document.getElementById("chat-messages").innerHTML =
+      '<div class="flex flex-col items-center justify-center h-full p-8 text-center"><p class="text-xs text-gcp-ink-muted">Chat aktif setelah triase pertama dan dikunci pada 3 referensi runbook.</p></div>';
+    document.getElementById("ref-count").textContent = "0 ref";
     document.getElementById("state-sanitized-log").value = "";
     document.getElementById("state-locked-ids").value = "";
     document.getElementById("state-category").value = "";
@@ -609,6 +617,7 @@ endblock %}
     localStorage.removeItem("sre_triage_top3");
     localStorage.removeItem("sre_triage_chat");
     localStorage.removeItem("sre_triage_ref_count");
+    sessionStorage.removeItem("sre_pending_history_load");
   });
 
   // ===== Persist Top-3 + chat ke localStorage agar tidak hilang refresh ====
