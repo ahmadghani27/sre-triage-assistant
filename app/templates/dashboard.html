@@ -1,70 +1,68 @@
-{% extends "base.html" %} {% block title %}Operations Analytics &middot; SRE
-Console{% endblock %} {% block page_title %}Operations Analytics{% endblock %}
-{% block page_subtitle %}Distribusi insiden, proporsi severitas, dan tren
-frekuensi{% endblock %} {% block content %}
-<div class="space-y-5">
-  <!-- ===== Header + Ringkasan ===== -->
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h2 class="text-lg font-semibold text-gcp-ink">Operational Analytics</h2>
-      <p class="text-xs text-gcp-ink-muted mt-0.5">
-        Distribusi insiden, proporsi severitas, dan tren frekuensi &mdash;
-        digabung dari riwayat triase sesi + basis knowledge base.
-      </p>
-    </div>
-    <div class="flex items-center gap-3">
-      <button
-        id="refresh-charts"
-        class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-surface px-3 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue-light/30 hover:text-gcp-blue-light transition"
-      >
-        <svg
-          class="h-3.5 w-3.5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <path
-            d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.7L4 8m0 7a8 8 0 0013.7 3.3L20 16"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        Refresh
-      </button>
-      <span
-        id="last-updated"
-        class="text-[10px] text-gcp-ink-muted font-mono"
-      ></span>
-    </div>
-  </div>
+{% extends "base.html" %}
+{% block title %}Operations Analytics &middot; SRE Console{% endblock %}
+{% block page_title %}Operations Analytics{% endblock %}
+{% block page_subtitle %}Distribusi insiden, proporsi severitas, dan tren frekuensi{% endblock %}
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <div class="rounded-lg border border-gcp-border bg-gcp-surface p-4">
+{% block toolbar %}
+<div class="flex items-center gap-3">
+  <span
+    id="last-updated"
+    class="text-[10px] text-gcp-ink-muted font-mono"
+  ></span>
+  <button
+    id="refresh-charts"
+    type="button"
+    class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-elevated px-3 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition"
+  >
+    <svg
+      class="h-3.5 w-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.7L4 8m0 7a8 8 0 0013.7 3.3L20 16"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    Refresh
+  </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  <!-- ===== KPI Cards (Solid GCP Accent Borders) ===== -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
       <p class="text-[10px] uppercase tracking-wider text-gcp-ink-muted mb-1">
         Total Triase
       </p>
       <p class="text-2xl font-semibold text-gcp-ink font-mono" id="kpi-total">
         0
       </p>
-      <p class="text-[10px] text-gcp-ink-muted mt-0.5">sesi ini</p>
+      <p class="text-[10px] text-gcp-ink-secondary mt-1">sesi tercatat</p>
     </div>
-    <div class="rounded-lg border border-gcp-border bg-gcp-surface p-4">
+
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
       <p class="text-[10px] uppercase tracking-wider text-gcp-ink-muted mb-1">
         Fallback Rate
       </p>
       <p
-        class="text-2xl font-semibold text-gcp-warning font-mono"
+        class="text-2xl font-semibold text-[#FBBC05] font-mono"
         id="kpi-fallback"
       >
         0%
       </p>
-      <p class="text-[10px] text-gcp-ink-muted mt-0.5">
+      <p class="text-[10px] text-gcp-ink-secondary mt-1">
         LLM offline &rarr; lexical
       </p>
     </div>
-    <div class="rounded-lg border border-gcp-border bg-gcp-surface p-4">
+
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
       <p class="text-[10px] uppercase tracking-wider text-gcp-ink-muted mb-1">
         Runbook Terindeks
       </p>
@@ -74,20 +72,30 @@ frekuensi{% endblock %} {% block content %}
       >
         0
       </p>
-      <p class="text-[10px] text-gcp-ink-muted mt-0.5">SQLite FTS5</p>
+      <p class="text-[10px] text-gcp-ink-secondary mt-1">SQLite FTS5</p>
+    </div>
+
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
+      <p class="text-[10px] uppercase tracking-wider text-gcp-ink-muted mb-1">
+        Top Kategori
+      </p>
+      <p class="text-2xl font-semibold text-[#24C1E0] font-mono" id="kpi-top-cat">
+        —
+      </p>
+      <p class="text-[10px] text-gcp-ink-secondary mt-1">kasus terbanyak</p>
     </div>
   </div>
 
   <!-- ===== Charts Grid ===== -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-    <!-- Grafik 1: Distribusi Kategori (Doughnut) -->
-    <div class="rounded-lg border border-gcp-border bg-gcp-surface p-4">
-      <div class="flex items-center justify-between mb-3">
+    <!-- Grafik 1: Distribusi Kategori (Doughnut Solid) -->
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
+      <div class="flex items-center justify-between mb-4 pb-2.5 border-b border-gcp-border">
         <h3 class="text-xs font-semibold text-gcp-ink uppercase tracking-wider">
           Distribusi Kategori Insiden
         </h3>
         <span
-          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary"
+          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary font-mono"
           >domain</span
         >
       </div>
@@ -100,14 +108,14 @@ frekuensi{% endblock %} {% block content %}
       </div>
     </div>
 
-    <!-- Grafik 2: Proporsi Severitas (Bar) -->
-    <div class="rounded-lg border border-gcp-border bg-gcp-surface p-4">
-      <div class="flex items-center justify-between mb-3">
+    <!-- Grafik 2: Proporsi Severitas (Bar Solid) -->
+    <div class="rounded-md border border-gcp-border bg-gcp-surface p-4">
+      <div class="flex items-center justify-between mb-4 pb-2.5 border-b border-gcp-border">
         <h3 class="text-xs font-semibold text-gcp-ink uppercase tracking-wider">
           Proporsi Severitas
         </h3>
         <span
-          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary"
+          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary font-mono"
           >SEV1&ndash;SEV4 + Pending</span
         >
       </div>
@@ -120,16 +128,16 @@ frekuensi{% endblock %} {% block content %}
       </div>
     </div>
 
-    <!-- Grafik 3: Tren Frekuensi (Area, full width) -->
+    <!-- Grafik 3: Tren Frekuensi (Solid Crisp Line ala Cloud Monitoring) -->
     <div
-      class="lg:col-span-2 rounded-lg border border-gcp-border bg-gcp-surface p-4"
+      class="lg:col-span-2 rounded-md border border-gcp-border bg-gcp-surface p-4"
     >
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-4 pb-2.5 border-b border-gcp-border">
         <h3 class="text-xs font-semibold text-gcp-ink uppercase tracking-wider">
           Tren Frekuensi Insiden
         </h3>
         <span
-          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary"
+          class="text-[10px] px-2 py-0.5 rounded-sm bg-gcp-elevated border border-gcp-border text-gcp-ink-secondary font-mono"
           >14 hari terakhir</span
         >
       </div>
@@ -142,35 +150,41 @@ frekuensi{% endblock %} {% block content %}
       </div>
     </div>
   </div>
-
-  <!-- ===== Catatan degradation ===== -->
-  <p class="text-[10px] text-gcp-ink-muted leading-relaxed">
-    Catatan: ketika API LLM tidak merespons, triase memakai peringkat lexical
-    FTS5 murni dan ditandai
-    <span class="text-gcp-warning">is_fallback=1</span> pada
-    <span class="font-mono">triage_logs</span>; rasio tersebut tercermin pada
-    KPI Fallback Rate.
-  </p>
 </div>
-{% endblock %} {% block scripts %}
-<script>
-  /* ===== Chart.js Dark Mode (GCP Console) ===== */
-  Chart.defaults.color = "#9AA0A6";
-  Chart.defaults.borderColor = "#2C3038";
-  Chart.defaults.font.family = "Inter, Roboto, sans-serif";
-  Chart.defaults.font.size = 10;
+{% endblock %}
 
-  const GRID = "#2C3038";
-  const TICK = "#9AA0A6";
-  const TOOLTIP_BG = "#1E2025";
-  const GCP_COLORS = [
-    "#8AB4F8",
-    "#81C995",
-    "#FBBC05",
-    "#EA4335",
-    "#C58AF9",
-    "#F28B82",
+{% block scripts %}
+<script>
+  /* ===== Chart.js Solid Dark Theme (Google Cloud Console Palette) ===== */
+  Chart.defaults.color = "#9AA0A6";
+  Chart.defaults.borderColor = "#32353E";
+  Chart.defaults.font.family = "'Inter', 'Roboto', sans-serif";
+  Chart.defaults.font.size = 11;
+
+  const GRID = "#32353E";
+  const TOOLTIP_BG = "#282A30";
+  const SURFACE_BG = "#1E1F24";
+
+  // Palet Solid Google Cloud Data Visualization (tanpa opacity/alpha)
+  const GCP_SOLID_PALETTE = [
+    "#4285F4", // Google Blue
+    "#24C1E0", // Google Cyan
+    "#A142F4", // Google Purple
+    "#34A853", // Google Green
+    "#FBBC05", // Google Yellow
+    "#FA7B17", // Google Orange
+    "#F538A0", // Google Pink
   ];
+
+  // Warna Solid Severitas
+  const SEV_SOLID_COLORS = {
+    SEV1: "#EA4335",        // Solid Red
+    SEV2: "#FBBC05",        // Solid Yellow
+    SEV3: "#4285F4",        // Solid Blue
+    SEV4: "#80868B",        // Solid Neutral Slate
+    "SEV-PENDING": "#F29900", // Solid Amber
+    unclassified: "#F29900",
+  };
 
   const state = { category: null, severity: null, trend: null };
 
@@ -184,13 +198,13 @@ frekuensi{% endblock %} {% block content %}
       "kpi-total",
       data.summary
         ? Number(data.summary.total_triages || 0).toLocaleString("id-ID")
-        : "0",
+        : "0"
     );
     setText(
       "kpi-runbooks",
       data.summary
         ? Number(data.summary.runbook_total || 0).toLocaleString("id-ID")
-        : "0",
+        : "0"
     );
     const rate =
       data.summary && typeof data.summary.fallback_rate === "number"
@@ -200,10 +214,10 @@ frekuensi{% endblock %} {% block content %}
 
     const cats = data.category_distribution || {};
     const topKey = Object.keys(cats)[0];
-    setText("kpi-top-cat", topKey ? topKey.toUpperCase() : "&mdash;");
+    setText("kpi-top-cat", topKey ? topKey.toUpperCase() : "—");
 
     const now = new Date();
-    setText("last-updated", now.toLocaleTimeString("id-ID", { hour12: false }));
+    setText("last-updated", "Updated " + now.toLocaleTimeString("id-ID", { hour12: false }));
   }
 
   function renderCategoryChart(data) {
@@ -223,45 +237,51 @@ frekuensi{% endblock %} {% block content %}
           {
             data: values,
             backgroundColor: labels.map(
-              (_, i) => GCP_COLORS[i % GCP_COLORS.length],
+              (_, i) => GCP_SOLID_PALETTE[i % GCP_SOLID_PALETTE.length]
             ),
-            borderColor: "#131314",
+            borderColor: SURFACE_BG,
             borderWidth: 2,
-            hoverOffset: 6,
+            hoverOffset: 4,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "70%",
+        cutout: "68%",
         plugins: {
           legend: {
             display: true,
             position: "right",
             labels: {
-              color: "#9AA0A6",
+              color: "#E8EAED",
               boxWidth: 10,
-              padding: 12,
-              font: { size: 11 },
+              boxHeight: 10,
+              padding: 14,
+              font: { size: 11, weight: "500" },
             },
           },
           tooltip: {
             backgroundColor: TOOLTIP_BG,
-            borderColor: GRID,
+            titleColor: "#E8EAED",
+            bodyColor: "#E8EAED",
+            borderColor: "#454954",
             borderWidth: 1,
             padding: 10,
-            displayColors: false,
+            cornerRadius: 4,
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
             callbacks: {
               label(ctx) {
                 const total = ctx.dataset.data.reduce(
                   (a, b) => a + Number(b || 0),
-                  0,
+                  0
                 );
                 const pct = total
                   ? ((Number(ctx.raw || 0) / total) * 100).toFixed(1)
                   : "0.0";
-                return ctx.label + ": " + ctx.raw + " (" + pct + "%)";
+                return " " + ctx.label + ": " + ctx.raw + " (" + pct + "%)";
               },
             },
           },
@@ -278,15 +298,7 @@ frekuensi{% endblock %} {% block content %}
     const raw = data.severity_distribution || {};
     const labels = Object.keys(raw);
     const values = Object.values(raw);
-
-    const sevColors = {
-      SEV1: "#F28B82",
-      SEV2: "#FDD663",
-      SEV3: "#8AB4F8",
-      SEV4: "#9AA0A6",
-      "SEV-PENDING": "#FBBC05",
-      unclassified: "#FBBC05",
-    };
+    const colors = labels.map((l) => SEV_SOLID_COLORS[l] || "#4285F4");
 
     state.severity = new Chart(ctx, {
       type: "bar",
@@ -296,13 +308,11 @@ frekuensi{% endblock %} {% block content %}
           {
             label: "Jumlah",
             data: values,
-            backgroundColor: labels.map(
-              (l) => (sevColors[l] || "#8AB4F8") + "cc",
-            ),
-            borderColor: labels.map((l) => sevColors[l] || "#8AB4F8"),
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 22,
+            backgroundColor: colors,
+            hoverBackgroundColor: colors,
+            borderWidth: 0,
+            borderRadius: 2,
+            barThickness: 20,
           },
         ],
       },
@@ -314,20 +324,25 @@ frekuensi{% endblock %} {% block content %}
           legend: { display: false },
           tooltip: {
             backgroundColor: TOOLTIP_BG,
-            borderColor: GRID,
+            titleColor: "#E8EAED",
+            bodyColor: "#E8EAED",
+            borderColor: "#454954",
             borderWidth: 1,
             padding: 10,
-            displayColors: false,
+            cornerRadius: 4,
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
             callbacks: {
               label(ctx) {
                 const total = ctx.dataset.data.reduce(
                   (a, b) => a + Number(b || 0),
-                  0,
+                  0
                 );
                 const pct = total
                   ? ((Number(ctx.raw || 0) / total) * 100).toFixed(1)
                   : "0.0";
-                return ctx.label + ": " + ctx.raw + " (" + pct + "%)";
+                return " " + ctx.raw + " insiden (" + pct + "%)";
               },
             },
           },
@@ -335,10 +350,20 @@ frekuensi{% endblock %} {% block content %}
         scales: {
           x: {
             grid: { color: GRID },
-            ticks: { precision: 0 },
-            title: { display: true, text: "jumlah insiden", font: { size: 9 } },
+            border: { display: false },
+            ticks: { precision: 0, color: "#9AA0A6" },
+            title: {
+              display: true,
+              text: "JUMLAH INSIDEN",
+              color: "#6E6E78",
+              font: { size: 9, weight: "600" },
+            },
           },
-          y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: {
+            grid: { display: false },
+            border: { color: GRID },
+            ticks: { color: "#E8EAED", font: { size: 11, weight: "600" } },
+          },
         },
       },
     });
@@ -361,49 +386,66 @@ frekuensi{% endblock %} {% block content %}
           {
             label: "Insiden",
             data: values,
-            borderColor: "#8AB4F8",
-            backgroundColor: "rgba(138, 180, 248, 0.12)",
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2.5,
-            pointHoverRadius: 5,
-            pointBackgroundColor: "#131314",
-            pointBorderColor: "#8AB4F8",
-            borderWidth: 2,
+            borderColor: "#4285F4",
+            backgroundColor: "#4285F4",
+            fill: false, // Garis solid tegas khas GCP Cloud Monitoring tanpa area transparan
+            tension: 0.2,
+            borderWidth: 2.5,
+            pointRadius: 3.5,
+            pointHoverRadius: 5.5,
+            pointBackgroundColor: "#4285F4",
+            pointBorderColor: SURFACE_BG,
+            pointBorderWidth: 1.5,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: "index",
+          intersect: false,
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
             backgroundColor: TOOLTIP_BG,
-            borderColor: GRID,
+            titleColor: "#E8EAED",
+            bodyColor: "#E8EAED",
+            borderColor: "#454954",
             borderWidth: 1,
             padding: 10,
+            cornerRadius: 4,
             displayColors: false,
+            callbacks: {
+              label(ctx) {
+                return ctx.raw + " insiden";
+              },
+            },
           },
         },
         scales: {
           x: {
             grid: { color: GRID },
+            border: { display: false },
             ticks: {
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 10,
-              font: { size: 9 },
+              color: "#9AA0A6",
+              font: { size: 10 },
             },
           },
           y: {
             beginAtZero: true,
             grid: { color: GRID },
-            ticks: { precision: 0 },
+            border: { display: false },
+            ticks: { precision: 0, color: "#9AA0A6" },
             title: {
               display: true,
-              text: "jumlah insiden / hari",
-              font: { size: 9 },
+              text: "INSIDEN / HARI",
+              color: "#6E6E78",
+              font: { size: 9, weight: "600" },
             },
           },
         },

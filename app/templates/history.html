@@ -1,165 +1,312 @@
-{% extends "base.html" %} {% block title %}History Triage &middot; SRE Console{% endblock %} {% block page_title %}History Triase{% endblock %} {% block page_subtitle %}Riwayat laporan yang tersimpan, tidak hilang saat refresh{% endblock %} {% block content %}
-<div class="space-y-5">
-  <!-- ===== Header + Tombol Kembali ===== -->
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h2 class="text-lg font-semibold text-gcp-ink">History Triase</h2>
-      <p class="text-xs text-gcp-ink-muted mt-0.5">
-        Daftar laporan triase yang telah disimpan. Data tersimpan di SQLite dan
-        tetap ada saat halaman direfresh.
-      </p>
-    </div>
-    <div class="flex items-center gap-3">
-      <a
-        href="{{ url_for('triage.index') }}"
-        class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-surface px-3 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue-light/30 hover:text-gcp-blue-light transition"
+{% extends "base.html" %}
+{% block title %}History Triage &middot; SRE Console{% endblock %}
+{% block page_title %}History Triase{% endblock %}
+{% block page_subtitle %}Riwayat laporan yang tersimpan, tidak hilang saat refresh{% endblock %}
+
+{% block toolbar %}
+<div class="flex items-center gap-3">
+  <a
+    href="{{ url_for('triage.index') }}"
+    class="inline-flex items-center gap-1.5 rounded-sm border border-gcp-border bg-gcp-elevated px-3 py-1.5 text-xs font-medium text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition"
+  >
+    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Kembali ke Triage
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+  <!-- ===== Toolbar Pencarian & Filter Severitas ===== -->
+  <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-md border border-gcp-border bg-gcp-surface">
+    <div class="relative min-w-[240px] flex-1 sm:max-w-xs">
+      <svg class="absolute left-2.5 top-2 h-4 w-4 text-gcp-ink-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="text"
+        id="history-search"
+        placeholder="Cari judul atau query…"
+        class="w-full pl-8 pr-3 py-1.5 rounded-sm border border-gcp-border-elev bg-gcp-canvas text-xs text-gcp-ink placeholder:text-gcp-ink-muted focus:border-gcp-blue focus:outline-none transition"
       >
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Kembali ke Triage
-      </a>
+    </div>
+
+    <div class="flex items-center gap-1.5 overflow-x-auto" id="severity-filter" role="group" aria-label="Filter severitas">
+      <button type="button" class="severity-pill active-sev inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="">
+        Semua
+      </button>
+      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV1">
+        <span class="sev-dot h-2 w-2 rounded-full bg-[#EA4335]" aria-hidden="true"></span>
+        SEV1
+      </button>
+      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV2">
+        <span class="sev-dot h-2 w-2 rounded-full bg-[#FBBC05]" aria-hidden="true"></span>
+        SEV2
+      </button>
+      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV3">
+        <span class="sev-dot h-2 w-2 rounded-full bg-[#4285F4]" aria-hidden="true"></span>
+        SEV3
+      </button>
+      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV4">
+        <span class="sev-dot h-2 w-2 rounded-full bg-[#80868B]" aria-hidden="true"></span>
+        SEV4
+      </button>
     </div>
   </div>
 
   <!-- ===== Daftar Riwayat ===== -->
-  <div class="rounded-lg border border-gcp-border bg-gcp-surface overflow-hidden">
+  <div class="rounded-md border border-gcp-border bg-gcp-surface overflow-hidden">
     {% if rows %}
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="border-b border-gcp-border bg-gcp-surface/50">
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">#</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">Judul</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted">Query</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Kategori</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-20">Severity</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-24">Waktu</th>
-          <th class="px-4 py-3 text-[10px] uppercase tracking-wider text-gcp-ink-muted text-center w-32">Aksi</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gcp-border">
-        {% for row in rows %}
-        <tr class="hover:bg-gcp-elevated/30 transition" id="history-row-{{ row.id }}">
-          <td class="px-4 py-3 text-xs font-mono text-gcp-ink-secondary">{{ row.id }}</td>
-          <td class="px-4 py-3 text-xs text-gcp-ink font-medium truncate max-w-xs" title="{{ row.title }}">{{ row.title }}</td>
-          <td class="px-4 py-3 text-xs text-gcp-ink-secondary truncate max-w-xs" title="{{ row.query }}">{{ row.query }}</td>
-          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.category }}</td>
-          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink">{{ row.severity }}</td>
-          <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink-muted">{{ row.created_at }}</td>
-          <td class="px-4 py-3 text-center">
-            <button
-              type="button"
-              class="btn-load-history inline-flex items-center gap-1 rounded-sm border border-gcp-border bg-gcp-surface px-2 py-1 text-[10px] font-medium text-gcp-ink hover:bg-gcp-blue-light/10 hover:text-gcp-blue-light transition"
-              data-id="{{ row.id }}"
-              title="Muat ke workspace"
-            >
-              <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5M5 5L19 19"/></svg>
-              Buka
-            </button>
-            <button
-              type="button"
-              class="btn-delete-history inline-flex items-center gap-1 rounded-sm border border-gcp-border bg-gcp-surface px-2 py-1 text-[10px] font-medium text-gcp-ink-secondary hover:border-gcp-error/40 hover:text-gcp-error hover:bg-gcp-error/10 transition"
-              data-id="{{ row.id }}"
-              title="Hapus riwayat"
-            >
-              <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-              Hapus
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" id="history-table">
+        <thead>
+          <tr class="border-b border-gcp-border bg-gcp-elevated">
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary w-14">#</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary">Judul</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary">Query</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary text-center w-28">Kategori</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary text-center w-24">Severity</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary text-center w-36">Waktu</th>
+            <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gcp-ink-secondary text-right w-40">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gcp-border">
+          {% for row in rows %}
+          <tr class="hover:bg-gcp-elevated transition-colors cursor-default" id="history-row-{{ row.id }}" data-severity="{{ row.severity }}">
+            <td class="px-4 py-3 text-xs font-mono text-gcp-ink-muted">{{ row.id }}</td>
+            <td class="px-4 py-3 text-xs text-gcp-ink font-medium truncate max-w-xs" title="{{ row.title }}">{{ row.title }}</td>
+            <td class="px-4 py-3 text-xs text-gcp-ink-secondary font-mono truncate max-w-xs" title="{{ row.query }}">{{ row.query }}</td>
+            <td class="px-4 py-3 text-center">
+              <span class="inline-block px-2 py-0.5 rounded-sm bg-gcp-canvas border border-gcp-border text-[11px] font-mono text-gcp-ink">
+                {{ row.category }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-center">
+              {% set scls = {
+                'SEV1': 'bg-[#EA4335] text-white',
+                'SEV2': 'bg-[#FBBC05] text-[#131316]',
+                'SEV3': 'bg-[#4285F4] text-white',
+                'SEV4': 'bg-[#80868B] text-white'
+              }.get(row.severity, 'bg-[#F29900] text-[#131316]') %}
+              <span class="inline-flex items-center justify-center rounded-sm px-2 py-0.5 text-[10px] font-mono font-bold tracking-wide {{ scls }}">
+                {{ row.severity }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-xs font-mono text-center text-gcp-ink-muted whitespace-nowrap">{{ row.created_at }}</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+              <div class="inline-flex items-center justify-end gap-1.5">
+                <button
+                  type="button"
+                  class="btn-load-history inline-flex items-center gap-1 rounded-sm border border-gcp-border-elev bg-gcp-canvas px-2.5 py-1 text-[11px] font-medium text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition"
+                  data-id="{{ row.id }}"
+                  title="Muat ke workspace"
+                >
+                  <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 5l5 5m0 0l-5 5m5-5H3"/>
+                  </svg>
+                  Buka
+                </button>
+                <button
+                  type="button"
+                  class="btn-delete-history inline-flex items-center gap-1 rounded-sm border border-gcp-border bg-gcp-canvas px-2.5 py-1 text-[11px] font-medium text-gcp-ink-secondary hover:border-[#EA4335] hover:bg-[#EA4335] hover:text-white transition"
+                  data-id="{{ row.id }}"
+                  title="Hapus riwayat"
+                >
+                  <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                  </svg>
+                  Hapus
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% else %}
-    <div class="px-6 py-10 text-center">
-      <div class="w-12 h-12 rounded-full bg-gcp-elevated flex items-center justify-center mx-auto mb-3 text-gcp-ink-muted">
+    <div class="px-6 py-12 text-center">
+      <div class="w-12 h-12 rounded-full bg-gcp-elevated border border-gcp-border flex items-center justify-center mx-auto mb-3 text-gcp-ink-muted">
         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       </div>
-      <p class="text-xs text-gcp-ink-muted">Belum ada laporan yang disimpan.</p>
-      <p class="text-[10px] text-gcp-ink-muted mt-1">
-        Jalankan triase lalu klik <span class="font-medium text-gcp-blue-light">Save Report</span> untuk menyimpan.
+      <p class="text-xs font-medium text-gcp-ink">Belum ada laporan yang disimpan.</p>
+      <p class="text-[11px] text-gcp-ink-muted mt-1">
+        Jalankan triase lalu klik <span class="font-semibold text-[#4285F4]">Save Report</span> untuk menyimpan.
       </p>
     </div>
     {% endif %}
-    </div>
-    </div>
-    {% endblock %}
+  </div>
+</div>
+{% endblock %}
 
-    {% block scripts %}
-    <script>
-      // ===== Toast sederhana (tersedia juga di halaman history) =====
-      function toast(msg) {
-        const el = document.createElement("div");
-        el.className =
-          "fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-sm border border-gcp-border bg-gcp-surface text-xs text-gcp-ink shadow-lg";
-        el.setAttribute("aria-live", "polite");
-        el.textContent = msg;
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 2800);
+{% block scripts %}
+<script>
+  // ===== Toast solid ala GCP Snackbar =====
+  function toast(msg) {
+    const el = document.createElement("div");
+    el.className =
+      "fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-sm border border-gcp-border-elev bg-gcp-elevated text-xs font-medium text-gcp-ink shadow-xl";
+    el.setAttribute("aria-live", "polite");
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+
+  // ===== Filter pencarian + pill severitas (Warna Solid sesuai Dashboard) =====
+  (function () {
+    const search = document.getElementById("history-search");
+    const pills = document.querySelectorAll("#severity-filter button");
+    const rows = document.querySelectorAll("#history-table tbody tr");
+    if (!search || !rows.length) return;
+
+    const SEV_ACTIVE_STYLES = {
+      "": ["bg-[#4285F4]", "text-white", "border-[#4285F4]"],
+      "SEV1": ["bg-[#EA4335]", "text-white", "border-[#EA4335]"],
+      "SEV2": ["bg-[#FBBC05]", "text-[#131316]", "border-[#FBBC05]", "font-semibold"],
+      "SEV3": ["bg-[#4285F4]", "text-white", "border-[#4285F4]"],
+      "SEV4": ["bg-[#80868B]", "text-white", "border-[#80868B]"],
+    };
+
+    const ALL_ACTIVE_CLASSES = [
+      "active-sev",
+      "bg-[#4285F4]", "border-[#4285F4]",
+      "bg-[#EA4335]", "border-[#EA4335]",
+      "bg-[#FBBC05]", "border-[#FBBC05]", "text-[#131316]", "font-semibold",
+      "bg-[#80868B]", "border-[#80868B]",
+      "text-white"
+    ];
+
+    function setActivePill(btn) {
+      pills.forEach((b) => {
+        b.classList.remove(...ALL_ACTIVE_CLASSES);
+        b.classList.add("bg-gcp-elevated", "text-gcp-ink-secondary", "border-gcp-border");
+        const dot = b.querySelector(".sev-dot");
+        if (dot) dot.classList.remove("bg-white", "bg-[#131316]");
+      });
+
+      const sev = btn.dataset.sev || "";
+      const activeClasses = SEV_ACTIVE_STYLES[sev] || SEV_ACTIVE_STYLES[""];
+      btn.classList.remove("bg-gcp-elevated", "text-gcp-ink-secondary", "border-gcp-border");
+      btn.classList.add("active-sev", ...activeClasses);
+
+      // Ubah warna titik indikator saat tombol aktif agar tetap kontras dengan background solid
+      const dot = btn.querySelector(".sev-dot");
+      if (dot) {
+        dot.classList.add(sev === "SEV2" ? "bg-[#131316]" : "bg-white");
+      }
+    }
+
+    function filter() {
+      const q = (search.value || "").toLowerCase();
+      const active = document.querySelector("#severity-filter button.active-sev");
+      const sev = active ? active.dataset.sev : "";
+      rows.forEach((row) => {
+        const matchQ = row.textContent.toLowerCase().includes(q);
+        const matchSev = !sev || row.dataset.severity === sev;
+        row.style.display = matchQ && matchSev ? "" : "none";
+      });
+    }
+
+    search.addEventListener("input", filter);
+    pills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setActivePill(btn);
+        filter();
+      });
+    });
+    const initialActive = document.querySelector("#severity-filter button.active-sev");
+    if (initialActive) setActivePill(initialActive);
+  })();
+
+  // ===== Tombol Hapus Riwayat (konfirmasi dua tahap, 3 detik, Solid Red) =====
+  document.querySelectorAll(".btn-delete-history").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+
+      // Klik kedua dalam jendela 3 detik -> hapus
+      if (btn.dataset.confirm === id) {
+        btn.removeAttribute("data-confirm");
+        btn.innerHTML = btn.getAttribute("data-orig") || btn.innerHTML;
+        btn.classList.remove("border-[#EA4335]", "bg-[#EA4335]", "text-white");
+        await doDelete(id);
+        return;
       }
 
-      // ===== Tombol Hapus Riwayat =====
-      document.querySelectorAll(".btn-delete-history").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          if (!confirm("Hapus riwayat ini?")) return;
-          const res = await fetch("{{ url_for('triage.history_delete', history_id=0) }}".replace("/0", "/" + id), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "X-CSRFToken": (() => {
-                try {
-                  return JSON.parse(document.body.getAttribute("hx-headers") || "{}")["X-CSRFToken"] || "";
-                } catch (_) { return ""; }
-              })(),
-            },
-          });
-          const data = await res.json();
-          if (data.ok) {
-            const row = document.getElementById("history-row-" + id);
-            if (row) row.remove();
-            toast("Riwayat dihapus.");
-          } else {
-            toast("Gagal menghapus: " + (data.error || ""));
-          }
-        });
-      });
+      // Klik pertama -> tampilkan "Yakin?"
+      btn.setAttribute("data-orig", btn.innerHTML);
+      btn.setAttribute("data-confirm", id);
+      btn.innerHTML = '<span>Yakin?</span>';
+      btn.classList.add("border-[#EA4335]", "bg-[#EA4335]", "text-white");
 
-      // ===== Tombol Buka (Load) Riwayat =====
-      document.querySelectorAll(".btn-load-history").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          const res = await fetch("{{ url_for('triage.history_load', history_id=0) }}".replace("/0", "/" + id), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "X-CSRFToken": (() => {
-                try {
-                  return JSON.parse(document.body.getAttribute("hx-headers") || "{}")["X-CSRFToken"] || "";
-                } catch (_) { return ""; }
-              })(),
-            },
-          });
-          const data = await res.json();
-          if (!data.ok) {
-            toast("Gagal memuat riwayat: " + (data.error || ""));
-            return;
-          }
-          // Simpan ke sessionStorage DAN localStorage sebagai fallback
-          const payload = {
-            query: data.query || "",
-            category: data.category || "",
-            severity: data.severity || "",
-            top_runbook_ids: data.top_runbook_ids || [],
-            top_runbooks: data.top_runbooks || [],
-            top3_html: data.top3_html || "",
-          };
-          sessionStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
-          localStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
-          window.location.href = "{{ url_for('triage.index') }}";
-        });
+      setTimeout(() => {
+        if (btn.dataset.confirm === id) {
+          btn.removeAttribute("data-confirm");
+          btn.innerHTML = btn.getAttribute("data-orig") || btn.innerHTML;
+          btn.classList.remove("border-[#EA4335]", "bg-[#EA4335]", "text-white");
+        }
+      }, 3000);
+    });
+  });
+
+  async function doDelete(id) {
+    const res = await fetch("{{ url_for('triage.history_delete', history_id=0) }}".replace("/0", "/" + id), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": (() => {
+          try {
+            return JSON.parse(document.body.getAttribute("hx-headers") || "{}")["X-CSRFToken"] || "";
+          } catch (_) { return ""; }
+        })(),
+      },
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const row = document.getElementById("history-row-" + id);
+      if (row) row.remove();
+      toast("Riwayat dihapus.");
+    } else {
+      toast("Gagal menghapus: " + (data.error || ""));
+    }
+  }
+
+  // ===== Tombol Buka (Load) Riwayat =====
+  document.querySelectorAll(".btn-load-history").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const res = await fetch("{{ url_for('triage.history_load', history_id=0) }}".replace("/0", "/" + id), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": (() => {
+            try {
+              return JSON.parse(document.body.getAttribute("hx-headers") || "{}")["X-CSRFToken"] || "";
+            } catch (_) { return ""; }
+          })(),
+        },
       });
-    </script>
-    {% endblock %}
+      const data = await res.json();
+      if (!data.ok) {
+        toast("Gagal memuat riwayat: " + (data.error || ""));
+        return;
+      }
+      const payload = {
+        query: data.query || "",
+        category: data.category || "",
+        severity: data.severity || "",
+        top_runbook_ids: data.top_runbook_ids || [],
+        top_runbooks: data.top_runbooks || [],
+        top3_html: data.top3_html || "",
+        triage_html: data.triage_html || "",
+      };
+      sessionStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
+      localStorage.setItem("sre_pending_history_load", JSON.stringify(payload));
+      window.location.href = "{{ url_for('triage.index') }}";
+    });
+  });
+</script>
+{% endblock %}

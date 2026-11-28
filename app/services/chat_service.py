@@ -4,10 +4,13 @@ Jawaban WAJIB hanya bersumber dari dokumen runbook yang dikunci pada segment
 percakapan aktif. Kegagalan LLM jatuh ke jawaban deterministik lokal.
 """
 
+import logging
 from typing import Any
 
 from app.extensions import llm
 from app.repositories.runbook_repo import RunbookRepository
+
+logger = logging.getLogger(__name__)
 
 _SYSTEM_INSTRUCTION = (
     "You are an SRE Incident Mitigation Assistant. "
@@ -67,32 +70,50 @@ class ChatService:
             )
 
         if is_quick_action and prompt == _QUICK_PROMPTS["checklist"]:
-            lines = ["Checklist mitigasi & verifikasi (disusun dari referensi aktif):"]
-            for idx, rb in enumerate(runbooks, start=1):
-                lines.append(f"\n#{idx} {rb['title']}")
-                lines.extend(rb["resolution_steps"].splitlines())
-            return "\n".join(lines)
+            return self._local_checklist(runbooks)
 
         if is_quick_action and prompt == _QUICK_PROMPTS["compare"]:
-            lines = ["Perbandingan akar masalah & gejala antar referensi:"]
-            for idx, rb in enumerate(runbooks, start=1):
-                lines.append(f"\n#{idx} {rb['title']}")
-                lines.append(f"  Gejala: {rb['symptoms_log'][:300]}")
-                lines.append(f"  Akar masalah: {rb['root_cause']}")
-            return "\n".join(lines)
+            return self._local_compare(runbooks)
 
         if is_quick_action and prompt == _QUICK_PROMPTS["status_draft"]:
-            rb = runbooks[0]
-            return (
-                "Draf pengumuman status (dari referensi aktif):\n\n"
-                f"[INCURRING] Sedang menangani insiden terkait "
-                f"'{rb['title']}' (kategori {rb['category']}, severity {rb['severity']}). "
-                f"Dampak: {rb['symptoms_log'][:200]}. "
-                f"Langkah mitigasi mengacu pada runbook #{rb['id']}; "
-                "pembaruan berikutnya akan dikirim setelah mitigasi tervalidasi."
-            )
+            return self._local_status_draft(runbooks)
 
         # Pertanyaan bebas: berikan ringkasan referensi yang relevan secara lexical
+        return self._local_freeform(runbooks)
+
+    @staticmethod
+    def _local_checklist(runbooks: list[dict[str, Any]]) -> str:
+        lines = ["Checklist mitigasi & verifikasi (disusun dari referensi aktif):"]
+        for idx, rb in enumerate(runbooks, start=1):
+            lines.append(f"\n#{idx} {rb['title']}")
+            lines.extend(rb["resolution_steps"].splitlines())
+        return "\n".join(lines)
+
+    @staticmethod
+    def _local_compare(runbooks: list[dict[str, Any]]) -> str:
+        lines = ["Perbandingan akar masalah & gejala antar referensi:"]
+        for idx, rb in enumerate(runbooks, start=1):
+            lines.append(f"\n#{idx} {rb['title']}")
+            lines.append(f"  Gejala: {rb['symptoms_log'][:300]}")
+            lines.append(f"  Akar masalah: {rb['root_cause']}")
+        return "\n".join(lines)
+
+    @staticmethod
+    def _local_status_draft(runbooks: list[dict[str, Any]]) -> str:
+        if not runbooks:
+            return "Draf pengumuman status tidak tersedia: tidak ada referensi runbook aktif."
+        rb = runbooks[0]
+        return (
+            "Draf pengumuman status (dari referensi aktif):\n\n"
+            f"[INCURRING] Sedang menangani insiden terkait "
+            f"'{rb['title']}' (kategori {rb['category']}, severity {rb['severity']}). "
+            f"Dampak: {rb['symptoms_log'][:200]}. "
+            f"Langkah mitigasi mengacu pada runbook #{rb['id']}; "
+            "pembaruan berikutnya akan dikirim setelah mitigasi tervalidasi."
+        )
+
+    @staticmethod
+    def _local_freeform(runbooks: list[dict[str, Any]]) -> str:
         return (
             "Layanan AI sintesis sedang offline. Ringkasan referensi aktif berikut "
             "merupakan data langkah perbaikan yang tersedia:\n\n"
@@ -131,8 +152,8 @@ class ChatService:
                         "answer": text,
                         "is_fallback": is_fallback,
                     }
-            except Exception:  # noqa: BLE001 - graceful degradation
-                pass
+            except Exception as exc:  # noqa: BLE001 - graceful degradation
+                logger.warning("[Chat] LLM gagal, fallback ke jawaban lokal: %s", exc)
 
         return {
             "user_message": prompt,

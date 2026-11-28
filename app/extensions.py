@@ -39,7 +39,7 @@ class LLM:
         api_key = os.environ.get("GEMINI_API_KEY") or app.config.get("GEMINI_API_KEY")
         model = (
             os.environ.get("GEMINI_MODEL")
-            or app.config.get("GEMINI_MODEL", "gemini-2.5-flash")
+            or app.config.get("GEMINI_MODEL", "gemini-3.8-flash")
         )
         if api_key and genai is not None:
             try:
@@ -83,45 +83,6 @@ class LLM:
             self.custom_enabled,
             self.custom_model,
         )
-        # --- Provider 1: Gemini (native google-genai) ---
-        api_key = os.environ.get("GEMINI_API_KEY") or app.config.get("GEMINI_API_KEY")
-        model = (
-            os.environ.get("GEMINI_MODEL")
-            or app.config.get("GEMINI_MODEL", "gemini-2.5-flash")
-        )
-        if api_key and genai is not None:
-            try:
-                self.gemini_client = genai.Client(api_key=api_key)
-                self.gemini_enabled = True
-                self.gemini_model = model
-            except Exception:  # pragma: no cover - client init failure
-                logger.warning("[LLM Init Gemini Error] %s", exc)
-                self.gemini_client = None
-                self.gemini_enabled = False
-        else:
-            self.gemini_enabled = False
-
-        # --- Provider 2: Custom / OpenAI-compatible (hcnsec.cn) ---
-        ckey = os.environ.get("CUSTOM_API_KEY") or app.config.get("CUSTOM_API_KEY")
-        cbase = (
-            os.environ.get("CUSTOM_BASE_URL")
-            or app.config.get("CUSTOM_BASE_URL", "https://api.hcnsec.cn/v1")
-        )
-        cmodel = (
-            os.environ.get("CUSTOM_MODEL")
-            or app.config.get("CUSTOM_MODEL", "Qwen3.8-Flash-Next")
-        )
-        if ckey and OpenAI is not None:
-            try:
-                self.custom_client = OpenAI(api_key=ckey, base_url=cbase, timeout=30.0)
-                self.custom_enabled = True
-                self.custom_model = cmodel
-            except Exception:  # pragma: no cover - client init failure
-                self.custom_client = None
-                self.custom_enabled = False
-        else:
-            self.custom_enabled = False
-
     @staticmethod
     def _extract_json(raw_text: str) -> dict:
         """Bersihkan blok <think>...</think> atau ```json ... ``` sebelum json.loads."""
@@ -167,8 +128,8 @@ class LLM:
                 text = (response.text or "").strip() if response else ""
                 if text:
                     return text, False
-            except Exception:  # noqa: BLE001 - coba provider lain
-                pass
+            except Exception as exc:  # noqa: BLE001 - coba provider lain
+                logger.warning("[LLM] Gemini generate_text gagal: %s", exc)
 
         # Custom OpenAI-compatible
         if self.custom_enabled and self.custom_client is not None:
@@ -188,8 +149,8 @@ class LLM:
                 )
                 if reply:
                     return reply, False
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[LLM] Custom generate_text gagal: %s", exc)
 
         return "", True
 
@@ -202,8 +163,6 @@ class LLM:
 
         Mengembalikan (dict, is_fallback).
         """
-        import json
-
         # Gemini
         if self.gemini_enabled and self.gemini_client is not None:
             try:
@@ -221,8 +180,8 @@ class LLM:
                 )
                 if response and response.text:
                     return json.loads(response.text), False
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[LLM] Gemini generate_json gagal: %s", exc)
 
         # Custom OpenAI-compatible: paksa JSON melalui system prompt
         if self.custom_enabled and self.custom_client is not None:
@@ -249,13 +208,13 @@ class LLM:
                 )
                 if text:
                     return json.loads(text), False
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[LLM] Custom generate_json gagal: %s", exc)
 
         return None, True
 
 
-db_getter = None
+db_getter = None  # Hanya untuk injeksi DB dalam tes (conftest); produksi pakai get_db() standar.
 
 _SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "schema.sql")
 

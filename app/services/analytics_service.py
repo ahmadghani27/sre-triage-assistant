@@ -21,9 +21,9 @@ class AnalyticsService:
 
     def category_distribution(self) -> dict[str, int]:
         """Distribusi kategori: triase riwayat sesi + seed KB sebagai basis demo."""
-        totals: dict[str, int] = {row["category"]: 0 for row in self.runbook_repo.count_by_category()}
+        totals: dict[str, int] = {}
         for row in self.runbook_repo.count_by_category():
-            totals[row["category"]] += int(row["total"])
+            totals[row["category"]] = totals.get(row["category"], 0) + int(row["total"])
         for row in self.log_repo.count_by_category():
             totals[row["category"]] = totals.get(row["category"], 0) + int(row["total"])
         return dict(sorted(totals.items(), key=lambda kv: (-kv[1], kv[0])))

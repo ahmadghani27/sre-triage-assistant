@@ -23,7 +23,7 @@ class TestPages:
         r = client.get("/")
         assert r.status_code == 200
         html = r.data.decode()
-        assert "Paste Error Log" in html
+        assert "RAW ERROR LOG / STACK TRACE" in html
         assert 'id="triage-output-area"' in html
         assert 'id="top3-reference-panel"' in html
         assert 'id="workspace-state"' in html
@@ -81,8 +81,8 @@ class TestTriageEndpoint:
         assert r.status_code == 200
         body = r.data.decode()
 
-        assert "Triage Result" in body
-        assert "rahasia tersensor" in body
+        assert "lexical fallback" in body
+        assert "rahasia disensor" in body
         assert "AI offline" in body
         assert 'id="top3-reference-panel"' in body
         assert "hx-swap-oob" in body
@@ -110,7 +110,7 @@ class TestTriageEndpoint:
         payload = 'ERROR: src/db/(pool)[0] - "pool exhausted" * 5 "quoted"'
         r = client.post("/triage", data={"raw_log": payload})
         assert r.status_code == 200
-        assert "Triage Result" in r.data.decode()
+        assert "lexical fallback" in r.data.decode()
 
     def test_triage_csrf_required(self, app_csrf):
         client = app_csrf.test_client()
@@ -211,3 +211,64 @@ class TestChatEndpoint:
         r = client.post("/chat", data={"quick_action": "checklist", "locked_runbook_ids": ""})
         assert r.status_code == 200
         assert "Strict-RAG Assistant" in r.data.decode()
+
+
+class TestTriageBlueprintHelpers:
+    """Tes untuk helper yang diekstrak dari triage() dan refine()."""
+
+    def test_build_locked_ids_joins_ranked_ids(self):
+        from app.blueprints.triage import _build_locked_ids
+
+        class FakeResult:
+            ranked_ids = [5, 1, 9]
+
+        assert _build_locked_ids(FakeResult()) == "5,1,9"
+
+    def test_render_oob_partials_returns_top3_and_state(self, app):
+        from app.blueprints.triage import _render_oob_partials
+
+        class Runbook:
+            def __init__(self, rid, title, category, severity, root_cause, resolution_steps):
+                self.id = rid
+                self.title = title
+                self.category = category
+                self.severity = severity
+                self.root_cause = root_cause
+                self.resolution_steps = resolution_steps
+
+        class FakeResult:
+            ranked_ids = [1]
+            top_runbooks = [
+                Runbook(1, "Runbook A", "network", "SEV2", "upstream mismatch", "1. Drain\n2. Verify"),
+            ]
+            sanitized_log = "log bersih"
+            category = "network"
+            severity = "SEV2"
+            redaction_count = 0
+            redaction_labels = []
+            is_fallback = False
+
+        with app.app_context():
+            partial = _render_oob_partials(FakeResult(), "log bersih", "1")
+        assert "hx-swap-oob" in partial
+        assert "top3-reference-panel" in partial or "top3" in partial.lower()
+        assert "workspace-state" in partial
+
+    def test_render_triage_partial_includes_result(self, app):
+        from app.blueprints.triage import _render_triage_partial
+
+        class FakeResult:
+            ranked_ids = [1]
+            top_runbooks = []
+            sanitized_log = "log bersih"
+            category = "network"
+            severity = "SEV2"
+            reasoning = "fallback"
+            redaction_count = 0
+            redaction_labels = []
+            is_fallback = False
+
+        with app.app_context():
+            partial = _render_triage_partial(FakeResult(), "log bersih", "1", oob=True)
+        assert "hx-swap-oob" in partial
+        assert "log bersih" in partial or "network" in partial
