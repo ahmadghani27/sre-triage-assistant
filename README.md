@@ -16,18 +16,16 @@ Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root C
 
 ```
 sre-triage-assistant/
+├── .github/
+│   └── workflows/
+│       └── ci.yml      # CI: test + security (bandit, pip-audit)
 ├── app/                # Flask application factory, blueprints, services, repositories
 ├── data/               # app.db, schema.sql, seed_runbooks.json
-├── other/              # Catatan implementasi dan deskripsi proyek
 ├── scripts/
 │   ├── fetch/          # Pengambilan runbook dari sumber publik (5 skrip)
 │   ├── processing/     # Normalisasi hasil fetch → seed_runbooks.json
 │   └── seed.py         # Seeder database (idempotent)
-├── .github/
-│   └── workflows/
-│       └── ci.yml              # CI: test + security (bandit, pip-audit)
 ├── tests/              # Suite pengujian endpoints & layanan
-├── deploy_docker.md    # Keputusan penerapan Docker (pendekatan B: single container, runtime seed)
 ├── Dockerfile          # Image Python slim, non-root user, gunicorn
 ├── .dockerignore       # Exclude .venv, __pycache__, .git, data/app.db, .env*, tests/, other/
 ├── docker-compose.yml  # Service app, port 5000:5000, volume data/, env_file .env.docker
