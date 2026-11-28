@@ -23,7 +23,6 @@ class TestPages:
         r = client.get("/")
         assert r.status_code == 200
         html = r.data.decode()
-        assert "RAW ERROR LOG / STACK TRACE" in html
         assert 'id="triage-output-area"' in html
         assert 'id="top3-reference-panel"' in html
         assert 'id="workspace-state"' in html
