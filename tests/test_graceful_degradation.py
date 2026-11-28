@@ -26,7 +26,9 @@ class TestTriageFallback:
         assert 1 <= len(result.top_runbooks) <= 3
         assert len(result.ranked_ids) == len(result.top_runbooks)
         assert result.category == "unclassified"
-        assert result.severity == "SEV-PENDING"
+        # Saat LLM offline, severity diambil dari runbook teratas hasil
+        # pencarian lexical (bukan selalu SEV-PENDING).
+        assert result.severity == "SEV2"
         assert result.reasoning == ""
         assert all(
             r["category"] in {"network", "database", "deployment", "resource"}
@@ -113,3 +115,126 @@ class TestChatFallback:
         prompt, is_quick = ChatService.expand_quick_action("bogus", "  pertanyaan user  ")
         assert is_quick is False
         assert prompt == "pertanyaan user"
+
+
+class TestChatServiceLocalAnswers:
+    """Tes untuk fungsi pendek _local_answer per quick_action."""
+
+    def _runbooks(self):
+        return [
+            {
+                "id": 1,
+                "title": "Runbook A",
+                "category": "network",
+                "severity": "SEV2",
+                "symptoms_log": "502 Bad Gateway",
+                "root_cause": "upstream mismatch",
+                "resolution_steps": "1. Drain old pods\n2. Verify nginx upstream\n3. Roll back if mismatch",
+            },
+            {
+                "id": 2,
+                "title": "Runbook B",
+                "category": "database",
+                "severity": "SEV1",
+                "symptoms_log": "pool exhausted",
+                "root_cause": "max_connections exceeded",
+                "resolution_steps": "1. Identify idle connections\n2. Terminate idle backends\n3. Introduce PgBouncer",
+            },
+        ]
+
+    def test_local_checklist_returns_steps_per_runbook(self, app):
+        from app.services.chat_service import ChatService
+
+        answer = ChatService._local_checklist(self._runbooks())
+        assert "Checklist mitigasi" in answer
+        assert "#1 Runbook A" in answer
+        assert "#2 Runbook B" in answer
+        assert "Drain old pods" in answer
+        assert "Introduce PgBouncer" in answer
+
+    def test_local_checklist_empty_runbooks(self, app):
+        from app.services.chat_service import ChatService
+
+        answer = ChatService._local_checklist([])
+        assert "Checklist mitigasi" in answer
+
+    def test_local_compare_returns_root_cause_and_symptoms(self, app):
+        from app.services.chat_service import ChatService
+
+        answer = ChatService._local_compare(self._runbooks())
+        assert "Perbandingan" in answer
+        assert "Runbook A" in answer
+        assert "upstream mismatch" in answer
+        assert "max_connections exceeded" in answer
+
+    def test_local_status_draft_uses_first_runbook(self, app):
+        from app.services.chat_service import ChatService
+
+        answer = ChatService._local_status_draft(self._runbooks())
+        assert "Runbook A" in answer
+        assert "network" in answer
+        assert "SEV2" in answer
+
+    def test_local_status_draft_empty_runbooks(self, app):
+        from app.services.chat_service import ChatService
+
+        answer = ChatService._local_status_draft([])
+        assert answer  # tidak crash meski kosong
+
+
+class TestSearchServiceExtractedHelpers:
+    """Tes untuk fungsi-fungsi pendek yang diekstrak dari classify_and_rerank."""
+
+    def test_build_json_schema_has_required_properties(self):
+        from app.services.search_service import SearchService
+
+        schema = SearchService._build_json_schema()
+        assert schema["type"] == "object"
+        assert set(schema["required"]) == {
+            "category",
+            "severity",
+            "reasoning",
+            "ranked_runbook_ids",
+        }
+        assert set(schema["properties"].keys()) == set(schema["required"])
+
+    def test_build_llm_payload_keys(self):
+        from app.services.search_service import SearchService
+
+        candidates = [{"id": 1, "title": "x", "category": "network", "severity": "SEV1", "symptoms_log": "err"}]
+        payload = SearchService._build_llm_payload("nginx 502 error", candidates)
+        assert payload["sanitized_log"] == "nginx 502 error"
+        assert payload["candidates"] == [{"id": 1, "title": "x", "category": "network", "severity": "SEV1", "symptoms": "err"}]
+        assert "instruction" in payload
+
+    def test_filter_ranked_ids_keeps_only_allowed(self):
+        from app.services.search_service import SearchService
+
+        allowed = {1, 2, 3}
+        assert SearchService._filter_ranked_ids([1, 2, 3, 99], allowed, [1, 2]) == [1, 2, 3]
+        assert SearchService._filter_ranked_ids([99, 100], allowed, [1]) == [1]
+        assert SearchService._filter_ranked_ids([3, 1, 2], allowed, [9]) == [3, 1, 2]
+
+    def test_verdict_to_result_maps_fields(self):
+        from app.services.search_service import SearchService
+
+        verdict = {
+            "category": "database",
+            "severity": "SEV1",
+            "reasoning": "conn pool exhausted",
+            "ranked_runbook_ids": [5, 6],
+        }
+        result = SearchService._verdict_to_result(verdict, fallback_ids=[1, 2])
+        assert result["category"] == "database"
+        assert result["severity"] == "SEV1"
+        assert result["reasoning"] == "conn pool exhausted"
+        assert result["ranked_runbook_ids"] == [5, 6]
+
+    def test_verdict_to_result_fills_defaults(self):
+        from app.services.search_service import SearchService
+
+        result = SearchService._verdict_to_result({}, fallback_ids=[9])
+        assert result["category"] == "unclassified"
+        assert result["severity"] == "SEV-PENDING"
+        assert result["reasoning"] == ""
+        assert result["ranked_runbook_ids"] == [9]
