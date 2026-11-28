@@ -87,22 +87,6 @@ class RunbookRepository:
         by_id = {row["id"]: row for row in found}
         return [by_id[i] for i in ids if i in by_id]
 
-    def get_most_frequent_in_category(self, category: str, limit: int = 3) -> list[dict[str, Any]]:
-        """Fallback ketika FTS5 tidak mengembalikan baris sama sekali."""
-        db = get_db()
-        cur = db.execute(
-            """
-            SELECT r.id, r.title, r.category, r.severity, r.symptoms_log,
-                   r.root_cause, r.resolution_steps, r.source_ref, 0.0 AS score
-            FROM runbooks r
-            WHERE r.category = ?
-            ORDER BY r.created_at DESC
-            LIMIT ?
-            """,
-            (category, limit),
-        )
-        return _rows_to_dicts(cur.fetchall())
-
     def get_any(self, limit: int = 3) -> list[dict[str, Any]]:
         """Fallback terakhir: runbook terbaru apa pun kategorinya."""
         db = get_db()
@@ -123,7 +107,8 @@ class RunbookRepository:
         db = get_db()
         cur = db.execute(
             """
-            SELECT id, title, category, severity, source_ref, created_at
+            SELECT id, title, category, severity, source_ref, created_at,
+                   root_cause, resolution_steps
             FROM runbooks
             ORDER BY created_at DESC
             """
