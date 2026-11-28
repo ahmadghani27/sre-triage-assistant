@@ -20,7 +20,6 @@ Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root C
 sre-triage-assistant/
 ├── app/                # Flask application factory, blueprints, services, repositories
 ├── data/               # app.db, schema.sql, seed_runbooks.json (gitignored)
-├── docs/               # PRD, MVP, DESIGN, ARCHI, DATA_FLOW, STRUKTUR_DIREKTORI
 ├── scripts/
 │   ├── fetch/          # Pengambilan runbook dari Prometheus & Stack Exchange
 │   ├── processing/     # Normalisasi hasil fetch → seed_runbooks.json
