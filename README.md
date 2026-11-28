@@ -2,8 +2,6 @@
 
 Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root Cause Analysis) dan standarisasi mitigasi insiden SRE. Menerima raw error log, menyensor data sensitif secara otomatis, mengklasifikasikan kategori & severitas insiden, menemukan Top-3 referensi runbook relevan via pencarian hybrid (SQLite FTS5 BM25 + LLM re-ranking), serta menyediakan asisten tanya jawab terkunci (Strict-RAG) dan visualisasi analitik.
 
-> **Stack:** Flask 3 (Application Factory + Blueprints), SQLite FTS5/BM25, Gemini (google-genai) dengan OpenAI-compatible fallback, HTMX, Chart.js, python-dotenv, Flask-WTF CSRF, pydantic.
-
 ## Fitur utama
 
 - **Sanitasi log otomatis**: Regex filter sisi server menyensor Bearer token, API key, connection string DB, email menjadi `<REDACTED>` sebelum log diproses atau dikirim ke LLM.
@@ -20,7 +18,6 @@ Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root C
 sre-triage-assistant/
 ├── app/                # Flask application factory, blueprints, services, repositories
 ├── data/               # app.db, schema.sql, seed_runbooks.json
-├── docs/               # PRD, MVP, DESIGN, ARCHI, DATA_FLOW, STRUKTUR_DIREKTORI
 ├── other/              # Catatan implementasi dan deskripsi proyek
 ├── scripts/
 │   ├── fetch/          # Pengambilan runbook dari sumber publik (5 skrip)
