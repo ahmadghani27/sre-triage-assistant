@@ -58,12 +58,13 @@ class RedactionResult:
 
 
 def redact_secrets(text: str) -> RedactionResult:
-    """Sensor pola sensitif dalam teks dan kembalikan beserta jumlah redaksi.
+    """Sensor pola sensitif dalam teks dan kembalikan hasil beserta jumlah redaksi.
 
-    Semua pola diperlakukan dengan penyensoran penuh token kecuali jika memakai
-    grup penanda (prefix) agar format log tetap terbaca, misal:
-    ``Authorization: Bearer eyJhbGi...`` menjadi
-    ``Authorization: Bearer <REDACTED>``.
+    Pola seperti bearer token dan URI database diformat dengan prefix dipertahankan
+    (misal ``Authorization: Bearer <REDACTED>``) agar format log tetap terbaca dan
+    pola tetap teridentifikasi sebagai struktur kredensial, tanpa membocorkan nilai
+    sebenarnya. Pola lain (email, IPv4, API key murni) diganti sepenuhnya karena
+    tidak memiliki prefix yang bermakna untuk dipertahankan.
     """
     if not text:
         return RedactionResult(text=text or "", count=0, labels=[])
