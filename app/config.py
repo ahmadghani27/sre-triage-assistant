@@ -9,8 +9,8 @@ class Config:
     MAX_CONTENT_LENGTH = 5000
     DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "app.db")
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-    # Sinkronkan default dengan asumsi extensions.py: gemini-3.8-flash
-    GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
+    # Sinkronkan default dengan asumsi extensions.py: gemini-3.6-flash
+    GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
     CUSTOM_API_KEY = os.environ.get("CUSTOM_API_KEY")
     CUSTOM_BASE_URL = os.environ.get("CUSTOM_BASE_URL", "https://api.hcnsec.cn/v1")
     CUSTOM_MODEL = os.environ.get("CUSTOM_MODEL", "Qwen3.8-Flash-Next")

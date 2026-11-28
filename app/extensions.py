@@ -39,7 +39,7 @@ class LLM:
         api_key = os.environ.get("GEMINI_API_KEY") or app.config.get("GEMINI_API_KEY")
         model = (
             os.environ.get("GEMINI_MODEL")
-            or app.config.get("GEMINI_MODEL", "gemini-3.8-flash")
+            or app.config.get("GEMINI_MODEL", "gemini-3.6-flash")
         )
         if api_key and genai is not None:
             try:
