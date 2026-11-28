@@ -15,6 +15,6 @@ fi
 python scripts/seed.py
 
 # Jalankan production WSGI server
-exec gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 \
+exec gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 8 \
     --access-logfile - --error-logfile - \
     "app:create_app()"

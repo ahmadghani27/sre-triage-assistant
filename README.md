@@ -23,7 +23,16 @@ sre-triage-assistant/
 │   ├── fetch/          # Pengambilan runbook dari sumber publik (5 skrip)
 │   ├── processing/     # Normalisasi hasil fetch → seed_runbooks.json
 │   └── seed.py         # Seeder database (idempotent)
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # CI: test + security (bandit, pip-audit)
 ├── tests/              # Suite pengujian endpoints & layanan
+├── deploy_docker.md    # Keputusan penerapan Docker (pendekatan B: single container, runtime seed)
+├── Dockerfile          # Image Python slim, non-root user, gunicorn
+├── .dockerignore       # Exclude .venv, __pycache__, .git, data/app.db, .env*, tests/, other/
+├── docker-compose.yml  # Service app, port 5000:5000, volume data/, env_file .env.docker
+├── entrypoint.sh       # Runtime seed (idempoten) lalu gunicorn bind 0.0.0.0:5000
+├── .env.docker         # Contoh env vars untuk container (secrets tidak dikomit)
 ├── requirements.txt
 └── run.py              # Titik masuk aplikasi
 ```
@@ -68,11 +77,21 @@ Seeder membaca `data/schema.sql` dan `data/seed_runbooks.json`, lalu menghasilka
 
 ### 4. Jalankan aplikasi
 
+**Development:**
+
 ```bash
 flask --app "app:create_app()" --debug run
 ```
 
 Buka `http://localhost:5000`. Tidak perlu login untuk triase (sesi anonim).
+
+**Produksi (Docker):**
+
+```bash
+docker compose up --build
+```
+
+Aplikasi akan tersedia di `http://localhost:5000` dengan `gunicorn` sebagai WSGI server production. Detail konfigurasi lihat `deploy_docker.md` dan `Dockerfile`.
 
 ## Endpoint ringkasan
 
@@ -89,6 +108,21 @@ Buka `http://localhost:5000`. Tidak perlu login untuk triase (sesi anonim).
 | `POST` | `/triage/save-report` | Simpan hasil triase ke riwayat |
 | `POST` | `/triage/history/<id>/delete` | Hapus satu riwayat |
 | `POST` | `/triage/history/<id>/load` | Muat ulang riwayat ke workspace |
+
+## CI (GitHub Actions)
+
+Workflow ada di `.github/workflows/ci.yml`. Dijalankan pada:
+
+- `push` ke `main` / `master`
+- `pull_request` ke `main` / `master`
+- `workflow_dispatch` (manual)
+
+Terdapat dua job:
+
+1. **test** — install dependensi dari `requirements.txt`, jalankan `pytest` pada matrix Python `3.12` dan `3.13`.
+2. **security** (butuh `test` lulus) — `pip-audit` untuk kerentanan dependensi dan `bandit` untuk static security scan pada `app/`. Laporan diunggah sebagai artifact (30 hari).
+
+Keamanan: `permissions` read-only, `concurrency` dengan `cancel-in-progress`, `checkout` tanpa credentials, dan tidak ada secret yang dibaked ke image.
 
 ## Pengujian
 
