@@ -36,6 +36,40 @@ def _get_history_repo() -> HistoryRepository:
     return _history_repo
 
 
+def _build_locked_ids(result) -> str:
+    """Gabung ranked_ids menjadi string koma untuk disimpan di hidden state."""
+    return ",".join(str(i) for i in result.ranked_ids)
+
+
+def _render_triage_partial(result, sanitized_log: str, locked_ids: str, oob: bool = False) -> str:
+    """Render _triage_result.html dengan result dan locked_ids."""
+    return render_template(
+        "partials/_triage_result.html",
+        result=result,
+        sanitized_log=sanitized_log,
+        locked_ids=locked_ids,
+        oob=oob,
+    )
+
+
+def _render_oob_partials(result, sanitized_log: str, locked_ids: str) -> str:
+    """Render panel Top-3 + workspace state sebagai OOB swap (satu respons)."""
+    top3 = render_template(
+        "partials/_top3_panel.html",
+        runbooks=result.top_runbooks,
+        oob=True,
+    )
+    state = render_template(
+        "partials/_workspace_state.html",
+        sanitized_log=sanitized_log,
+        locked_ids=locked_ids,
+        category=result.category,
+        severity=result.severity,
+        oob=True,
+    )
+    return top3 + state
+
+
 @triage_bp.get("/")
 def index():
     return render_template("workspace.html")
@@ -52,29 +86,12 @@ def triage():
         )
 
     result = _get_triage_service().run(raw_log)
-    locked_ids = ",".join(str(i) for i in result.ranked_ids)
+    locked_ids = _build_locked_ids(result)
 
-    partial = render_template(
-        "partials/_triage_result.html",
-        result=result,
-        sanitized_log=result.sanitized_log,
-        locked_ids=locked_ids,
-    )
+    partial = _render_triage_partial(result, result.sanitized_log, locked_ids)
     # OOB swap: panel kanan Top-3 + hidden state, dikirim dalam satu respons
-    top3 = render_template(
-        "partials/_top3_panel.html",
-        runbooks=result.top_runbooks,
-        oob=True,
-    )
-    state = render_template(
-        "partials/_workspace_state.html",
-        sanitized_log=result.sanitized_log,
-        locked_ids=locked_ids,
-        category=result.category,
-        severity=result.severity,
-        oob=True,
-    )
-    return partial + top3 + state
+    oob = _render_oob_partials(result, result.sanitized_log, locked_ids)
+    return partial + oob
 
 
 @triage_bp.post("/triage/refine")
@@ -87,30 +104,12 @@ def refine():
         )
 
     result = _get_triage_service().refine(sanitized_log, refine_note)
-    locked_ids = ",".join(str(i) for i in result.ranked_ids)
+    locked_ids = _build_locked_ids(result)
 
     divider = render_template("partials/_context_divider.html")
-    triage_partial = render_template(
-        "partials/_triage_result.html",
-        result=result,
-        sanitized_log=result.sanitized_log,
-        locked_ids=locked_ids,
-        oob=True,
-    )
-    top3 = render_template(
-        "partials/_top3_panel.html",
-        runbooks=result.top_runbooks,
-        oob=True,
-    )
-    state = render_template(
-        "partials/_workspace_state.html",
-        sanitized_log=result.sanitized_log,
-        locked_ids=locked_ids,
-        category=result.category,
-        severity=result.severity,
-        oob=True,
-    )
-    return divider + triage_partial + top3 + state
+    triage_partial = _render_triage_partial(result, result.sanitized_log, locked_ids, oob=True)
+    oob = _render_oob_partials(result, result.sanitized_log, locked_ids)
+    return divider + triage_partial + oob
 
 
 @triage_bp.post("/chat")
