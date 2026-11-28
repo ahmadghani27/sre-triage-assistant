@@ -102,18 +102,27 @@ class RunbookRepository:
         )
         return _rows_to_dicts(cur.fetchall())
 
-    def list_all(self) -> list[dict[str, Any]]:
-        """Semua runbook yang tersedia di DB, urutan terbaru dulu."""
+    def list_all(self, page: int = 1, page_size: int | None = None) -> list[dict[str, Any]]:
+        """Semua runbook yang tersedia di DB, urut dari ID 1 (terlama dulu).
+
+        Jika page_size None -> tanpa pagination (semua data).
+        """
         db = get_db()
         cur = db.execute(
             """
             SELECT id, title, category, severity, source_ref, created_at,
                    root_cause, resolution_steps
             FROM runbooks
-            ORDER BY created_at DESC
+            ORDER BY id ASC
             """
         )
-        return [dict(row) for row in cur.fetchall()]
+        rows = [dict(row) for row in cur.fetchall()]
+        if page_size is None:
+            return rows
+        page = max(1, page)
+        page_size = max(1, page_size)
+        start = (page - 1) * page_size
+        return rows[start : start + page_size]
 
     def count_by_category(self) -> list[dict[str, Any]]:
         """Agregasi jumlah runbook per kategori (untuk dasbor yang memadukan seed + live)."""

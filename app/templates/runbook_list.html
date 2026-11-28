@@ -21,44 +21,56 @@
 <div class="space-y-4">
   <!-- ===== Toolbar Pencarian & Filter Severitas ===== -->
   <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-md border border-gcp-border bg-gcp-surface">
-    <div class="relative min-w-[240px] flex-1 sm:max-w-xs">
-      <svg class="absolute left-2.5 top-2 h-4 w-4 text-gcp-ink-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-      </svg>
-      <input
-        type="text"
-        id="runbook-search"
-        placeholder="Cari judul atau kategori…"
-        class="w-full pl-8 pr-3 py-1.5 rounded-sm border border-gcp-border-elev bg-gcp-canvas text-xs text-gcp-ink placeholder:text-gcp-ink-muted focus:border-gcp-blue focus:outline-none transition"
-      >
+    <!-- Kiri: Search + Filter Pills -->
+    <div class="flex flex-wrap items-center gap-3 flex-1">
+      <div class="relative min-w-[240px] flex-1 sm:max-w-xs">
+        <svg class="absolute left-2.5 top-2 h-4 w-4 text-gcp-ink-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input
+          type="text"
+          id="runbook-search"
+          placeholder="Cari judul atau kategori…"
+          class="w-full pl-8 pr-3 py-1.5 rounded-sm border border-gcp-border-elev bg-gcp-canvas text-xs text-gcp-ink placeholder:text-gcp-ink-muted focus:border-gcp-blue focus:outline-none transition"
+        >
+      </div>
+
+      <div class="flex items-center gap-1.5 overflow-x-auto" id="runbook-severity-filter" role="group" aria-label="Filter severitas">
+        <button type="button" class="severity-pill active-sev inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="">
+          Semua
+        </button>
+        <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV1">
+          <span class="sev-dot h-2 w-2 rounded-full bg-[#EA4335]" aria-hidden="true"></span>
+          SEV1
+        </button>
+        <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV2">
+          <span class="sev-dot h-2 w-2 rounded-full bg-[#FBBC05]" aria-hidden="true"></span>
+          SEV2
+        </button>
+        <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV3">
+          <span class="sev-dot h-2 w-2 rounded-full bg-[#4285F4]" aria-hidden="true"></span>
+          SEV3
+        </button>
+        <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV4">
+          <span class="sev-dot h-2 w-2 rounded-full bg-[#80868B]" aria-hidden="true"></span>
+          SEV4
+        </button>
+      </div>
     </div>
 
-    <div class="flex items-center gap-1.5 overflow-x-auto" id="runbook-severity-filter" role="group" aria-label="Filter severitas">
-      <button type="button" class="severity-pill active-sev inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="">
-        Semua
-      </button>
-      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV1">
-        <span class="sev-dot h-2 w-2 rounded-full bg-[#EA4335]" aria-hidden="true"></span>
-        SEV1
-      </button>
-      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV2">
-        <span class="sev-dot h-2 w-2 rounded-full bg-[#FBBC05]" aria-hidden="true"></span>
-        SEV2
-      </button>
-      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV3">
-        <span class="sev-dot h-2 w-2 rounded-full bg-[#4285F4]" aria-hidden="true"></span>
-        SEV3
-      </button>
-      <button type="button" class="severity-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-gcp-border bg-gcp-elevated text-[11px] font-medium text-gcp-ink-secondary hover:text-gcp-ink transition" data-sev="SEV4">
-        <span class="sev-dot h-2 w-2 rounded-full bg-[#80868B]" aria-hidden="true"></span>
-        SEV4
-      </button>
+    <!-- Kanan: Badge Ringkasan Total -->
+    <div class="text-xs text-gcp-ink-secondary font-mono bg-gcp-canvas px-2.5 py-1 rounded-sm border border-gcp-border">
+      Total: <span class="font-semibold text-gcp-ink">{{ total }}</span> runbook
     </div>
   </div>
 
   <!-- ===== Daftar Runbook ===== -->
   <div class="rounded-md border border-gcp-border bg-gcp-surface overflow-hidden">
     {% if rows %}
+    {% set is_all = (page_size == 'all' or page_size is none) %}
+    {% set current_ps = 0 if is_all else (page_size | int) %}
+    {% set offset = (page - 1) * current_ps %}
+
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -73,8 +85,9 @@
         </thead>
         <tbody class="divide-y divide-gcp-border" id="runbook-table-body">
           {% for row in rows %}
+          {% set no = offset + loop.index %}
           <tr class="hover:bg-gcp-elevated transition-colors cursor-pointer group" id="runbook-row-{{ row.id }}" data-severity="{{ row.severity }}" onclick="toggleRunbookDrawer({{ row.id }})">
-            <td class="px-4 py-3 text-xs font-mono text-gcp-ink-muted">{{ row.id }}</td>
+            <td class="px-4 py-3 text-xs font-mono text-gcp-ink-muted">{{ no }}</td>
             <td class="px-4 py-3 text-xs text-gcp-ink font-medium max-w-md" title="{{ row.title }}">
               <div class="flex items-center gap-2 min-w-0">
                 <svg id="runbook-chevron-{{ row.id }}" class="h-3.5 w-3.5 shrink-0 text-gcp-ink-muted group-hover:text-gcp-ink transition-transform duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -144,6 +157,91 @@
         </tbody>
       </table>
     </div>
+
+    <!-- ===== Footer Pagination Bar (Gaya GCP Console) ===== -->
+    {% set start_item = offset + 1 %}
+    {% set end_item = offset + (rows | length) %}
+    <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-2.5 border-t border-gcp-border bg-gcp-elevated/50 text-xs text-gcp-ink-secondary">
+      
+      <!-- Kiri: Selector Jumlah Baris & Info Rentang Data -->
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="runbook-page-size" class="text-gcp-ink-secondary">Baris per halaman:</label>
+          <select id="runbook-page-size" class="rounded-sm border border-gcp-border bg-gcp-canvas px-2 py-1 text-xs font-mono text-gcp-ink focus:border-gcp-blue focus:outline-none cursor-pointer">
+            {% for ps in page_sizes %}
+            <option value="{{ ps }}" {% if page_size|string == ps|string %}selected{% endif %}>{{ ps }}</option>
+            {% endfor %}
+            <option value="all" {% if is_all %}selected{% endif %}>Semua</option>
+          </select>
+        </div>
+
+        <span class="hidden sm:inline text-gcp-border">|</span>
+
+        <div class="font-mono text-[11px]">
+          Menampilkan <strong class="text-gcp-ink">{{ start_item }}&ndash;{{ end_item }}</strong> dari <strong class="text-gcp-ink">{{ total }}</strong>
+        </div>
+      </div>
+
+      <!-- Kanan: Tombol Navigasi Halaman -->
+      {% if not is_all and total_pages > 1 %}
+      <nav class="flex items-center gap-1" aria-label="Navigasi halaman">
+        <!-- Halaman Pertama -->
+        {% if has_prev %}
+        <a href="{{ url_for('runbook.index', page=1, page_size=page_size) }}" title="Halaman pertama" class="p-1.5 rounded-sm border border-gcp-border bg-gcp-canvas text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="{{ url_for('runbook.index', page=page-1, page_size=page_size) }}" title="Sebelumnya" class="p-1.5 rounded-sm border border-gcp-border bg-gcp-canvas text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        {% else %}
+        <span class="p-1.5 rounded-sm border border-gcp-border bg-gcp-surface text-gcp-ink-muted opacity-40 cursor-not-allowed">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="p-1.5 rounded-sm border border-gcp-border bg-gcp-surface text-gcp-ink-muted opacity-40 cursor-not-allowed">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        {% endif %}
+
+        <!-- Nomor Halaman dengan Ellipsis (...) -->
+        <div class="flex items-center gap-1 mx-1">
+          {% for p in range(1, total_pages + 1) %}
+            {% if p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+              {% if p == page %}
+              <span aria-current="page" class="min-w-[28px] text-center px-2 py-1 rounded-sm border border-[#4285F4] bg-[#4285F4] text-white font-mono font-semibold">
+                {{ p }}
+              </span>
+              {% else %}
+              <a href="{{ url_for('runbook.index', page=p, page_size=page_size) }}" class="min-w-[28px] text-center px-2 py-1 rounded-sm border border-gcp-border bg-gcp-canvas text-gcp-ink font-mono hover:border-gcp-blue hover:text-[#8AB4F8] transition">
+                {{ p }}
+              </a>
+              {% endif %}
+            {% elif p == page - 2 or p == page + 2 %}
+              <span class="px-1 text-gcp-ink-muted font-mono">&hellip;</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Halaman Berikutnya & Terakhir -->
+        {% if has_next %}
+        <a href="{{ url_for('runbook.index', page=page+1, page_size=page_size) }}" title="Selanjutnya" class="p-1.5 rounded-sm border border-gcp-border bg-gcp-canvas text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="{{ url_for('runbook.index', page=total_pages, page_size=page_size) }}" title="Halaman terakhir" class="p-1.5 rounded-sm border border-gcp-border bg-gcp-canvas text-gcp-ink hover:border-gcp-blue hover:bg-gcp-blue hover:text-white transition">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        {% else %}
+        <span class="p-1.5 rounded-sm border border-gcp-border bg-gcp-surface text-gcp-ink-muted opacity-40 cursor-not-allowed">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="p-1.5 rounded-sm border border-gcp-border bg-gcp-surface text-gcp-ink-muted opacity-40 cursor-not-allowed">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+    </div>
+
     {% else %}
     <div class="px-6 py-12 text-center">
       <div class="w-12 h-12 rounded-full bg-gcp-elevated border border-gcp-border flex items-center justify-center mx-auto mb-3 text-gcp-ink-muted">
@@ -167,7 +265,6 @@
     const chevron = document.getElementById("runbook-chevron-" + id);
     const isOpen = drawer && !drawer.classList.contains("hidden");
 
-    // Tutup semua drawer lain & reset highlight baris
     document.querySelectorAll('[id^="runbook-drawer-"]').forEach((el) => el.classList.add("hidden"));
     document.querySelectorAll('[id^="runbook-row-"]').forEach((el) => {
       el.classList.remove("bg-gcp-elevated");
@@ -183,7 +280,7 @@
     }
   }
 
-  // ===== Filter pencarian + pill severitas (Warna Solid sesuai Dashboard) =====
+  // ===== Filter pencarian + pill severitas =====
   (function () {
     const search = document.getElementById("runbook-search");
     const pills = document.querySelectorAll("#runbook-severity-filter button");
@@ -255,6 +352,18 @@
     });
     const initialActive = document.querySelector("#runbook-severity-filter button.active-sev");
     if (initialActive) setActivePill(initialActive);
+  })();
+
+  // ===== Pagination: ganti ukuran halaman =====
+  (function () {
+    const sel = document.getElementById("runbook-page-size");
+    if (!sel) return;
+    sel.addEventListener("change", () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("page_size", sel.value);
+      url.searchParams.set("page", "1");
+      window.location.href = url.toString();
+    });
   })();
 </script>
 {% endblock %}
