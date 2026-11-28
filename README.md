@@ -2,7 +2,7 @@
 
 Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root Cause Analysis) dan standarisasi mitigasi insiden SRE. Menerima raw error log, menyensor data sensitif secara otomatis, mengklasifikasikan kategori & severitas insiden, menemukan Top-3 referensi runbook relevan via pencarian hybrid (SQLite FTS5 BM25 + LLM re-ranking), serta menyediakan asisten tanya jawab terkunci (Strict-RAG) dan visualisasi analitik.
 
-> **Stack:** Flask (Application Factory + Blueprints), SQLite FTS5/BM25, Gemini 2.5-flash (dengan OpenAI-compatible fallback), HTMX, Chart.js, python-dotenv, Flask-WTF CSRF.
+> **Stack:** Flask 3 (Application Factory + Blueprints), SQLite FTS5/BM25, Gemini (google-genai) dengan OpenAI-compatible fallback, HTMX, Chart.js, python-dotenv, Flask-WTF CSRF, pydantic.
 
 ## Fitur utama
 
@@ -12,17 +12,18 @@ Aplikasi web pendukung keputusan untuk mempercepat analisis akar masalah (Root C
 - **Strict-RAG chat**: Asisten mitigasi terkunci pada 3 runbook aktif; anti-halusinasi, quick prompts (checklist, perbandingan, draf status).
 - **Dashboard analitik**: Distribusi kategori, proporsi severitas, dan tren insiden (Chart.js).
 - **Graceful degradation**: Saat LLM API mati/timeout, aplikasi tetap menampilkan Top-3 hasil FTS5 lokal tanpa crash.
-- **Seeding**: `scripts/seed.py` inisialisasi `data/app.db` dari `data/schema.sql` dan memuat `data/seed_runbooks.json`.
+- **Seeding**: `scripts/seed.py` inisialisasi `data/app.db` dari `data/schema.sql` dan memuat `data/seed_runbooks.json` (idempotent via `content_hash`).
 
 ## Struktur direktori
 
 ```
 sre-triage-assistant/
 ├── app/                # Flask application factory, blueprints, services, repositories
-├── data/               # app.db, schema.sql, seed_runbooks.json (gitignored)
+├── data/               # app.db, schema.sql, seed_runbooks.json
 ├── docs/               # PRD, MVP, DESIGN, ARCHI, DATA_FLOW, STRUKTUR_DIREKTORI
+├── other/              # Catatan implementasi dan deskripsi proyek
 ├── scripts/
-│   ├── fetch/          # Pengambilan runbook dari Prometheus & Stack Exchange
+│   ├── fetch/          # Pengambilan runbook dari sumber publik (5 skrip)
 │   ├── processing/     # Normalisasi hasil fetch → seed_runbooks.json
 │   └── seed.py         # Seeder database (idempotent)
 ├── tests/              # Suite pengujian endpoints & layanan
@@ -39,6 +40,7 @@ git clone <repo-url>
 cd sre-triage-assistant
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 > Catatan: environment ini dielola secara lokal; `requirements.txt` mencakup semua dependensi runtime.
@@ -85,6 +87,11 @@ Buka `http://localhost:5000`. Tidak perlu login untuk triase (sesi anonim).
 | `POST` | `/chat` | Strict-RAG chat terkunci pada runbook aktif |
 | `GET` | `/dashboard` | Halaman analitik operasi |
 | `GET` | `/api/analytics/charts` | Agregasi kategori, severitas, tren harian (JSON) |
+| `GET` | `/runbook` | Daftar semua runbook (read-only) |
+| `GET` | `/triage/history` | Daftar riwayat triase yang disimpan user |
+| `POST` | `/triage/save-report` | Simpan hasil triase ke riwayat |
+| `POST` | `/triage/history/<id>/delete` | Hapus satu riwayat |
+| `POST` | `/triage/history/<id>/load` | Muat ulang riwayat ke workspace |
 
 ## Pengujian
 
