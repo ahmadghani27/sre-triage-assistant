@@ -1,6 +1,8 @@
-"""Agregasi untuk dasbor operasional: menggabungkan riwayat triase sesi
-dengan distribusi knowledge base agar grafik tetap terisi saat demo
-(lihat MVP.md §4: seed + riwayat triase sesi)."""
+"""Agregasi untuk dasbor operasional.
+
+Distribusi kategori & proporsi severitas hanya dari tabel runbooks (basis knowledge,
+SEV1–SEV4 saja). Tren harian dan KPI triase masih dari tabel triage_logs.
+"""
 
 from typing import Any
 
@@ -20,19 +22,16 @@ class AnalyticsService:
         self.runbook_repo = runbook_repo or RunbookRepository()
 
     def category_distribution(self) -> dict[str, int]:
-        """Distribusi kategori: triase riwayat sesi + seed KB sebagai basis demo."""
+        """Distribusi kategori hanya dari tabel runbooks (basis knowledge)."""
         totals: dict[str, int] = {}
         for row in self.runbook_repo.count_by_category():
-            totals[row["category"]] = totals.get(row["category"], 0) + int(row["total"])
-        for row in self.log_repo.count_by_category():
             totals[row["category"]] = totals.get(row["category"], 0) + int(row["total"])
         return dict(sorted(totals.items(), key=lambda kv: (-kv[1], kv[0])))
 
     def severity_distribution(self) -> dict[str, int]:
+        """Proporsi severitas hanya dari tabel runbooks (SEV1–SEV4, tanpa SEV-PENDING)."""
         totals: dict[str, int] = {sev: 0 for sev in _SEVERITY_ORDER}
         for row in self.runbook_repo.count_by_severity():
-            totals[row["severity"]] = totals.get(row["severity"], 0) + int(row["total"])
-        for row in self.log_repo.count_by_severity():
             totals[row["severity"]] = totals.get(row["severity"], 0) + int(row["total"])
         return totals
 
